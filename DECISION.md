@@ -1,5 +1,23 @@
 # 주요 결정
 
-- 단일 모듈 Maven 프로젝트와 공식 Maven Wrapper를 사용해 빌드 도구 사전 설치를 없애요. 간단한 유틸리티 빌드에는 별도 Gradle 스크립트보다 Maven 표준 구조로 충분해요.
-- Java release를 21로 고정하고 Lombok annotation processor를 명시해요.
-- Jackson 2 계열과 JUnit Jupiter 5 계열을 사용하고 의존성 버전을 고정해요.
+## 빌드와 의존성
+
+- 단일 모듈 Maven과 공식 only-script Maven Wrapper를 선택했어요. 간단한 유틸리티 프로젝트에는 Gradle 별도 스크립트 없이 표준 디렉터리 구조로 충분하고, 빌드 도구 사전 설치도 필요 없어요.
+- Java release 21과 Lombok annotation processor를 명시해요. Jackson 2 계열과 JUnit Jupiter 5 계열을 사용하며 정확한 의존성·플러그인 버전은 `pom.xml`에서 관리해요.
+- `@Slf4j` 컴파일과 테스트 로그 출력을 위해 SLF4J API와 Simple 구현체를 test scope로 추가했어요. 라이브러리 소비자에게 로깅 구현체를 강제하지 않아요.
+
+## StringUtil 구현 가정
+
+아래는 최초 명세에 없어서 구현 시 선택한 동작이에요. 경계값 제안에 대한 별도 사용자 확정 응답은 없었어요. 현재 공개 동작의 전체 목록은 [README.md](README.md#문자열-유틸리티)를 기준으로 해요.
+
+- null과 잘못된 크기는 조기 반환해요. `slice`는 범위 오류 예외 대신 빈 문자열을 반환하고 `head`/`tail`은 크기를 원문 길이로 제한해요.
+- `pad`/`pad2`는 가운데 정렬하며 홀수 여백의 한 칸은 오른쪽에 둬요. 길이가 이미 충분하면 원문을 자르지 않아요. 패턴은 양쪽에서 각각 처음부터 반복해요.
+- Supplier는 순서대로 필요한 후보만 한 번씩 평가하고 null Supplier는 null 값으로 취급해요. 내부 예외는 기본값으로 숨기지 않고 전달해요.
+- `split`은 마지막 빈 필드를 버리는 기본 분할 대신 이를 유지해 데이터 손실을 피하고, 잘못된 정규식은 예외로 전달해요.
+- `trimLeadingZero`는 부호 있는 정수·소수까지 지원해요. 입력의 부호와 소수부는 유지하고 정수부가 모두 0이면 하나를 남겨요.
+
+## stringify 후속 요구사항 반영
+
+- 사용자가 표현한 `YYYY-MM-DD`는 달력 날짜로 해석하여 Java 패턴 `yyyy-MM-dd`를 사용해요. 대문자 `Y`/`D`의 주 기준 연도·연중 일수 의미를 피하고 연말·연초 테스트로 확인해요.
+- 시간대는 별도 지정이 없어 시스템 기본 시간대를 사용해요. `SimpleDateFormat`은 호출마다 생성해 공유 가변 상태를 피하고 `java.sql.Date`도 지원해요.
+- BigDecimal은 사용자 요구대로 `toPlainString()`을 사용해 지수 표기를 없애고 소수점 뒤 0을 유지해요. `join`도 기존 `stringify` 호출을 통해 같은 변환을 적용받아요.

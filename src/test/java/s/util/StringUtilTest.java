@@ -128,25 +128,25 @@ class StringUtilTest {
 
     @Test
     void firstNonBlankOrLastWith2Suppliers() {
-        assertSupplierSelection(2, " ", values -> StringUtil.firstNonBlankOrLast(
+        _assertSupplierSelection(2, " ", values -> StringUtil.firstNonBlankOrLast(
                 values.get(0), values.get(1)));
     }
 
     @Test
     void firstNonBlankOrLastWith3Suppliers() {
-        assertSupplierSelection(3, " ", values -> StringUtil.firstNonBlankOrLast(
+        _assertSupplierSelection(3, " ", values -> StringUtil.firstNonBlankOrLast(
                 values.get(0), values.get(1), values.get(2)));
     }
 
     @Test
     void firstNonBlankOrLastWith4Suppliers() {
-        assertSupplierSelection(4, " ", values -> StringUtil.firstNonBlankOrLast(
+        _assertSupplierSelection(4, " ", values -> StringUtil.firstNonBlankOrLast(
                 values.get(0), values.get(1), values.get(2), values.get(3)));
     }
 
     @Test
     void firstNonBlankOrLastWith5Suppliers() {
-        assertSupplierSelection(5, " ", values -> StringUtil.firstNonBlankOrLast(
+        _assertSupplierSelection(5, " ", values -> StringUtil.firstNonBlankOrLast(
                 values.get(0), values.get(1), values.get(2), values.get(3), values.get(4)));
     }
 
@@ -163,25 +163,25 @@ class StringUtilTest {
 
     @Test
     void firstNonBlankOrEmptyWith2Suppliers() {
-        assertSupplierSelection(2, "", values -> StringUtil.firstNonBlankOrEmpty(
+        _assertSupplierSelection(2, "", values -> StringUtil.firstNonBlankOrEmpty(
                 values.get(0), values.get(1)));
     }
 
     @Test
     void firstNonBlankOrEmptyWith3Suppliers() {
-        assertSupplierSelection(3, "", values -> StringUtil.firstNonBlankOrEmpty(
+        _assertSupplierSelection(3, "", values -> StringUtil.firstNonBlankOrEmpty(
                 values.get(0), values.get(1), values.get(2)));
     }
 
     @Test
     void firstNonBlankOrEmptyWith4Suppliers() {
-        assertSupplierSelection(4, "", values -> StringUtil.firstNonBlankOrEmpty(
+        _assertSupplierSelection(4, "", values -> StringUtil.firstNonBlankOrEmpty(
                 values.get(0), values.get(1), values.get(2), values.get(3)));
     }
 
     @Test
     void firstNonBlankOrEmptyWith5Suppliers() {
-        assertSupplierSelection(5, "", values -> StringUtil.firstNonBlankOrEmpty(
+        _assertSupplierSelection(5, "", values -> StringUtil.firstNonBlankOrEmpty(
                 values.get(0), values.get(1), values.get(2), values.get(3), values.get(4)));
     }
 
@@ -198,29 +198,29 @@ class StringUtilTest {
 
     @Test
     void firstNonBlankOrNullWith2Suppliers() {
-        assertSupplierSelection(2, null, values -> StringUtil.firstNonBlankOrNull(
+        _assertSupplierSelection(2, null, values -> StringUtil.firstNonBlankOrNull(
                 values.get(0), values.get(1)));
     }
 
     @Test
     void firstNonBlankOrNullWith3Suppliers() {
-        assertSupplierSelection(3, null, values -> StringUtil.firstNonBlankOrNull(
+        _assertSupplierSelection(3, null, values -> StringUtil.firstNonBlankOrNull(
                 values.get(0), values.get(1), values.get(2)));
     }
 
     @Test
     void firstNonBlankOrNullWith4Suppliers() {
-        assertSupplierSelection(4, null, values -> StringUtil.firstNonBlankOrNull(
+        _assertSupplierSelection(4, null, values -> StringUtil.firstNonBlankOrNull(
                 values.get(0), values.get(1), values.get(2), values.get(3)));
     }
 
     @Test
     void firstNonBlankOrNullWith5Suppliers() {
-        assertSupplierSelection(5, null, values -> StringUtil.firstNonBlankOrNull(
+        _assertSupplierSelection(5, null, values -> StringUtil.firstNonBlankOrNull(
                 values.get(0), values.get(1), values.get(2), values.get(3), values.get(4)));
     }
 
-    private static void assertSupplierSelection(
+    private static void _assertSupplierSelection(
             int count, String fallback, Function<List<Supplier<String>>, String> select) {
         List<Supplier<String>> blanks = new ArrayList<>();
         for (int i = 0; i < count; i++) {

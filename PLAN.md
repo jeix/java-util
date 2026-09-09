@@ -4,7 +4,7 @@
 
 - 저장소: `https://github.com/jeix/java-util.git`, 작업 브랜치: `codex`.
 - 초기화 기준 커밋: `294d430` — `자바 유틸리티 프로젝트 초기화`.
-- 사용자 요청에 따라 아래 StringUtil 기능과 컨텍스트 문서를 하나의 작업 단위로 커밋해요. push 요청은 없어요.
+- StringUtil 기능과 컨텍스트 문서는 `55044cd` (`문자열 유틸리티와 테스트 추가`)로 커밋했어요. push 요청은 없어요.
 
 ## 완료
 
@@ -36,3 +36,10 @@ MAVEN_USER_HOME=/tmp/java-util-maven-home ./mvnw -B -ntp -Dmaven.repo.local=/tmp
 
 - 사용자가 후속 요구사항을 주면 현재 브랜치에서 이어서 작업해요.
 - 명세에 없던 경계값 규칙은 구현 가정으로 유지 중이에요. 별도의 사용자 확정 응답은 없었으며 상세 내용은 [DECISION.md](DECISION.md)에 있어요.
+
+## private 메서드 명명 규칙 소급 적용
+
+- `AGENTS.md`에 private 메서드 이름의 `_` 접두사 규칙을 추가했어요.
+- StringUtil의 `supply`/`padded`/`padding`과 테스트 보조 메서드 `assertSupplierSelection`에 접두사를 붙이고 호출부를 수정했어요.
+- 검증: `clean verify`로 전체 테스트 63개가 통과했고 `git diff --check`도 통과했어요. 소스의 모든 private 메서드가 `_` 접두사를 사용하는지 확인했어요.
+- 사용자 요청에 따라 명명 규칙과 소급 적용 변경을 하나의 작업 단위로 커밋해요.

@@ -31,9 +31,9 @@ public final class StringUtil {
 
     /** 필요한 Supplier만 한 번 호출해요. null Supplier는 null 값으로 취급해요. */
     public static String nonNullOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
-        String value = supply(supplier);
+        String value = _supply(supplier);
         if (value == null) {
-            return supply(dfltSupplier);
+            return _supply(dfltSupplier);
         }
         return value;
     }
@@ -47,9 +47,9 @@ public final class StringUtil {
 
     /** 필요한 Supplier만 한 번 호출해요. null Supplier는 null 값으로 취급해요. */
     public static String nonBlankOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
-        String value = supply(supplier);
+        String value = _supply(supplier);
         if (isBlank(value)) {
-            return supply(dfltSupplier);
+            return _supply(dfltSupplier);
         }
         return value;
     }
@@ -63,9 +63,9 @@ public final class StringUtil {
 
     /** 필요한 Supplier만 한 번 호출해요. null Supplier는 null 값으로 취급해요. */
     public static String nonEmptyOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
-        String value = supply(supplier);
+        String value = _supply(supplier);
         if (isEmpty(value)) {
-            return supply(dfltSupplier);
+            return _supply(dfltSupplier);
         }
         return value;
     }
@@ -119,16 +119,16 @@ public final class StringUtil {
     @SafeVarargs
     private static String _firstNonBlankOrLast(
             Supplier<String> supplier1, Supplier<String> supplier2, Supplier<String>... suppliers) {
-        String value = supply(supplier1);
+        String value = _supply(supplier1);
         if (!isBlank(value)) {
             return value;
         }
-        value = supply(supplier2);
+        value = _supply(supplier2);
         if (!isBlank(value) || suppliers == null) {
             return value;
         }
         for (Supplier<String> supplier : suppliers) {
-            value = supply(supplier);
+            value = _supply(supplier);
             if (!isBlank(value)) {
                 return value;
             }
@@ -214,7 +214,7 @@ public final class StringUtil {
         return nonBlankOf(_firstNonBlankOrLast(supplier1, supplier2, suppliers), (String) null);
     }
 
-    private static String supply(Supplier<String> supplier) {
+    private static String _supply(Supplier<String> supplier) {
         if (supplier == null) {
             return null;
         }
@@ -308,29 +308,29 @@ public final class StringUtil {
     }
 
     public static String lpad2(int len, String s, String pad) {
-        return padded(len, s, pad, -1);
+        return _padded(len, s, pad, -1);
     }
 
     public static String rpad2(int len, String s, String pad) {
-        return padded(len, s, pad, 1);
+        return _padded(len, s, pad, 1);
     }
 
     /** 양쪽에서 패턴을 처음부터 반복하며 남는 한 칸은 오른쪽에 채워요. */
     public static String pad2(int len, String s, String pad) {
-        return padded(len, s, pad, 0);
+        return _padded(len, s, pad, 0);
     }
 
     // 단일 바이트 문자열을 전제로 해요. 길이가 충분하거나 패턴이 없으면 원문을 유지해요.
-    private static String padded(int len, String s, String pad, int direction) {
+    private static String _padded(int len, String s, String pad, int direction) {
         if (s == null || len <= s.length() || isEmpty(pad)) {
             return s;
         }
         int missing = len - s.length();
         int left = direction < 0 ? missing : direction > 0 ? 0 : missing / 2;
-        return padding(pad, left) + s + padding(pad, missing - left);
+        return _padding(pad, left) + s + _padding(pad, missing - left);
     }
 
-    private static String padding(String pattern, int size) {
+    private static String _padding(String pattern, int size) {
         if (size <= 0) {
             return "";
         }

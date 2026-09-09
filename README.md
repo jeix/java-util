@@ -23,13 +23,16 @@ JAR는 유틸리티 라이브러리이며 의존성을 포함하지 않아요.
 ## 구조
 
 ```text
-src/main/java/s/Hello.java                # 초기 구조 확인 예제
-src/main/java/s/util/StringUtil.java      # 문자열 유틸리티
-src/test/java/s/HelloTest.java             # 초기 구조 확인 테스트
-src/test/java/s/util/StringUtilTest.java   # 문자열 유틸리티 테스트
-pom.xml                        # Java 버전, 의존성, 빌드 설정
-.mvn/wrapper/                  # Maven Wrapper 설정
-mvnw / mvnw.cmd                # Maven 실행 스크립트
+src/main/java/s/Hello.java                  # 초기 구조 확인 예제
+src/main/java/s/util/StringUtil.java        # 문자열 유틸리티
+src/main/java/s/util/CollectionUtil.java    # 컬렉션 유틸리티
+src/main/java/s/util/Pair.java              # zip 결과 record
+src/test/java/s/HelloTest.java              # 초기 구조 확인 테스트
+src/test/java/s/util/StringUtilTest.java     # 문자열 유틸리티 테스트
+src/test/java/s/util/CollectionUtilTest.java # 컬렉션 유틸리티 테스트
+pom.xml                                      # Java 버전, 의존성, 빌드 설정
+.mvn/wrapper/                                # Maven Wrapper 설정
+mvnw / mvnw.cmd                              # Maven 실행 스크립트
 ```
 
 유틸리티 클래스는 `src/main/java`, 테스트 클래스는 같은 패키지의 `src/test/java`에 추가해요.
@@ -62,6 +65,36 @@ mvnw / mvnw.cmd                # Maven 실행 스크립트
 [Lombok Maven 설정](https://projectlombok.org/setup/maven),
 [Jackson 2.21](https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.21),
 [JUnit 5](https://docs.junit.org/5.14.1/user-guide/).
+
+## 컬렉션 유틸리티
+
+`s.util.CollectionUtil`은 리스트 판별·대체, zip, 배열 변환, 검색, 집합 연산,
+부분 리스트, 색인·그룹 생성, 맵 생성·형변환·복사를 제공해요.
+`CollectionUtilTest`도 Lombok `@Slf4j`를 사용해요.
+
+```bash
+./mvnw -Dtest=s.util.CollectionUtilTest test
+```
+
+```java
+List<Pair<String, Integer>> pairs = CollectionUtil.zip(List.of("a", "b"), List.of(1, 2));
+String first = pairs.getFirst().first();
+Map<String, Integer> map = CollectionUtil.asMap(String.class, Integer.class, "foo", 42, "bar", 43);
+String[] array = CollectionUtil.toArray(List.of(), String.class);
+```
+
+- null 리스트·맵은 빈 컬렉션으로 취급해요. `emptyIfNull`은 non-null 입력을 그대로 반환하고 null이면 새 수정 가능한 컬렉션을 반환해요.
+- `zip`은 짧은 리스트 길이까지만 묶어요. `Pair<T,U>`는 `s.util.Pair` record이며 `first()`·`second()`로 값을 읽어요.
+- `toArray(list)`는 첫 non-null 항목의 런타임 클래스를 사용해요. null/빈 리스트/모두 null이면 `IllegalArgumentException`, 나머지 항목의 타입이 호환되지 않으면 `ArrayStoreException`이 발생해요. 빈 리스트·혼합 하위 타입에는 `toArray(list, Class<T>)`로 배열 타입을 지정해요.
+- `findOne`은 첫 일치 항목 또는 null을, `findAll`은 순서와 중복을 유지한 새 리스트를 반환해요. null 항목도 콜백에 전달해요. 일치 항목이 null이면 미발견과 구분되지 않아요.
+- null 콜백은 결과 없음으로 취급해요. 콜백 내부 예외는 전달해요.
+- `unionOf`는 `list1 + (list2 - list1)`, `intersectionOf`는 list2에 포함된 list1 항목, `differenceOf`는 list2에 없는 list1 항목을 반환해요. `symmetricDifferenceOf`는 양방향 차집합을 연결해요. `equals`/`hashCode`로 비교하며 입력 순서와 남는 항목의 중복을 유지해요.
+- `slice`는 begin 포함/end 불포함의 `subList` 뷰를 반환해요. `head`/`tail`도 이 뷰를 사용하며 길이를 0~원문 크기로 제한해요. 뷰의 수정 가능성과 변경 반영은 원본 리스트에 따라요. null이나 잘못된 slice 범위는 새 빈 리스트를 반환해요.
+- `indexing`/`grouping`은 키 최초 등장 순서를 유지해요. 중복 키의 색인은 마지막 항목을 사용하고 그룹은 항목 순서·중복을 유지해요. null 키도 허용해요.
+- `asMap`은 키/값 교대 인자를 받아요. 홀수 개면 `IllegalArgumentException`, Class 지정 시 타입이 맞지 않으면 `ClassCastException`이 발생해요. 타입 변환은 하지 않아요. null Class는 허용하지 않아요.
+- `asMap(entries)`는 null entry를 건너뛰어요. 모든 맵 생성은 null 키/값을 허용하고 중복 키는 마지막 값으로 덮어쓰며 키 최초 등장 순서를 유지해요.
+- `castKeyValue`는 원본 맵을 복사하지 않는 unchecked cast예요. Class 인자가 없어 실제 키/값 타입은 검사하지 않으며 호출자가 보장해야 해요. null이면 새 빈 맵을 반환해요.
+- `copyOf`는 원본 순회 순서를 유지하는 수정 가능한 얕은 복사예요. 키·값 객체는 공유해요.
 
 ## 프로젝트 컨텍스트
 

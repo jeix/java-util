@@ -32,7 +32,30 @@ Supplier 선택 메서드는 각각 private static `_firstNonBlankOrLast`, `_fir
 - `BigDecimal` 입력에는 `toPlainString()`을 호출해요.
 - `StringUtilTest`에 Lombok `@Slf4j`를 적용해요.
 
+## CollectionUtil API
+
+`s.util.CollectionUtil`과 `s.util.CollectionUtilTest`를 추가해요. 아래 API는 public static이에요.
+
+| 기능 | 요구 API |
+| --- | --- |
+| 판별·대체 | List/Map 각각 `isEmpty`, `emptyIfNull` |
+| 묶기 | `zip(list1, list2)` → `List<Pair<T,U>>`, `zip(list1, list2, BiFunction<T,U,R>)` → `List<R>` |
+| 배열 | `toArray(List<T>)` → `T[]` |
+| 검색 | `findOne(List<T>, Predicate<T>)` → `T` 또는 null, `findAll` → `List<T>` |
+| 집합 연산 | `unionOf`, `intersectionOf`, `differenceOf`, 대칭차 (모두 리스트 2개 입력) |
+| 추출 | `slice(list, begin)`, `slice(list, begin, end)`, `head(list, size)`, `tail(list, size)` |
+| 색인·분류 | `indexing(List<T>, Function<T,String>)` → `Map<String,T>`, `grouping` → `Map<String,List<T>>` |
+| 맵 생성 | `asMap(Object... items)`, `asMap(Class<K>, Class<V>, Object... items)`, `asMap(List<Map.Entry<K,V>>)` |
+| 맵 변환·복사 | `castKeyValue(origin)` → `Map<K,V>`, `copyOf(origin)` → `Map<K,V>` |
+
+목록에 중복 기재된 대칭차 `unionOf`는 영어 용어인 symmetric difference에 맞춰 `symmetricDifferenceOf`로 구분했어요.
+배열 타입을 명시하는 `toArray(list, Class<T>)`도 제공해요. 이 두 선택은 제안한 구현 기준이며 별도 확정 응답은 없었어요.
+구체적인 경계값과 반환 컬렉션의 공유 여부는 README에 기록해요.
+
 ## 검증 기준
 
-전체 빌드와 JUnit 테스트가 통과하고 정상값·경계값, Supplier 지연 평가와 호출 순서, 날짜·숫자 변환을 검증해야 해요.
-현재 세부 동작은 [README.md](README.md#문자열-유틸리티), 명세에 없는 동작의 선택 근거는 [DECISION.md](DECISION.md)에 기록해요.
+전체 빌드와 JUnit 테스트가 통과해야 해요. StringUtil은 정상값·경계값, Supplier 지연 평가와 호출 순서,
+날짜·숫자 변환을 검증해요. CollectionUtil은 null/빈 입력, 순서·중복, 콜백 평가와 예외,
+배열 타입, 부분 리스트 뷰, 맵 생성·형변환·복사를 검증해요.
+현재 세부 동작은 README의 [문자열 유틸리티](README.md#문자열-유틸리티)와
+[컬렉션 유틸리티](README.md#컬렉션-유틸리티), 명세에 없는 동작의 선택 근거는 [DECISION.md](DECISION.md)에 기록해요.

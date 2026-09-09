@@ -21,3 +21,13 @@
 - 사용자가 표현한 `YYYY-MM-DD`는 달력 날짜로 해석하여 Java 패턴 `yyyy-MM-dd`를 사용해요. 대문자 `Y`/`D`의 주 기준 연도·연중 일수 의미를 피하고 연말·연초 테스트로 확인해요.
 - 시간대는 별도 지정이 없어 시스템 기본 시간대를 사용해요. `SimpleDateFormat`은 호출마다 생성해 공유 가변 상태를 피하고 `java.sql.Date`도 지원해요.
 - BigDecimal은 사용자 요구대로 `toPlainString()`을 사용해 지수 표기를 없애고 소수점 뒤 0을 유지해요. `join`도 기존 `stringify` 호출을 통해 같은 변환을 적용받아요.
+
+## CollectionUtil
+
+- 동일 시그니처의 합집합·대칭차 `unionOf`를 함께 선언할 수 없어 대칭차를 영어 용어 symmetric difference에 맞춘 `symmetricDifferenceOf`로 구분했어요. 이 이름은 구현 가정이며 별도 확정 응답은 없었어요.
+- 기존 Pair 의존성이 없어 추가 라이브러리 대신 `s.util.Pair<T,U>` record를 사용해요.
+- 타입 소거 때문에 `toArray(list)`만으로 빈 리스트의 배열 타입을 알 수 없어요. `Object[]`를 `T[]`로 가장하는 대신 첫 non-null 요소의 클래스로 추론하고, 추론 불가 시 예외를 발생시켜요. 안전하게 타입을 지정하는 Class 오버로드도 제공해요. 혼합 하위 타입은 Class 지정이 필요할 수 있어요.
+- 집합 연산은 Set 반환이나 완전 중복 제거 대신 요청한 리스트 수식을 따라 순서·중복을 유지해요. 포함 여부는 HashSet으로 판별해요.
+- `slice`는 명세의 `list.subList()`에 맞춰 원본과 연결된 뷰를 반환해요. Map 결과는 LinkedHashMap으로 순서를 유지하며 중복 키는 마지막 값으로 정했어요.
+- `castKeyValue`는 Class 정보가 없는 unchecked cast이며 검증·변환을 하지 않아요. 런타임 검증이 필요하면 Class를 받는 `asMap`을 사용해요.
+- null 처리, 짧은 길이 zip, 중복 키, 홀수 맵 인자 예외 등 미지정 경계값은 README에 명시한 구현 가정이에요.

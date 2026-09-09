@@ -26,10 +26,13 @@ JAR는 유틸리티 라이브러리이며 의존성을 포함하지 않아요.
 src/main/java/s/Hello.java                  # 초기 구조 확인 예제
 src/main/java/s/util/StringUtil.java        # 문자열 유틸리티
 src/main/java/s/util/CollectionUtil.java    # 컬렉션 유틸리티
-src/main/java/s/util/Pair.java              # zip 결과 record
+src/main/java/s/type/tuple/Pair.java        # 2개 값 튜플
+src/main/java/s/type/tuple/Triplet.java     # 3개 값 튜플
+src/main/java/s/type/tuple/Quartet.java     # 4개 값 튜플
 src/test/java/s/HelloTest.java              # 초기 구조 확인 테스트
 src/test/java/s/util/StringUtilTest.java     # 문자열 유틸리티 테스트
 src/test/java/s/util/CollectionUtilTest.java # 컬렉션 유틸리티 테스트
+src/test/java/s/type/tuple/TupleTest.java   # 튜플 타입 테스트
 pom.xml                                      # Java 버전, 의존성, 빌드 설정
 .mvn/wrapper/                                # Maven Wrapper 설정
 mvnw / mvnw.cmd                              # Maven 실행 스크립트
@@ -78,13 +81,13 @@ mvnw / mvnw.cmd                              # Maven 실행 스크립트
 
 ```java
 List<Pair<String, Integer>> pairs = CollectionUtil.zip(List.of("a", "b"), List.of(1, 2));
-String first = pairs.getFirst().first();
+String first = pairs.getFirst().ord1();
 Map<String, Integer> map = CollectionUtil.asMap(String.class, Integer.class, "foo", 42, "bar", 43);
 String[] array = CollectionUtil.toArray(List.of(), String.class);
 ```
 
 - null 리스트·맵은 빈 컬렉션으로 취급해요. `emptyIfNull`은 non-null 입력을 그대로 반환하고 null이면 새 수정 가능한 컬렉션을 반환해요.
-- `zip`은 짧은 리스트 길이까지만 묶어요. `Pair<T,U>`는 `s.util.Pair` record이며 `first()`·`second()`로 값을 읽어요.
+- `zip`은 짧은 리스트 길이까지만 묶어요. 결과는 `s.type.tuple.Pair<T,U>`이며 `ord1()`·`ord2()`로 값을 읽어요.
 - `toArray(list)`는 첫 non-null 항목의 런타임 클래스를 사용해요. null/빈 리스트/모두 null이면 `IllegalArgumentException`, 나머지 항목의 타입이 호환되지 않으면 `ArrayStoreException`이 발생해요. 빈 리스트·혼합 하위 타입에는 `toArray(list, Class<T>)`로 배열 타입을 지정해요.
 - `findOne`은 첫 일치 항목 또는 null을, `findAll`은 순서와 중복을 유지한 새 리스트를 반환해요. null 항목도 콜백에 전달해요. 일치 항목이 null이면 미발견과 구분되지 않아요.
 - null 콜백은 결과 없음으로 취급해요. 콜백 내부 예외는 전달해요.
@@ -95,6 +98,27 @@ String[] array = CollectionUtil.toArray(List.of(), String.class);
 - `asMap(entries)`는 null entry를 건너뛰어요. 모든 맵 생성은 null 키/값을 허용하고 중복 키는 마지막 값으로 덮어쓰며 키 최초 등장 순서를 유지해요.
 - `castKeyValue`는 원본 맵을 복사하지 않는 unchecked cast예요. Class 인자가 없어 실제 키/값 타입은 검사하지 않으며 호출자가 보장해야 해요. null이면 새 빈 맵을 반환해요.
 - `copyOf`는 원본 순회 순서를 유지하는 수정 가능한 얕은 복사예요. 키·값 객체는 공유해요.
+
+## 튜플 타입
+
+`s.type.tuple` 패키지는 두 값의 `Pair<T,U>`, 세 값의 `Triplet<T,U,V>`,
+네 값의 `Quartet<T,U,V,W>`를 제공해요.
+
+```java
+Pair<String, Integer> pair = Pair.of("cat", 2);
+Triplet<String, Integer, Boolean> triplet = Triplet.of("cat", 2, true);
+Quartet<String, Integer, Boolean, Double> quartet = Quartet.of("cat", 2, true, 4.5);
+```
+
+- 생성은 static factory `of(...)`를 사용하고 값은 순서대로 `ord1()`~`ord4()`에서 읽어요.
+- `toString()`은 `(cat, 2, true, 4.5)`처럼 괄호 안에 값을 쉼표와 공백으로 구분해요.
+- Lombok `@EqualsAndHashCode`가 모든 순서 값을 기준으로 동등성과 해시 코드를 생성해요.
+- `ordN`은 Jackson JSON 속성 이름이에요. `of(...)`를 creator로 사용하므로 같은 속성 이름으로 역직렬화할 수 있어요.
+- 모든 값은 null을 허용해요.
+
+```bash
+./mvnw -Dtest=s.type.tuple.TupleTest test
+```
 
 ## 프로젝트 컨텍스트
 

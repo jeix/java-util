@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import s.type.tuple.Pair;
 
 /** null 컬렉션을 빈 컬렉션으로 취급하는 유틸리티예요. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -31,7 +32,7 @@ public final class CollectionUtil {
     }
 
     public static <T, U> List<Pair<T, U>> zip(List<T> list1, List<U> list2) {
-        return zip(list1, list2, Pair::new);
+        return zip(list1, list2, Pair::of);
     }
 
     /** 두 리스트 중 짧은 길이만큼 순서대로 묶어요. */

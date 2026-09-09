@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import s.type.tuple.Pair;
 
 @Slf4j
 class CollectionUtilTest {
@@ -41,14 +42,14 @@ class CollectionUtilTest {
     void zipsToPairsUsingShorterLength() {
         List<Pair<String, Integer>> pairs = CollectionUtil.zip(
                 new LinkedList<>(List.of("a", "b", "c")), List.of(1, 2));
-        assertEquals(List.of(new Pair<>("a", 1), new Pair<>("b", 2)), pairs);
-        assertEquals("a", pairs.getFirst().first());
-        assertEquals(1, pairs.getFirst().second());
-        assertEquals(List.of(new Pair<>("a", 1)), CollectionUtil.zip(List.of("a"), List.of(1, 2)));
+        assertEquals(List.of(Pair.of("a", 1), Pair.of("b", 2)), pairs);
+        assertEquals("a", pairs.getFirst().ord1());
+        assertEquals(1, pairs.getFirst().ord2());
+        assertEquals(List.of(Pair.of("a", 1)), CollectionUtil.zip(List.of("a"), List.of(1, 2)));
         assertTrue(CollectionUtil.zip(null, List.of(1)).isEmpty());
         assertTrue(CollectionUtil.zip(List.of(1), null).isEmpty());
         assertTrue(CollectionUtil.zip(List.of(), List.of(1)).isEmpty());
-        assertEquals(List.of(new Pair<>(null, null)), CollectionUtil.zip(
+        assertEquals(List.of(Pair.of(null, null)), CollectionUtil.zip(
                 Arrays.asList((String) null), Arrays.asList((Integer) null)));
     }
 

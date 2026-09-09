@@ -52,10 +52,22 @@ Supplier 선택 메서드는 각각 private static `_firstNonBlankOrLast`, `_fir
 배열 타입을 명시하는 `toArray(list, Class<T>)`도 제공해요. 이 두 선택은 제안한 구현 기준이며 별도 확정 응답은 없었어요.
 구체적인 경계값과 반환 컬렉션의 공유 여부는 README에 기록해요.
 
+## Tuple API
+
+`s.type.tuple.Pair<T,U>`, `Triplet<T,U,V>`, `Quartet<T,U,V,W>`와
+JUnit 기반 `s.type.tuple.TupleTest`를 제공해요. 기존 `s.util.Pair`는 새 Pair로 대체해요.
+
+- 각 타입은 값 개수에 맞는 public static `of(...)` factory를 제공해요.
+- 값은 JSON 변환 대상인 instance 메서드 `ord1()`~`ord4()`로 노출해요.
+- `toString()`은 값을 `(t, u)`, `(t, u, v)`, `(t, u, v, w)` 형식으로 반환해요.
+- Lombok `@EqualsAndHashCode`를 적용해 모든 순서 값으로 동등성과 해시 코드를 계산해요.
+- CollectionUtil의 `zip(list1, list2)`는 새 `s.type.tuple.Pair`를 반환해요.
+
 ## 검증 기준
 
 전체 빌드와 JUnit 테스트가 통과해야 해요. StringUtil은 정상값·경계값, Supplier 지연 평가와 호출 순서,
 날짜·숫자 변환을 검증해요. CollectionUtil은 null/빈 입력, 순서·중복, 콜백 평가와 예외,
 배열 타입, 부분 리스트 뷰, 맵 생성·형변환·복사를 검증해요.
+Tuple은 factory와 순서별 접근자, null, 문자열 표현, 동등성·해시 코드, Jackson JSON 왕복 변환을 검증해요.
 현재 세부 동작은 README의 [문자열 유틸리티](README.md#문자열-유틸리티)와
 [컬렉션 유틸리티](README.md#컬렉션-유틸리티), 명세에 없는 동작의 선택 근거는 [DECISION.md](DECISION.md)에 기록해요.

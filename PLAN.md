@@ -3,8 +3,8 @@
 ## 현재 기준
 
 - 저장소: `https://github.com/jeix/java-util.git`, 작업 브랜치: `codex`.
-- 최신 커밋: `eb2492c` — `private 메서드에 밑줄 접두사 적용`.
-- `CollectionUtil`, `Pair`, `CollectionUtilTest`와 관련 문서는 구현·검증을 마쳤고 사용자 요청에 따라 커밋해요. push 요청은 없어요.
+- 최신 커밋: `317a25c` — `컬렉션 유틸리티와 테스트 추가`.
+- 튜플 타입과 기존 CollectionUtil 연동 변경은 구현·검증을 마쳤고 사용자 요청에 따라 커밋 후 `origin/codex`로 push해요.
 
 ## 완료
 
@@ -13,11 +13,12 @@
 - `stringify`의 Date·BigDecimal 처리, StringUtilTest의 `@Slf4j`, 테스트용 SLF4J API/Simple 의존성 추가.
 - 컨텍스트 정리: `AGENTS.md`·`PRD.md` 생성, `README.md`·`PLAN.md`·`DECISION.md` 현행화.
 - private 메서드의 `_` 접두사 규칙과 기존 코드 소급 적용을 `eb2492c`에 커밋.
+- CollectionUtil과 테스트를 `317a25c`에 커밋.
 
 ## 검증 결과
 
 - 2026-09-10, JDK 21.0.11에서 오프라인 `clean verify` 성공 및 JAR 생성.
-- CollectionUtil 테스트 20개 + StringUtil 테스트 61개 + Hello 테스트 2개 = 총 83개 통과, 실패·오류·건너뜀 0개.
+- Tuple 테스트 7개 + CollectionUtil 테스트 20개 + StringUtil 테스트 61개 + Hello 테스트 2개 = 총 90개 통과, 실패·오류·건너뜀 0개.
 - 결과 파일은 `target/surefire-reports/`에 있으며 생성물이므로 커밋하지 않아요.
 
 ## 검증 환경 재사용
@@ -45,8 +46,16 @@ MAVEN_USER_HOME=/tmp/java-util-maven-home ./mvnw -B -ntp -Dmaven.repo.local=/tmp
 
 ## CollectionUtil 추가
 
-- 구현 완료: `CollectionUtil`, `Pair` record, `CollectionUtilTest`와 관련 문서.
+- 구현 완료: `CollectionUtil`, 당시 `s.util.Pair` record, `CollectionUtilTest`와 관련 문서.
 - 대칭차는 `symmetricDifferenceOf`로 구분하고 배열 타입 명시용 `toArray(list, Class<T>)`를 추가했어요. 이름·배열 경계값 제안에 별도 확정 응답은 없었어요.
 - 2026-09-10 JDK 21.0.11에서 오프라인 `clean verify` 성공: CollectionUtil 20개 + 기존 63개 = 총 83개 테스트 통과, 실패·오류·건너뜀 0개.
 - 검증 범위: null/빈 입력, 중복·순서, Supplier가 아닌 각 컬렉션 콜백의 호출·예외, 타입 추론·검증 실패, subList 뷰, 맵 형변환과 얕은 복사.
-- 다음 단계: 검증 결과를 확인하고 관련 파일만 커밋해요. push 요청은 없어요.
+- 커밋 완료: `317a25c` (`컬렉션 유틸리티와 테스트 추가`).
+
+## 튜플 타입 추가
+
+- 구현 완료: `s.type.tuple.Pair`, `Triplet`, `Quartet`, `TupleTest`와 관련 문서.
+- 기존 `s.util.Pair` record를 제거하고 새 Pair로 `CollectionUtil.zip`과 테스트를 변경했어요.
+- 세 타입에 `@EqualsAndHashCode`, `of(...)`, `ordN()`, 지정 형식의 `toString()`을 구현했어요. Jackson annotation으로 JSON 직렬화·역직렬화를 지원해요.
+- 2026-09-10 JDK 21.0.11에서 오프라인 `clean verify` 성공: 신규 Tuple 테스트 7개를 포함한 전체 90개 테스트 통과. Tuple·CollectionUtil 대상 테스트 27개도 별도로 통과했어요.
+- 다음 단계: 전체 검증 후 관련 파일만 커밋하고 새 upstream `origin/codex`로 push해요.

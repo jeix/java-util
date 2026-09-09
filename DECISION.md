@@ -25,9 +25,16 @@
 ## CollectionUtil
 
 - 동일 시그니처의 합집합·대칭차 `unionOf`를 함께 선언할 수 없어 대칭차를 영어 용어 symmetric difference에 맞춘 `symmetricDifferenceOf`로 구분했어요. 이 이름은 구현 가정이며 별도 확정 응답은 없었어요.
-- 기존 Pair 의존성이 없어 추가 라이브러리 대신 `s.util.Pair<T,U>` record를 사용해요.
+- CollectionUtil 구현 당시에는 추가 라이브러리 대신 `s.util.Pair<T,U>` record를 사용했어요. 이후 튜플 타입 요구사항에 따라 이를 제거하고 `s.type.tuple.Pair<T,U>` 불변 클래스로 대체했어요.
 - 타입 소거 때문에 `toArray(list)`만으로 빈 리스트의 배열 타입을 알 수 없어요. `Object[]`를 `T[]`로 가장하는 대신 첫 non-null 요소의 클래스로 추론하고, 추론 불가 시 예외를 발생시켜요. 안전하게 타입을 지정하는 Class 오버로드도 제공해요. 혼합 하위 타입은 Class 지정이 필요할 수 있어요.
 - 집합 연산은 Set 반환이나 완전 중복 제거 대신 요청한 리스트 수식을 따라 순서·중복을 유지해요. 포함 여부는 HashSet으로 판별해요.
 - `slice`는 명세의 `list.subList()`에 맞춰 원본과 연결된 뷰를 반환해요. Map 결과는 LinkedHashMap으로 순서를 유지하며 중복 키는 마지막 값으로 정했어요.
 - `castKeyValue`는 Class 정보가 없는 unchecked cast이며 검증·변환을 하지 않아요. 런타임 검증이 필요하면 Class를 받는 `asMap`을 사용해요.
 - null 처리, 짧은 길이 zip, 중복 키, 홀수 맵 인자 예외 등 미지정 경계값은 README에 명시한 구현 가정이에요.
+
+## Tuple
+
+- `Pair`, `Triplet`, `Quartet`은 데이터 타입이므로 public 동작을 static `of(...)`를 제외한 instance 메서드로 제공해요. 생성자를 private으로 두어 생성 경로를 factory로 통일해요.
+- 각 순서 값은 private final field에 보관해 불변으로 만들고 Lombok `@EqualsAndHashCode`로 모든 field 기반 동등성을 구현해요.
+- Jackson이 `ord1`~`ord4`를 속성으로 처리하도록 접근자에 `@JsonProperty`를 붙이고, 같은 속성으로 복원하도록 factory에 `@JsonCreator`를 붙였어요.
+- 사용자가 반환 타입 설명에 적은 `Quartlet`은 요청한 클래스 이름과 일반적인 용어에 맞춰 `Quartet`으로 구현했어요.

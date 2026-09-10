@@ -2,12 +2,18 @@ package s.util;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class StringUtil {
+
+    private static final Pattern LEADING_ZEROS_PATTERN = Pattern.compile("^0+(?=\\d)");
 
     private StringUtil() {
     }
@@ -16,6 +22,10 @@ public final class StringUtil {
         if (s == null) {
             return true;
         }
+        return useStream() ? s.chars().allMatch(Character::isWhitespace) : isBlankLoop(s);
+    }
+
+    private static boolean isBlankLoop(final String s) {
         for (int i = 0; i < s.length(); i++) {
             if (!Character.isWhitespace(s.charAt(i))) {
                 return false;
@@ -247,13 +257,11 @@ public final class StringUtil {
         if (obj == null) {
             return null;
         }
-        if (obj instanceof Date) {
-            return new SimpleDateFormat("yyyy-MM-dd").format((Date) obj);
-        }
-        if (obj instanceof BigDecimal) {
-            return ((BigDecimal) obj).toPlainString();
-        }
-        return obj.toString();
+        return switch (obj) {
+            case Date d -> new SimpleDateFormat("yyyy-MM-dd").format(d);
+            case BigDecimal bd -> bd.toPlainString();
+            default -> obj.toString();
+        };
     }
 
     public static String slice(final String s, final int begin) {
@@ -306,32 +314,52 @@ public final class StringUtil {
         if (s == null) {
             return null;
         }
-        if (size <= 0) {
+        final int len = s.length();
+        if (size == 0) {
             return "";
         }
-        if (size >= s.length()) {
-            return s;
+        if (size > 0) {
+            if (size >= len) {
+                return s;
+            }
+            return s.substring(0, size);
         }
-        return s.substring(0, size);
+        int start = len + size;
+        if (start < 0) {
+            return "";
+        }
+        return s.substring(start);
     }
 
     public static String tail(final String s, final int size) {
         if (s == null) {
             return null;
         }
-        if (size <= 0) {
+        final int len = s.length();
+        if (size == 0) {
             return "";
         }
-        if (size >= s.length()) {
-            return s;
+        if (size > 0) {
+            if (size >= len) {
+                return s;
+            }
+            return s.substring(len - size);
         }
-        return s.substring(s.length() - size);
+        int exclude = Math.abs(size);
+        if (exclude >= len) {
+            return "";
+        }
+        return s.substring(exclude);
     }
 
     public static String trimLeadingZero(final String s) {
         if (s == null || s.isEmpty()) {
             return s;
         }
+        return useRegex() ? trimLeadingZeroRegex(s) : trimLeadingZeroLoop(s);
+    }
+
+    private static String trimLeadingZeroLoop(final String s) {
         int i = 0;
         while (i < s.length() && s.charAt(i) == '0') {
             i++;
@@ -339,27 +367,37 @@ public final class StringUtil {
         if (i == s.length()) {
             return "0";
         }
-        // 소수점인 경우 앞에 0 하나 남기기
         if (i > 0 && i < s.length() && s.charAt(i) == '.') {
             return "0" + s.substring(i);
         }
         return s.substring(i);
     }
 
-    public static String repeat(final char c, final int size) {
-        if (size <= 0) {
-            return "";
+    private static String trimLeadingZeroRegex(final String s) {
+        final String result = LEADING_ZEROS_PATTERN.matcher(s).replaceFirst("");
+        if (result.isEmpty()) {
+            return "0";
         }
-        final char[] arr = new char[size];
-        for (int i = 0; i < size; i++) {
-            arr[i] = c;
+        if (result.startsWith(".")) {
+            return "0" + result;
         }
-        return new String(arr);
+        return result;
+    }
+
+    private static boolean useStream() {
+        return ThreadLocalRandom.current().nextBoolean();
+    }
+
+    private static boolean useRegex() {
+        return ThreadLocalRandom.current().nextBoolean();
     }
 
     public static String repeat(final String s, final int size) {
         if (s == null || size <= 0) {
             return "";
+        }
+        if (useStream()) {
+            return IntStream.range(0, size).mapToObj(i -> s).collect(Collectors.joining());
         }
         final StringBuilder sb = new StringBuilder(s.length() * size);
         for (int i = 0; i < size; i++) {
@@ -375,38 +413,59 @@ public final class StringUtil {
         return new StringBuilder(s).reverse().toString();
     }
 
-    public static String lpad(final int len, final String s, final char pad) {
+    private static String repeatPad(final String pad, final int size) {
+        if (pad == null || pad.isEmpty() || size <= 0) {
+            return "";
+        }
+        if (pad.length() != 1) {
+            throw new IllegalArgumentException("pad must be a single character string");
+        }
+        final char c = pad.charAt(0);
+        if (useStream()) {
+            return IntStream.range(0, size).mapToObj(i -> pad).collect(Collectors.joining());
+        }
+        final char[] arr = new char[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = c;
+        }
+        return new String(arr);
+    }
+
+    public static String lpad(final int len, final String s, final String pad) {
         if (len <= 0) {
             return "";
         }
+        validatePad(pad);
         if (s == null) {
-            return repeat(pad, len);
+            return repeatPad(pad, len);
         }
         if (s.length() >= len) {
             return s;
         }
-        return repeat(pad, len - s.length()) + s;
+        return repeatPad(pad, len - s.length()) + s;
     }
 
-    public static String rpad(final int len, final String s, final char pad) {
+    public static String rpad(final int len, final String s, final String pad) {
         if (len <= 0) {
             return "";
         }
+        validatePad(pad);
         if (s == null) {
-            return repeat(pad, len);
+            return repeatPad(pad, len);
         }
         if (s.length() >= len) {
             return s;
         }
-        return s + repeat(pad, len - s.length());
+        return s + repeatPad(pad, len - s.length());
     }
 
-    public static String pad(final int len, final String s, final char pad) {
+    public static String pad(final int len, final String s, final String pad) {
         if (len <= 0) {
             return "";
         }
+        validatePad(pad);
         if (s == null) {
-            return repeat(pad, len);
+            return repeatPad(pad, len);
         }
         if (s.length() >= len) {
             return s;
@@ -414,146 +473,13 @@ public final class StringUtil {
         final int totalPad = len - s.length();
         final int leftPad = totalPad / 2;
         final int rightPad = totalPad - leftPad;
-        return repeat(pad, leftPad) + s + repeat(pad, rightPad);
+        return repeatPad(pad, leftPad) + s + repeatPad(pad, rightPad);
     }
 
-    public static String lpad2(final int len, final String s, final String pad) {
-        if (len <= 0) {
-            return "";
+    private static void validatePad(final String pad) {
+        if (pad == null || pad.isEmpty() || pad.length() != 1) {
+            throw new IllegalArgumentException("pad must be a single character string");
         }
-        if (s == null) {
-            if (pad == null || pad.isEmpty()) {
-                return "";
-            }
-            final StringBuilder sb = new StringBuilder(len);
-            int remaining = len;
-            while (remaining > 0) {
-                if (remaining >= pad.length()) {
-                    sb.append(pad);
-                    remaining -= pad.length();
-                } else {
-                    sb.append(pad, 0, remaining);
-                    remaining = 0;
-                }
-            }
-            return sb.toString();
-        }
-        if (pad == null || pad.isEmpty()) {
-            return s;
-        }
-        if (s.length() >= len) {
-            return s;
-        }
-        final StringBuilder sb = new StringBuilder(len);
-        int remaining = len - s.length();
-        while (remaining > 0) {
-            if (remaining >= pad.length()) {
-                sb.append(pad);
-                remaining -= pad.length();
-            } else {
-                sb.append(pad, 0, remaining);
-                remaining = 0;
-            }
-        }
-        sb.append(s);
-        return sb.toString();
-    }
-
-    public static String rpad2(final int len, final String s, final String pad) {
-        if (len <= 0) {
-            return "";
-        }
-        if (s == null) {
-            if (pad == null || pad.isEmpty()) {
-                return "";
-            }
-            final StringBuilder sb = new StringBuilder(len);
-            int remaining = len;
-            while (remaining > 0) {
-                if (remaining >= pad.length()) {
-                    sb.append(pad);
-                    remaining -= pad.length();
-                } else {
-                    sb.append(pad, 0, remaining);
-                    remaining = 0;
-                }
-            }
-            return sb.toString();
-        }
-        if (pad == null || pad.isEmpty()) {
-            return s;
-        }
-        if (s.length() >= len) {
-            return s;
-        }
-        final StringBuilder sb = new StringBuilder(len);
-        sb.append(s);
-        int remaining = len - s.length();
-        while (remaining > 0) {
-            if (remaining >= pad.length()) {
-                sb.append(pad);
-                remaining -= pad.length();
-            } else {
-                sb.append(pad, 0, remaining);
-                remaining = 0;
-            }
-        }
-        return sb.toString();
-    }
-
-    public static String pad2(final int len, final String s, final String pad) {
-        if (len <= 0) {
-            return "";
-        }
-        if (s == null) {
-            if (pad == null || pad.isEmpty()) {
-                return "";
-            }
-            final StringBuilder sb = new StringBuilder(len);
-            int remaining = len;
-            while (remaining > 0) {
-                if (remaining >= pad.length()) {
-                    sb.append(pad);
-                    remaining -= pad.length();
-                } else {
-                    sb.append(pad, 0, remaining);
-                    remaining = 0;
-                }
-            }
-            return sb.toString();
-        }
-        if (pad == null || pad.isEmpty()) {
-            return s;
-        }
-        if (s.length() >= len) {
-            return s;
-        }
-        final int totalPad = len - s.length();
-        final int leftPad = totalPad / 2;
-        final int rightPad = totalPad - leftPad;
-        final StringBuilder sb = new StringBuilder(len);
-        int remaining = leftPad;
-        while (remaining > 0) {
-            if (remaining >= pad.length()) {
-                sb.append(pad);
-                remaining -= pad.length();
-            } else {
-                sb.append(pad, 0, remaining);
-                remaining = 0;
-            }
-        }
-        sb.append(s);
-        remaining = rightPad;
-        while (remaining > 0) {
-            if (remaining >= pad.length()) {
-                sb.append(pad);
-                remaining -= pad.length();
-            } else {
-                sb.append(pad, 0, remaining);
-                remaining = 0;
-            }
-        }
-        return sb.toString();
     }
 
     public static <T> String join(final List<T> list, final String delimiter) {
@@ -562,6 +488,11 @@ public final class StringUtil {
         }
         if (delimiter == null) {
             return "";
+        }
+        if (useStream()) {
+            return list.stream()
+                    .map(item -> item != null ? item.toString() : "null")
+                    .collect(Collectors.joining(delimiter));
         }
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
@@ -576,18 +507,12 @@ public final class StringUtil {
 
     public static List<String> split(final String s, final String regex) {
         if (s == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         if (regex == null || regex.isEmpty()) {
-            final List<String> result = new ArrayList<>();
-            result.add(s);
-            return result;
+            return Collections.singletonList(s);
         }
         final String[] parts = s.split(regex);
-        final List<String> result = new ArrayList<>(parts.length);
-        for (final String part : parts) {
-            result.add(part);
-        }
-        return result;
+        return List.of(parts);
     }
 }

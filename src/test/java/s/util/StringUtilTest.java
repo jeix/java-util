@@ -164,11 +164,16 @@ class StringUtilTest {
     void head() {
         assertNull(StringUtil.head(null, 3));
         assertEquals("", StringUtil.head("hello", 0));
-        assertEquals("", StringUtil.head("hello", -1));
         assertEquals("h", StringUtil.head("hello", 1));
         assertEquals("hel", StringUtil.head("hello", 3));
         assertEquals("hello", StringUtil.head("hello", 5));
         assertEquals("hello", StringUtil.head("hello", 10));
+        
+        // 음수 size: 역방향 인덱스
+        assertEquals("o", StringUtil.head("hello", -1));
+        assertEquals("lo", StringUtil.head("hello", -2));
+        assertEquals("hello", StringUtil.head("hello", -5));
+        assertEquals("", StringUtil.head("hello", -10));
         log.info("head tests passed");
     }
 
@@ -176,11 +181,16 @@ class StringUtilTest {
     void tail() {
         assertNull(StringUtil.tail(null, 3));
         assertEquals("", StringUtil.tail("hello", 0));
-        assertEquals("", StringUtil.tail("hello", -1));
         assertEquals("o", StringUtil.tail("hello", 1));
         assertEquals("llo", StringUtil.tail("hello", 3));
         assertEquals("hello", StringUtil.tail("hello", 5));
         assertEquals("hello", StringUtil.tail("hello", 10));
+        
+        // 음수 size: 양수로 바꿔서 앞에서부터 제외
+        assertEquals("ello", StringUtil.tail("hello", -1));
+        assertEquals("llo", StringUtil.tail("hello", -2));
+        assertEquals("", StringUtil.tail("hello", -5));
+        assertEquals("", StringUtil.tail("hello", -10));
         log.info("tail tests passed");
     }
 
@@ -198,11 +208,6 @@ class StringUtilTest {
 
     @Test
     void repeat() {
-        assertEquals("", StringUtil.repeat('a', 0));
-        assertEquals("", StringUtil.repeat('a', -1));
-        assertEquals("a", StringUtil.repeat('a', 1));
-        assertEquals("aaa", StringUtil.repeat('a', 3));
-
         assertEquals("", StringUtil.repeat("ab", 0));
         assertEquals("", StringUtil.repeat("ab", -1));
         assertEquals("ab", StringUtil.repeat("ab", 1));
@@ -223,71 +228,41 @@ class StringUtilTest {
 
     @Test
     void lpad() {
-        assertEquals("  hello", StringUtil.lpad(7, "hello", ' '));
-        assertEquals("00hello", StringUtil.lpad(7, "hello", '0'));
-        assertEquals("hello", StringUtil.lpad(3, "hello", ' '));
-        assertEquals("00000", StringUtil.lpad(5, null, '0'));
-        assertEquals("", StringUtil.lpad(0, "hello", ' '));
+        // pad is now String, single character
+        assertEquals("  hello", StringUtil.lpad(7, "hello", " "));
+        assertEquals("00hello", StringUtil.lpad(7, "hello", "0"));
+        assertEquals("hello", StringUtil.lpad(3, "hello", " "));
+        assertEquals("00000", StringUtil.lpad(5, null, "0"));
+        assertEquals("", StringUtil.lpad(0, "hello", " "));
+        
+        // pad length must be 1
+        assertThrows(IllegalArgumentException.class, () -> StringUtil.lpad(5, "hello", "ab"));
         log.info("lpad tests passed");
     }
 
     @Test
     void rpad() {
-        assertEquals("hello  ", StringUtil.rpad(7, "hello", ' '));
-        assertEquals("hello00", StringUtil.rpad(7, "hello", '0'));
-        assertEquals("hello", StringUtil.rpad(3, "hello", ' '));
-        assertEquals("00000", StringUtil.rpad(5, null, '0'));
-        assertEquals("", StringUtil.rpad(0, "hello", ' '));
+        assertEquals("hello  ", StringUtil.rpad(7, "hello", " "));
+        assertEquals("hello00", StringUtil.rpad(7, "hello", "0"));
+        assertEquals("hello", StringUtil.rpad(3, "hello", " "));
+        assertEquals("00000", StringUtil.rpad(5, null, "0"));
+        assertEquals("", StringUtil.rpad(0, "hello", " "));
+        
+        assertThrows(IllegalArgumentException.class, () -> StringUtil.rpad(5, "hello", "ab"));
         log.info("rpad tests passed");
     }
 
     @Test
     void pad() {
-        assertEquals(" hello ", StringUtil.pad(7, "hello", ' '));
-        assertEquals("0hello0", StringUtil.pad(7, "hello", '0'));
-        assertEquals("hello", StringUtil.pad(3, "hello", ' '));
-        assertEquals("00000", StringUtil.pad(5, null, '0'));
-        assertEquals("", StringUtil.pad(0, "hello", ' '));
-        assertEquals("  hello  ", StringUtil.pad(9, "hello", ' '));
+        assertEquals(" hello ", StringUtil.pad(7, "hello", " "));
+        assertEquals("0hello0", StringUtil.pad(7, "hello", "0"));
+        assertEquals("hello", StringUtil.pad(3, "hello", " "));
+        assertEquals("00000", StringUtil.pad(5, null, "0"));
+        assertEquals("", StringUtil.pad(0, "hello", " "));
+        assertEquals("  hello  ", StringUtil.pad(9, "hello", " "));
+        
+        assertThrows(IllegalArgumentException.class, () -> StringUtil.pad(5, "hello", "ab"));
         log.info("pad tests passed");
-    }
-
-    @Test
-    void lpad2() {
-        assertEquals("abhello", StringUtil.lpad2(7, "hello", "ab"));
-        assertEquals("ababhello", StringUtil.lpad2(9, "hello", "ab"));
-        assertEquals("abhello", StringUtil.lpad2(7, "hello", "abc"));
-        assertEquals("hello", StringUtil.lpad2(3, "hello", "ab"));
-        assertEquals("hello", StringUtil.lpad2(7, "hello", ""));
-        assertEquals("hello", StringUtil.lpad2(7, "hello", null));
-        assertEquals("abab", StringUtil.lpad2(4, null, "ab"));
-        assertEquals("", StringUtil.lpad2(0, "hello", "ab"));
-        log.info("lpad2 tests passed");
-    }
-
-    @Test
-    void rpad2() {
-        assertEquals("helloab", StringUtil.rpad2(7, "hello", "ab"));
-        assertEquals("helloabab", StringUtil.rpad2(9, "hello", "ab"));
-        assertEquals("helloab", StringUtil.rpad2(7, "hello", "abc"));
-        assertEquals("hello", StringUtil.rpad2(3, "hello", "ab"));
-        assertEquals("hello", StringUtil.rpad2(7, "hello", ""));
-        assertEquals("hello", StringUtil.rpad2(7, "hello", null));
-        assertEquals("abab", StringUtil.rpad2(4, null, "ab"));
-        assertEquals("", StringUtil.rpad2(0, "hello", "ab"));
-        log.info("rpad2 tests passed");
-    }
-
-    @Test
-    void pad2() {
-        assertEquals("abhelloab", StringUtil.pad2(9, "hello", "ab"));
-        assertEquals("abahelloaba", StringUtil.pad2(11, "hello", "ab"));
-        assertEquals("hello", StringUtil.pad2(3, "hello", "ab"));
-        assertEquals("hello", StringUtil.pad2(7, "hello", ""));
-        assertEquals("hello", StringUtil.pad2(7, "hello", null));
-        assertEquals("abab", StringUtil.pad2(4, null, "ab"));
-        assertEquals("", StringUtil.pad2(0, "hello", "ab"));
-        log.info("pad2 tests passed");
     }
 
     @Test
@@ -312,6 +287,10 @@ class StringUtilTest {
         assertArrayEquals(new String[]{"a", "", "c"}, StringUtil.split("a,,c", ",").toArray());
         assertArrayEquals(new String[]{"a b c"}, StringUtil.split("a b c", ",").toArray());
         assertArrayEquals(new String[]{"a", "b", "c"}, StringUtil.split("a, b, c", ", ").toArray());
+        
+        // 불변 리스트 반환 확인
+        List<String> result = StringUtil.split("a,b,c", ",");
+        assertThrows(UnsupportedOperationException.class, () -> result.add("d"));
         log.info("split tests passed");
     }
 }

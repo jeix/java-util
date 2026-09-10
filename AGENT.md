@@ -8,7 +8,8 @@ Java 유틸리티 프로젝트의 초기화 및 기본 구조 구축을 담당�
 2. Lombok, Jackson, JUnit 5 의존성 구성
 3. Maven Wrapper 포함 (별도 Maven 설치 불필요)
 4. 예제 클래스(s.Hello) 및 테스트(s.HelloTest) 작성
-5. 빌드 및 테스트 검증 완료
+5. 문자열 유틸리티 클래스(s.util.StringUtil) 및 테스트(s.util.StringUtilTest) 작성
+6. 빌드 및 테스트 검증 완료
 
 ## 작업 완료 기준
 - `./mvnw compile` 성공

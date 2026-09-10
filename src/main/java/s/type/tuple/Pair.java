@@ -1,5 +1,6 @@
 package s.type.tuple;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
@@ -17,10 +18,12 @@ public class Pair<T, U> {
         return new Pair<>(ord1, ord2);
     }
 
+    @JsonProperty("1")
     public T ord1() {
         return ord1;
     }
 
+    @JsonProperty("2")
     public U ord2() {
         return ord2;
     }

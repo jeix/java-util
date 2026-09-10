@@ -1,5 +1,6 @@
 package s.type.tuple;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -7,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class TupleTest {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Test
     void pair_of_and_getters() {
@@ -116,5 +119,23 @@ class TupleTest {
         assertEquals(3.14, quartet.ord3());
         assertEquals(true, quartet.ord4());
         log.info("Immutability test passed");
+    }
+
+    @Test
+    void tuples_json_serialization() throws Exception {
+        Pair<String, Integer> pair = Pair.of("hello", 42);
+        String pairJson = MAPPER.writeValueAsString(pair);
+        assertEquals("{\"1\":\"hello\",\"2\":42}", pairJson);
+        log.info("Pair JSON: {}", pairJson);
+
+        Triplet<String, Integer, Double> triplet = Triplet.of("hello", 42, 3.14);
+        String tripletJson = MAPPER.writeValueAsString(triplet);
+        assertEquals("{\"1\":\"hello\",\"2\":42,\"3\":3.14}", tripletJson);
+        log.info("Triplet JSON: {}", tripletJson);
+
+        Quartet<String, Integer, Double, Boolean> quartet = Quartet.of("hello", 42, 3.14, true);
+        String quartetJson = MAPPER.writeValueAsString(quartet);
+        assertEquals("{\"1\":\"hello\",\"2\":42,\"3\":3.14,\"4\":true}", quartetJson);
+        log.info("Quartet JSON: {}", quartetJson);
     }
 }

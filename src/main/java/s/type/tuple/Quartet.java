@@ -1,5 +1,6 @@
 package s.type.tuple;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
@@ -21,18 +22,22 @@ public class Quartet<T, U, V, W> {
         return new Quartet<>(ord1, ord2, ord3, ord4);
     }
 
+    @JsonProperty("1")
     public T ord1() {
         return ord1;
     }
 
+    @JsonProperty("2")
     public U ord2() {
         return ord2;
     }
 
+    @JsonProperty("3")
     public V ord3() {
         return ord3;
     }
 
+    @JsonProperty("4")
     public W ord4() {
         return ord4;
     }

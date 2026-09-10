@@ -10,7 +10,8 @@ Java 유틸리티 프로젝트의 초기화 및 기본 구조 구축을 담당�
 4. 예제 클래스(s.Hello) 및 테스트(s.HelloTest) 작성
 5. 문자열 유틸리티 클래스(s.util.StringUtil) 및 테스트(s.util.StringUtilTest) 작성
 6. 튜플 타입 클래스(s.type.tuple.Pair, Triplet, Quartet) 및 테스트(s.type.tuple.TupleTest) 작성
-7. 빌드 및 테스트 검증 완료
+7. 컬렉션 유틸리티 클래스(s.util.CollectionUtil) 및 테스트(s.util.CollectionUtilTest) 작성
+8. 빌드 및 테스트 검증 완료
 
 ## 작업 완료 기준
 - `./mvnw compile` 성공

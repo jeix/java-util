@@ -60,7 +60,7 @@
 ## 9. SLF4J 테스트 의존성 추가
 **결정**: slf4j-api + slf4j-simple을 test 스코프로 추가
 **근거**: 
-- StringUtilTest, TupleTest에서 @Slf4j 사용 위해 필요
+- StringUtilTest, TupleTest, CollectionUtilTest에서 @Slf4j 사용 위해 필요
 - 테스트 실행 시 콘솔 로그 출력용 simple 바인딩
 - 운영 코드에는 로깅 구현체 미포함 (호출자 결정)
 
@@ -111,3 +111,38 @@
 - 각 크기별 최적화된 구현 가능
 - 불필요한 추상화 회피 (YAGNI)
 - 필요시 Quintet 등 추가 용이
+
+## 14. CollectionUtil 메서드 설계 원칙
+**결정**: 
+- StringUtil과 동일한 guard clause 패턴 적용
+- null 안전성: null 입력 시 빈 컬렉션/맵 또는 null 반환
+- 불변성 보장: 원본 컬렉션 변경하지 않고 새 컬렉션 반환
+- 제네릭 타입 안전성: `@SuppressWarnings("unchecked")` 최소화, toArray 오버로드로 타입 안전성 확보
+- 스트림 API 활용: findAll, grouping에서 Stream API 사용
+**근거**: 
+- StringUtil과 일관된 설계로 학습 비용 감소
+- 부작용 없는 순수 함수형 스타일
+- Java 타입 시스템 제약 내 타입 안전성 최대화
+
+## 15. CollectionUtil 주요 메서드 그룹화
+**결정**: 관련 기능을 그룹화하여 일관된 네이밍 적용
+- `isEmpty`/`emptyIfNull` (Collection/Map 오버로드): 빈 체크/기본값
+- `zip` (Pair/BiFunction): 리스트 결합
+- `toArray` (타입 안전한 배열 변환): 제네릭 배열 생성
+- `findOne`/`findAll` (Predicate): 필터링/검색
+- `unionOf`/`intersectionOf`/`differenceOf`/`symmetricDifferenceOf`: 집합 연산
+- `slice`/`head`/`tail` (begin/end/size): 부분 리스트 추출
+- `indexing`/`grouping` (Function→Map/Map<List>): 색인화/분류
+- `asMap` (가변인자/클래스/Entry리스트)/`castKeyValue`/`copyOf`: 맵 생성/변환
+**근거**: 
+- 기능별 명확한 분리 및 네이밍 일관성
+- Java Collections Framework 관례 준수
+- Map.Entry, BiFunction 등 표준 함수형 인터페이스 활용
+
+## 16. toArray 메서드 타입 안전성 처리
+**결정**: `list.toArray(new T[0])` 패턴 대신 `list.toArray(new String[0])` 형태의 오버로드 제공
+**근거**: 
+- Java 제네릭 타입 소거로 인해 런타임에 타입 정보 손실
+- `toArray(new Object[0])` 후 캐스팅 시 ClassCastException 발생 가능
+- 호출자가 타입을 명시하는 오버로드(`toArray(list, array)`)로 타입 안전성 확보
+- 기존 `toArray()`는 Object[] 반환하며 필요 시 캐스팅

@@ -19,6 +19,10 @@
 - [x] 16단계: @JsonProperty 추가로 JSON 직렬화 지원
 - [x] 17단계: 빌드 및 테스트 검증 (Tuple)
 - [x] 18단계: 문서 갱신 (2차)
+- [x] 19단계: CollectionUtil 클래스 구현 (모든 메서드)
+- [x] 20단계: CollectionUtilTest 클래스 구현 (@Slf4j, 테스트 메서드)
+- [x] 21단계: 빌드 및 테스트 검증 (CollectionUtil)
+- [x] 22단계: 문서 갱신 (3차)
 
 ## 단계별 상세
 
@@ -130,8 +134,32 @@
 - **수정 파일**: 4개 마크다운 파일
 - **완료 기준**: 모든 문서가 현재 상태 반영
 
+### 19단계: CollectionUtil 클래스 구현 ✅
+- **입력**: 디렉토리 구조, PRD 기능 요구사항
+- **출력**: src/main/java/s/util/CollectionUtil.java
+- **수정 파일**: CollectionUtil.java
+- **완료 기준**: 25개 메서드 구현 완료 (빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환), 컴파일 성공
+
+### 20단계: CollectionUtilTest 클래스 구현 ✅
+- **입력**: CollectionUtil 클래스
+- **출력**: src/test/java/s/util/CollectionUtilTest.java
+- **수정 파일**: CollectionUtilTest.java
+- **완료 기준**: @Slf4j 적용, 21개 테스트 메서드 작성 (빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환)
+
+### 21단계: 빌드 및 테스트 검증 (CollectionUtil) ✅
+- **입력**: 전체 소스 코드 (Hello + StringUtil + Tuple + CollectionUtil)
+- **출력**: target/classes, target/test-classes, 테스트 리포트
+- **실행 명령**: ./mvnw test
+- **완료 기준**: BUILD SUCCESS, Tests run: 56, Failures: 0
+
+### 22단계: 문서 갱신 (3차) ✅
+- **입력**: 완료된 프로젝트
+- **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
+- **수정 파일**: 4개 마크다운 파일
+- **완료 기준**: 모든 문서가 현재 상태 반영
+
 ## 다음 단계 (향후 확장 시)
 - [ ] CI/CD 파이프라인 구성 (GitHub Actions 등)
 - [ ] 코드 품질 도구 추가 (SpotBugs, Checkstyle, PMD)
-- [ ] 추가 유틸리티 클래스 구현 (CollectionUtil, DateUtil 등)
+- [ ] 추가 유틸리티 클래스 구현 (DateUtil 등)
 - [ ] 통합 테스트 모듈 분리

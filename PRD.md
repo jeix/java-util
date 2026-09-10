@@ -47,10 +47,20 @@
   - JSON 직렬화용 getter: `ord1()`, `ord2()`, `ord3()`, `ord4()` (`@JsonProperty` 적용)
   - `toString()`: `(t, u, v, w)` 형식
 
-#### 3.4 테스트 클래스
+#### 3.4 CollectionUtil 클래스 (컬렉션/맵 유틸리티)
+- **빈 체크/기본값**: `isEmpty` (Collection/Map), `emptyIfNull` (List/Map)
+- **리스트 결합/변환**: `zip` (Pair/함수), `toArray` (타입 안전한 배열)
+- **필터링/검색**: `findOne`, `findAll` (Predicate)
+- **집합 연산**: `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf`
+- **슬라이싱**: `slice` (begin/end), `head`, `tail`
+- **색인화/분류**: `indexing` (Function→Map), `grouping` (Function→Map<List>)
+- **맵 생성/변환**: `asMap` (가변인자/클래스/Entry리스트), `castKeyValue`, `copyOf`
+
+#### 3.5 테스트 클래스
 - **HelloTest**: 정상/경계 케이스, Lombok 생성 메서드 검증 (3개 테스트)
 - **StringUtilTest**: @Slf4j 적용, 모든 public 메서드 검증 (23개 테스트)
 - **TupleTest**: @Slf4j 적용, 생성/조회, equals/hashCode, null 값, 불변성, JSON 직렬화 검증 (9개 테스트)
+- **CollectionUtilTest**: @Slf4j 적용, 빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환 검증 (21개 테스트)
 
 ### 4. 비기능 요구사항
 - Maven Wrapper 제공으로 별도 설치 없이 빌드 가능

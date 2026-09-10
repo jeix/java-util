@@ -22,6 +22,7 @@ Maven 사전 설치 없이 Wrapper로 실행하며 Lombok과 Jackson을 사용�
 | 단일 문자 패딩 | `lpad`, `rpad`, `pad`: `(int len, String s, String pad)` |
 | 문자열 패딩 | `lpad2`, `rpad2`, `pad2`: `(int len, String s, String pad)` |
 | 결합·분할 | `join(List<T>, String delimiter)`, `split(String, String regex)` → `List<String>` |
+| 함수 합성 | `pipe(Function<String,String>... fns)` → `Function<String,String>`, `pipe()` → `Pipeline` |
 
 Supplier 선택 메서드는 각각 private static `_firstNonBlankOrLast`, `_firstNonBlankOrEmpty`, `_firstNonBlankOrNull`에 위임해요. 이 메서드들은 Supplier 2개와 나머지 Supplier 가변 인자를 받아요.
 `lpad`, `rpad`, `pad`의 `pad`는 UTF-8 기준 단일 바이트 문자 하나로 제한하고, `lpad2`, `rpad2`, `pad2`는 임의 길이 문자열 패턴을 허용해요. 구현 스타일은 [AGENTS.md](AGENTS.md)를 따라요.
@@ -36,6 +37,7 @@ Supplier 선택 메서드는 각각 private static `_firstNonBlankOrLast`, `_fir
 - `trimLeadingZero`는 loop와 정규식 치환 구현 중 하나를 무작위로 선택해요.
 - `repeat`의 반복 대상과 `lpad`/`rpad`/`pad`의 pad는 `String`이에요. pad는 single-byte 문자 하나만 허용해요.
 - `split`은 불변 리스트를 반환해요.
+- 함수 배열형 `pipe`는 입력값 기반 reduce와 `Function::andThen` 합성 구현을 모두 유지하고 실행할 때 무작위로 선택해요. 인자 없는 `pipe`는 immutable `Pipeline`의 `then`·`apply` API를 제공해요.
 
 ## 후속 확정 요구사항
 
@@ -63,6 +65,14 @@ Supplier 선택 메서드는 각각 private static `_firstNonBlankOrLast`, `_fir
 배열 타입을 명시하는 `toArray(list, Class<T>)`도 제공해요. 이 두 선택은 제안한 구현 기준이며 별도 확정 응답은 없었어요.
 구체적인 경계값과 반환 컬렉션의 공유 여부는 README에 기록해요.
 
+### CollectionUtil 후속 변경
+
+- 컬렉션을 반환하는 모든 메서드는 불변 리스트 또는 불변 맵을 반환해요. 중첩된 그룹 리스트도 불변이에요.
+- for-loop나 while-loop를 stream으로 바꿀 수 있는 처리는 두 구현을 유지하고 실행할 때 무작위로 선택해요.
+- List/Map `emptyIfNull`은 삼항 연산자를 사용해요.
+- `slice`는 음수 인덱스를 끝 기준으로 해석하고 인덱스를 `0..size`로 제한해요.
+- `head`의 음수 size는 끝 기준 인덱스, `tail`의 음수 size는 절댓값만큼 앞에서 제외할 인덱스로 해석해요.
+
 ## Tuple API
 
 `s.type.tuple.Pair<T,U>`, `Triplet<T,U,V>`, `Quartet<T,U,V,W>`와
@@ -78,8 +88,9 @@ JUnit 기반 `s.type.tuple.TupleTest`를 제공해요. 기존 `s.util.Pair`는 �
 
 전체 빌드와 JUnit 테스트가 통과해야 해요. StringUtil은 정상값·경계값, 음수·범위 밖 인덱스,
 Supplier 지연 평가와 호출 순서, for-loop·stream 구현의 동등성, 불변 `split` 결과,
-날짜·숫자 변환을 검증해요. CollectionUtil은 null/빈 입력, 순서·중복, 콜백 평가와 예외,
-배열 타입, 부분 리스트 뷰, 맵 생성·형변환·복사를 검증해요.
+날짜·숫자 변환, 두 `pipe` 구현의 적용 순서와 동등성을 검증해요. CollectionUtil은 null/빈 입력, 순서·중복, 콜백 평가와 예외,
+배열 타입, 음수·범위 밖 인덱스, loop·stream 구현의 동등성, 반환 컬렉션의 불변성,
+맵 생성·형변환·복사를 검증해요.
 Tuple은 factory와 순서별 접근자, null, 문자열 표현, 동등성·해시 코드, Jackson JSON 왕복 변환을 검증해요.
 현재 세부 동작은 README의 [문자열 유틸리티](README.md#문자열-유틸리티)와
 [컬렉션 유틸리티](README.md#컬렉션-유틸리티), 명세에 없는 동작의 선택 근거는 [DECISION.md](DECISION.md)에 기록해요.

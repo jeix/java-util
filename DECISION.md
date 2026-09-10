@@ -19,6 +19,7 @@
 - 비교 가능한 구현을 함께 실행할 수 있도록 첫 유효값 탐색과 `join`에 for-loop·stream 구현을 두고 `ThreadLocalRandom`으로 선택해요. Supplier stream 구현은 인덱스와 값을 결과 요소로 묶어 첫 유효값 또는 마지막 값을 선택하므로 `peek` 부수효과에 의존하지 않으며, loop와 같은 평가 순서로 첫 유효값에서 중단해요.
 - `trimLeadingZero`도 loop·정규식 치환 구현을 무작위로 선택해요. 두 구현 전의 숫자 형식 검증은 공통으로 수행해요.
 - single-byte pad는 UTF-8 바이트 길이가 1이고 Java 문자열 길이도 1인 값으로 판정해요. 조건에 맞지 않으면 패딩하지 않고 원문을 반환해요.
+- 함수 배열형 `pipe`는 입력값을 reduce identity로 사용하는 구현과 `Arrays.stream(fns).reduce(Function.identity(), Function::andThen)` 합성 구현을 두고 `ThreadLocalRandom`으로 선택해요. 입력값 기반 3인자 `reduce`의 combiner는 병렬 수행에서만 사용되며 현재 순차 stream에서는 호출되지 않아요. 두 구현은 null 함수를 건너뛰고 같은 순서로 적용해요. fluent `Pipeline`은 `then`마다 새 인스턴스를 반환해 기존 pipeline을 보존하며 함수 내부 예외는 전달해요.
 
 ## stringify 후속 요구사항 반영
 
@@ -32,8 +33,10 @@
 - CollectionUtil 구현 당시에는 추가 라이브러리 대신 `s.util.Pair<T,U>` record를 사용했어요. 이후 튜플 타입 요구사항에 따라 이를 제거하고 `s.type.tuple.Pair<T,U>` 불변 클래스로 대체했어요.
 - 타입 소거 때문에 `toArray(list)`만으로 빈 리스트의 배열 타입을 알 수 없어요. `Object[]`를 `T[]`로 가장하는 대신 첫 non-null 요소의 클래스로 추론하고, 추론 불가 시 예외를 발생시켜요. 안전하게 타입을 지정하는 Class 오버로드도 제공해요. 혼합 하위 타입은 Class 지정이 필요할 수 있어요.
 - 집합 연산은 Set 반환이나 완전 중복 제거 대신 요청한 리스트 수식을 따라 순서·중복을 유지해요. 포함 여부는 HashSet으로 판별해요.
-- `slice`는 명세의 `list.subList()`에 맞춰 원본과 연결된 뷰를 반환해요. Map 결과는 LinkedHashMap으로 순서를 유지하며 중복 키는 마지막 값으로 정했어요.
-- `castKeyValue`는 Class 정보가 없는 unchecked cast이며 검증·변환을 하지 않아요. 런타임 검증이 필요하면 Class를 받는 `asMap`을 사용해요.
+- 컬렉션 반환값은 null 요소와 null 키·값을 허용하면서 불변이어야 하므로 `List.copyOf`·`Map.copyOf` 대신 방어적 복사 후 불변 래퍼를 사용해요. `grouping`은 내부 리스트까지 불변으로 만들어요.
+- `slice`는 정규화한 범위의 `subList()`를 방어적으로 복사해 원본과 분리해요. 음수 인덱스와 `head`·`tail`의 음수 size는 StringUtil과 같은 규칙을 적용해요.
+- 기존 반복문이 있는 `zip`, `findOne`, `findAll`, `indexing`, `grouping`, `asMap`은 loop·stream 구현을 두고 `ThreadLocalRandom`으로 선택해요. stream은 순차 실행해 loop와 같은 순서와 단락 평가를 유지해요.
+- Map 결과는 `LinkedHashMap` 기반 복사로 순서를 유지하며 중복 키는 마지막 값으로 정했어요. `castKeyValue`는 Class 정보가 없는 unchecked cast 후 불변 복사하며 검증·변환은 하지 않아요. 런타임 검증이 필요하면 Class를 받는 `asMap`을 사용해요.
 - null 처리, 짧은 길이 zip, 중복 키, 홀수 맵 인자 예외 등 미지정 경계값은 README에 명시한 구현 가정이에요.
 
 ## Tuple

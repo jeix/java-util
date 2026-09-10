@@ -7,10 +7,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -408,5 +411,64 @@ public final class StringUtil {
             return List.of(s);
         }
         return List.of(s.split(regex, -1));
+    }
+
+    /** 함수를 전달된 순서대로 합성해요. null 함수는 건너뛰어요. */
+    @SafeVarargs
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        if (fns == null || fns.length == 0) {
+            return Function.identity();
+        }
+        return _chooseAlternative()
+                ? _pipeWithInputReduction(fns)
+                : _pipeWithComposition(fns);
+    }
+
+    private static Function<String, String> _pipeWithInputReduction(
+            Function<String, String>[] fns) {
+        return input -> Stream.of(fns)
+                .filter(Objects::nonNull)
+                .reduce(
+                        input,
+                        (value, fn) -> fn.apply(value),
+                        // 병렬 stream의 부분 결과를 합치는 combiner예요.
+                        // 현재 순차 stream에서는 호출되지 않아요.
+                        (first, second) -> second);
+    }
+
+    private static Function<String, String> _pipeWithComposition(
+            Function<String, String>[] fns) {
+        return Arrays.stream(fns)
+                .filter(Objects::nonNull)
+                .reduce(Function.identity(), Function::andThen);
+    }
+
+    public static Pipeline pipe() {
+        return Pipeline._init();
+    }
+
+    /** 문자열 함수를 순서대로 합성하는 불변 pipeline이에요. */
+    public static final class Pipeline {
+
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline _init() {
+            return new Pipeline(Function.identity());
+        }
+
+        public Pipeline then(Function<String, String> next) {
+            if (next == null) {
+                return this;
+            }
+            return new Pipeline(fn.andThen(next));
+        }
+
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

@@ -437,6 +437,41 @@ class StringUtilTest {
     }
 
     @Test
+    void pipesFunctionsInOrder() {
+        String input = "2025-03-19 12:26:41.012345000";
+        IntStream.range(0, 100).forEach(ignored -> {
+            Function<String, String> pipeline = StringUtil.pipe(
+                    value -> StringUtil.slice(value, 20),
+                    StringUtil::reverse,
+                    StringUtil::trimLeadingZero,
+                    StringUtil::reverse);
+            assertEquals("012345", pipeline.apply(input));
+            assertEquals("ABC", StringUtil.pipe(null, String::toUpperCase).apply("abc"));
+        });
+        log.info("pipe result: {}", "012345");
+        Function<String, String>[] noFunctions = null;
+        assertEquals("value", StringUtil.pipe(noFunctions).apply("value"));
+    }
+
+    @Test
+    void buildsImmutablePipelineOneStageAtATime() {
+        String input = "2025-03-19 12:26:41.012345000";
+        StringUtil.Pipeline identity = StringUtil.pipe();
+        StringUtil.Pipeline pipeline = identity
+                .then(value -> StringUtil.slice(value, 20))
+                .then(StringUtil::reverse)
+                .then(StringUtil::trimLeadingZero)
+                .then(StringUtil::reverse);
+
+        String result = pipeline.apply(input);
+
+        assertEquals("012345", result);
+        log.info("pipeline result: {}", result);
+        assertEquals(input, identity.apply(input));
+        assertSame(identity, identity.then(null));
+    }
+
+    @Test
     void splitsByRegexAndPreservesEmptyFields() {
         List<List<String>> results = List.of(
                 StringUtil.split(null, ","),

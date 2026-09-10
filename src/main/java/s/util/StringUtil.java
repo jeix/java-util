@@ -75,6 +75,13 @@ public final class StringUtil {
     }
 
     public static String firstNonBlankOrLast(final String value1, final String value2, final String... values) {
+        if (useStream()) {
+            return firstNonBlankOrLastStream(value1, value2, values);
+        }
+        return firstNonBlankOrLastLoop(value1, value2, values);
+    }
+
+    private static String firstNonBlankOrLastLoop(final String value1, final String value2, final String... values) {
         if (!isBlank(value1)) {
             return value1;
         }
@@ -89,6 +96,21 @@ public final class StringUtil {
             }
         }
         return value2;
+    }
+
+    private static String firstNonBlankOrLastStream(final String value1, final String value2, final String... values) {
+        return java.util.stream.Stream.of(value1, value2)
+                .filter(v -> v != null && !isBlank(v))
+                .findFirst()
+                .orElseGet(() -> {
+                    if (values != null) {
+                        return java.util.stream.Stream.of(values)
+                                .filter(v -> v != null && !isBlank(v))
+                                .findFirst()
+                                .orElse(value2);
+                    }
+                    return value2;
+                });
     }
 
     public static String firstNonBlankOrLast(final Supplier<String> supplier1, final Supplier<String> supplier2) {
@@ -136,20 +158,8 @@ public final class StringUtil {
     }
 
     public static String firstNonBlankOrEmpty(final String value1, final String value2, final String... values) {
-        if (!isBlank(value1)) {
-            return value1;
-        }
-        if (!isBlank(value2)) {
-            return value2;
-        }
-        if (values != null) {
-            for (final String v : values) {
-                if (!isBlank(v)) {
-                    return v;
-                }
-            }
-        }
-        return "";
+        final String result = firstNonBlankOrLast(value1, value2, values);
+        return (result != null && !isBlank(result)) ? result : "";
     }
 
     public static String firstNonBlankOrEmpty(final Supplier<String> supplier1, final Supplier<String> supplier2) {
@@ -195,20 +205,8 @@ public final class StringUtil {
     }
 
     public static String firstNonBlankOrNull(final String value1, final String value2, final String... values) {
-        if (!isBlank(value1)) {
-            return value1;
-        }
-        if (!isBlank(value2)) {
-            return value2;
-        }
-        if (values != null) {
-            for (final String v : values) {
-                if (!isBlank(v)) {
-                    return v;
-                }
-            }
-        }
-        return null;
+        final String result = firstNonBlankOrLast(value1, value2, values);
+        return (result != null && !isBlank(result)) ? result : null;
     }
 
     public static String firstNonBlankOrNull(final Supplier<String> supplier1, final Supplier<String> supplier2) {

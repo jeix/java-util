@@ -23,6 +23,12 @@
 - [x] 20단계: CollectionUtilTest 클래스 구현 (@Slf4j, 테스트 메서드)
 - [x] 21단계: 빌드 및 테스트 검증 (CollectionUtil)
 - [x] 22단계: 문서 갱신 (3차)
+- [x] 23단계: StringUtil 리팩토링 (스트림/랜덤 분기, switch, head/tail 음수, trimLeadingZero 정규식, repeat char 제거, pad String, split 불변 리스트)
+- [x] 24단계: StringUtilTest 갱신 (char repeat 제거, pad String, head/tail 음수, split 불변 리스트 검증)
+- [x] 25단계: CollectionUtil 리팩토링 (불변 리스트/맵 반환, 스트림/랜덤 분기, head/tail 음수)
+- [x] 26단계: CollectionUtilTest 갱신 (불변성 검증, head/tail 음수, 불변 리스트/맵 검증)
+- [x] 27단계: 빌드 및 테스트 검증 (전체 리팩토링 후)
+- [x] 28단계: 문서 갱신 (4차)
 
 ## 단계별 상세
 
@@ -153,6 +159,68 @@
 - **완료 기준**: BUILD SUCCESS, Tests run: 56, Failures: 0
 
 ### 22단계: 문서 갱신 (3차) ✅
+- **입력**: 완료된 프로젝트
+- **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
+- **수정 파일**: 4개 마크다운 파일
+- **완료 기준**: 모든 문서가 현재 상태 반영
+
+### 23단계: StringUtil 리팩토링 ✅
+- **입력**: 기존 StringUtil 클래스
+- **출력**: 리팩토링된 StringUtil.java
+- **수정 파일**: StringUtil.java
+- **완료 기준**: 
+  - 스트림/루프 구현 병행 및 랜덤 분기 (isBlank, repeat, join, lpad/rpad/pad)
+  - stringify switch expression 적용
+  - head/tail 음수 size 지원 (역방향/앞에서 제외)
+  - trimLeadingZero 정규식/루프 랜덤 분기
+  - repeat(char) 제거, repeat(String)만 유지
+  - lpad/rpad/pad pad 파라미터 String 변경, 길이 1 검증
+  - lpad2/rpad2/pad2 제거
+  - split 불변 리스트 반환
+- **완료 기준**: 컴파일 성공, 기존 테스트 통과
+
+### 24단계: StringUtilTest 갱신 ✅
+- **입력**: 리팩토링된 StringUtil
+- **출력**: 갱신된 StringUtilTest.java
+- **수정 파일**: StringUtilTest.java
+- **완료 기준**: 
+  - char repeat 테스트 제거
+  - pad String 타입 테스트 (길이 1 검증 예외 확인)
+  - head/tail 음수 size 테스트 추가
+  - split 불변 리스트 검증 추가
+  - 20개 테스트 통과
+
+### 25단계: CollectionUtil 리팩토링 ✅
+- **입력**: 기존 CollectionUtil 클래스
+- **출력**: 리팩토링된 CollectionUtil.java
+- **수정 파일**: CollectionUtil.java
+- **완료 기준**:
+  - 모든 반환 리스트/맵을 불변으로 변경 (Collections.unmodifiableList/Map)
+  - 스트림/루프 구현 병행 및 랜덤 분기 (useStream())
+  - head/tail 음수 size 지원 (StringUtil과 동일)
+  - 스트림 구현에서 HashMap::new 사용 후 unmodifiableMap 래핑
+  - grouping 내부 리스트도 불변화
+  - indexing 스트림 버전 HashMap::new 후 unmodifiableMap
+- **완료 기준**: 컴파일 성공, 기존 테스트 통과
+
+### 26단계: CollectionUtilTest 갱신 ✅
+- **입력**: 리팩토링된 CollectionUtil
+- **출력**: 갱신된 CollectionUtilTest.java
+- **수정 파일**: CollectionUtilTest.java
+- **완료 기준**:
+  - 모든 반환 리스트/맵에 대해 UnsupportedOperationException 검증 추가
+  - head/tail 음수 size 테스트 추가
+  - grouping 내부 리스트 불변성 검증 추가
+  - copyOf 테스트 수정 (불변 맵 검증)
+  - 21개 테스트 통과
+
+### 27단계: 빌드 및 테스트 검증 (전체 리팩토링 후) ✅
+- **입력**: 전체 소스 코드
+- **출력**: target/classes, target/test-classes, 테스트 리포트
+- **실행 명령**: ./mvnw test (3회 연속 실행)
+- **완료 기준**: BUILD SUCCESS, Tests run: 53, Failures: 0, 3회 연속 성공
+
+### 28단계: 문서 갱신 (4차) ✅
 - **입력**: 완료된 프로젝트
 - **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
 - **수정 파일**: 4개 마크다운 파일

@@ -30,11 +30,11 @@
 #### 3.2 StringUtil 클래스 (문자열 유틸리티)
 - **Null/Blank/Empty 체크**: `isBlank`, `isEmpty`, `nonNullOf`, `nonBlankOf`, `nonEmptyOf` (값/Supplier 오버로드)
 - **첫 번째 NonBlank 선택**: `firstNonBlankOrLast`, `firstNonBlankOrEmpty`, `firstNonBlankOrNull` (가변 인자/Supplier 2~5개 오버로드)
-- **문자열 변환**: `stringify` (Date → yyyy-MM-dd, BigDecimal → toPlainString)
-- **슬라이싱**: `slice` (begin/end), `head`, `tail`
-- **숫자/문자열 조작**: `trimLeadingZero`, `repeat` (char/String), `reverse`
-- **패딩**: `lpad`/`rpad`/`pad` (char), `lpad2`/`rpad2`/`pad2` (String)
-- **리스트 연산**: `join` (List<T>, delimiter), `split` (String, regex)
+- **문자열 변환**: `stringify` (Date → yyyy-MM-dd, BigDecimal → toPlainString) - switch expression 사용
+- **슬라이싱**: `slice` (begin/end), `head`, `tail` - 음수 인덱스 지원 (head: 역방향, tail: 앞에서 제외)
+- **숫자/문자열 조작**: `trimLeadingZero` (정규식/루프 랜덤 분기), `repeat` (String만, 스트림/루프 랜덤 분기), `reverse`
+- **패딩**: `lpad`/`rpad`/`pad` (String pad, 길이 1 검증, 스트림/루프 랜덤 분기) - lpad2/rpad2/pad2 제거
+- **리스트 연산**: `join` (List<T>, delimiter, 스트림/루프 랜덤 분기), `split` (String, regex, 불변 리스트 반환)
 
 #### 3.3 튜플 타입 클래스 (s.type.tuple 패키지)
 - **Pair<T, U>**: 2개 요소 튜플
@@ -49,18 +49,18 @@
 
 #### 3.4 CollectionUtil 클래스 (컬렉션/맵 유틸리티)
 - **빈 체크/기본값**: `isEmpty` (Collection/Map), `emptyIfNull` (List/Map)
-- **리스트 결합/변환**: `zip` (Pair/함수), `toArray` (타입 안전한 배열)
-- **필터링/검색**: `findOne`, `findAll` (Predicate)
-- **집합 연산**: `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf`
-- **슬라이싱**: `slice` (begin/end), `head`, `tail`
-- **색인화/분류**: `indexing` (Function→Map), `grouping` (Function→Map<List>)
-- **맵 생성/변환**: `asMap` (가변인자/클래스/Entry리스트), `castKeyValue`, `copyOf`
+- **리스트 결합/변환**: `zip` (Pair/함수, 불변 리스트, 스트림/루프 랜덤 분기), `toArray` (타입 안전한 배열)
+- **필터링/검색**: `findOne` (스트림/루프 랜덤 분기), `findAll` (불변 리스트, 스트림/루프 랜덤 분기)
+- **집합 연산**: `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf` (모두 불변 리스트, 스트림/루프 랜덤 분기)
+- **슬라이싱**: `slice` (begin/end, 불변 리스트), `head`, `tail` (음수 인덱스 지원, 불변 리스트)
+- **색인화/분류**: `indexing` (Function→불변 Map, 스트림/루프 랜덤 분기), `grouping` (Function→불변 Map<불변 List>, 스트림/루프 랜덤 분기)
+- **맵 생성/변환**: `asMap` (가변인자/클래스/Entry리스트, 불변 맵, 스트림/루프 랜덤 분기), `castKeyValue`, `copyOf` (불변 맵)
 
 #### 3.5 테스트 클래스
 - **HelloTest**: 정상/경계 케이스, Lombok 생성 메서드 검증 (3개 테스트)
-- **StringUtilTest**: @Slf4j 적용, 모든 public 메서드 검증 (23개 테스트)
+- **StringUtilTest**: @Slf4j 적용, 모든 public 메서드 검증 (20개 테스트)
 - **TupleTest**: @Slf4j 적용, 생성/조회, equals/hashCode, null 값, 불변성, JSON 직렬화 검증 (9개 테스트)
-- **CollectionUtilTest**: @Slf4j 적용, 빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환 검증 (21개 테스트)
+- **CollectionUtilTest**: @Slf4j 적용, 빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환, 불변성 검증 (21개 테스트)
 
 ### 4. 비기능 요구사항
 - Maven Wrapper 제공으로 별도 설치 없이 빌드 가능
@@ -69,3 +69,5 @@
 - 파라미터 체크 후 정상 케이스 처리 (guard clause 패턴)
 - 오버로드된 메서드는 핵심 구현 메서드 호출 방식
 - 프라이빗 헬퍼 메서드는 `_` 접두사 사용
+- **스트림/루프 구현 병행 및 실행 시 랜덤 분기**
+- **불변 컬렉션/맵 반환**

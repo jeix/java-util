@@ -49,6 +49,9 @@ class CollectionUtilTest {
         assertEquals(Pair.of(2, "b"), zipped.get(1));
         assertEquals(Pair.of(3, "c"), zipped.get(2));
 
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> zipped.add(Pair.of(4, "d")));
+
         assertEquals(Collections.emptyList(), CollectionUtil.zip(null, list2));
         assertEquals(Collections.emptyList(), CollectionUtil.zip(list1, null));
         log.info("zip test passed: {}", zipped);
@@ -64,6 +67,9 @@ class CollectionUtilTest {
         assertEquals("1a", zipped.get(0));
         assertEquals("2b", zipped.get(1));
         assertEquals("3c", zipped.get(2));
+
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> zipped.add("4d"));
 
         assertEquals(Collections.emptyList(), CollectionUtil.zip(list1, list2, null));
         log.info("zip with mixer test passed: {}", zipped);
@@ -96,7 +102,12 @@ class CollectionUtilTest {
         List<Integer> list = List.of(1, 2, 3, 4, 5, 6);
         Predicate<Integer> even = i -> i % 2 == 0;
 
-        assertEquals(List.of(2, 4, 6), CollectionUtil.findAll(list, even));
+        List<Integer> result = CollectionUtil.findAll(list, even);
+        assertEquals(List.of(2, 4, 6), result);
+
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> result.add(8));
+
         assertEquals(Collections.emptyList(), CollectionUtil.findAll(list, i -> i > 10));
         assertEquals(Collections.emptyList(), CollectionUtil.findAll(null, even));
         assertEquals(Collections.emptyList(), CollectionUtil.findAll(list, null));
@@ -111,6 +122,9 @@ class CollectionUtilTest {
         assertEquals(5, union.size());
         assertTrue(union.containsAll(List.of(1, 2, 3, 4, 5)));
 
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> union.add(6));
+
         assertEquals(list2, CollectionUtil.unionOf(null, list2));
         assertEquals(list1, CollectionUtil.unionOf(list1, null));
         assertEquals(Collections.emptyList(), CollectionUtil.unionOf(null, null));
@@ -124,6 +138,9 @@ class CollectionUtilTest {
         List<Integer> intersection = CollectionUtil.intersectionOf(list1, list2);
         assertEquals(List.of(3, 4), intersection);
 
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> intersection.add(5));
+
         assertEquals(Collections.emptyList(), CollectionUtil.intersectionOf(null, list2));
         assertEquals(Collections.emptyList(), CollectionUtil.intersectionOf(list1, null));
         log.info("intersectionOf test passed: {}", intersection);
@@ -135,6 +152,9 @@ class CollectionUtilTest {
         List<Integer> list2 = List.of(3, 4, 5, 6);
         List<Integer> difference = CollectionUtil.differenceOf(list1, list2);
         assertEquals(List.of(1, 2), difference);
+
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> difference.add(5));
 
         assertEquals(Collections.emptyList(), CollectionUtil.differenceOf(null, list2));
         assertEquals(list1, CollectionUtil.differenceOf(list1, null));
@@ -148,6 +168,9 @@ class CollectionUtilTest {
         List<Integer> symDiff = CollectionUtil.symmetricDifferenceOf(list1, list2);
         assertEquals(4, symDiff.size());
         assertTrue(symDiff.containsAll(List.of(1, 2, 5, 6)));
+
+        // 불변 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> symDiff.add(7));
 
         assertEquals(list2, CollectionUtil.symmetricDifferenceOf(null, list2));
         assertEquals(list1, CollectionUtil.symmetricDifferenceOf(list1, null));
@@ -165,6 +188,10 @@ class CollectionUtilTest {
         assertEquals(Collections.emptyList(), CollectionUtil.slice(list, 10));
         assertEquals(Collections.emptyList(), CollectionUtil.slice(list, 2, 2));
         assertEquals(Collections.emptyList(), CollectionUtil.slice(null, 2));
+
+        // 불변 리스트 확인
+        List<Integer> sliceResult = CollectionUtil.slice(list, 1, 3);
+        assertThrows(UnsupportedOperationException.class, () -> sliceResult.add(99));
         log.info("slice test passed");
     }
 
@@ -176,6 +203,16 @@ class CollectionUtilTest {
         assertEquals(list, CollectionUtil.head(list, 10));
         assertEquals(Collections.emptyList(), CollectionUtil.head(list, 0));
         assertEquals(Collections.emptyList(), CollectionUtil.head(null, 3));
+
+        // 음수 size: 역방향 인덱스
+        assertEquals(List.of(5), CollectionUtil.head(list, -1));
+        assertEquals(List.of(4, 5), CollectionUtil.head(list, -2));
+        assertEquals(list, CollectionUtil.head(list, -5));
+        assertEquals(Collections.emptyList(), CollectionUtil.head(list, -10));
+
+        // 불변 리스트 확인
+        List<Integer> headResult = CollectionUtil.head(list, 3);
+        assertThrows(UnsupportedOperationException.class, () -> headResult.add(99));
         log.info("head test passed");
     }
 
@@ -187,6 +224,16 @@ class CollectionUtilTest {
         assertEquals(list, CollectionUtil.tail(list, 10));
         assertEquals(Collections.emptyList(), CollectionUtil.tail(list, 0));
         assertEquals(Collections.emptyList(), CollectionUtil.tail(null, 3));
+
+        // 음수 size: 양수로 바꿔서 앞에서부터 제외
+        assertEquals(List.of(2, 3, 4, 5), CollectionUtil.tail(list, -1));
+        assertEquals(List.of(3, 4, 5), CollectionUtil.tail(list, -2));
+        assertEquals(Collections.emptyList(), CollectionUtil.tail(list, -5));
+        assertEquals(Collections.emptyList(), CollectionUtil.tail(list, -10));
+
+        // 불변 리스트 확인
+        List<Integer> tailResult = CollectionUtil.tail(list, 3);
+        assertThrows(UnsupportedOperationException.class, () -> tailResult.add(99));
         log.info("tail test passed");
     }
 
@@ -200,6 +247,9 @@ class CollectionUtilTest {
         assertEquals("apple", indexed.get("APPLE"));
         assertEquals("banana", indexed.get("BANANA"));
         assertEquals("cherry", indexed.get("CHERRY"));
+
+        // 불변 맵 확인
+        assertThrows(UnsupportedOperationException.class, () -> indexed.put("DATE", "date"));
 
         assertEquals(Collections.emptyMap(), CollectionUtil.indexing(null, indexer));
         assertEquals(Collections.emptyMap(), CollectionUtil.indexing(list, null));
@@ -217,6 +267,10 @@ class CollectionUtilTest {
         assertEquals(List.of("banana", "blueberry"), grouped.get("b"));
         assertEquals(List.of("cherry"), grouped.get("c"));
 
+        // 불변 맵과 불변 내부 리스트 확인
+        assertThrows(UnsupportedOperationException.class, () -> grouped.put("d", List.of("date")));
+        assertThrows(UnsupportedOperationException.class, () -> grouped.get("a").add("avocado"));
+
         assertEquals(Collections.emptyMap(), CollectionUtil.grouping(null, classifier));
         assertEquals(Collections.emptyMap(), CollectionUtil.grouping(list, null));
         log.info("grouping test passed: {}", grouped);
@@ -228,6 +282,9 @@ class CollectionUtilTest {
         assertEquals(2, map.size());
         assertEquals(42, map.get("foo"));
         assertEquals("baz", map.get("bar"));
+
+        // 불변 맵 확인
+        assertThrows(UnsupportedOperationException.class, () -> map.put("baz", "qux"));
 
         assertEquals(Collections.emptyMap(), CollectionUtil.asMap());
 
@@ -255,6 +312,9 @@ class CollectionUtilTest {
         assertEquals(42, map.get("foo"));
         assertEquals(43, map.get("bar"));
 
+        // 불변 맵 확인
+        assertThrows(UnsupportedOperationException.class, () -> map.put("baz", 44));
+
         assertEquals(Collections.emptyMap(), CollectionUtil.asMap(String.class, Integer.class));
 
         assertThrows(IllegalArgumentException.class, () -> CollectionUtil.asMap(String.class, Integer.class, "foo"));
@@ -272,6 +332,9 @@ class CollectionUtilTest {
         assertEquals(42, map.get("foo"));
         assertEquals(43, map.get("bar"));
 
+        // 불변 맵 확인
+        assertThrows(UnsupportedOperationException.class, () -> map.put("baz", 44));
+
         assertEquals(Collections.emptyMap(), CollectionUtil.asMap((List<Map.Entry<String, Integer>>) null));
         assertEquals(Collections.emptyMap(), CollectionUtil.asMap(Collections.emptyList()));
         log.info("asMap with entries test passed: {}", map);
@@ -288,9 +351,12 @@ class CollectionUtilTest {
         assertEquals(42, copy.get("foo"));
         assertEquals(43, copy.get("bar"));
 
-        copy.put("baz", 44);
+        // 불변 맵 확인 - 복사본은 불변이어야 함
+        assertThrows(UnsupportedOperationException.class, () -> copy.put("baz", 44));
+        assertThrows(UnsupportedOperationException.class, () -> copy.put("qux", 45));
+
+        // 원본은 변경되지 않아야 함
         assertEquals(2, original.size());
-        assertEquals(3, copy.size());
 
         assertEquals(Collections.emptyMap(), CollectionUtil.copyOf(null));
         log.info("copyOf test passed");

@@ -82,7 +82,7 @@
 - `nonNullOf`/`nonBlankOf`/`nonEmptyOf`: 기본값 제공 메서드 (값/Supplier)
 - `firstNonBlankOrLast`/`OrEmpty`/`OrNull`: 우선순위 기반 선택 (가변인자/Supplier 2~5개)
 - `slice`/`head`/`tail`: 부분 문자열 추출
-- `lpad`/`rpad`/`pad` (char), `lpad2`/`rpad2`/`pad2` (String): 패딩
+- `lpad`/`rpad`/`pad` (String pad, 길이 1): 패딩
 - `join`/`split`: 리스트-문자열 변환
 **근거**: 
 - 일관된 API 설계로 학습 비용 감소
@@ -146,3 +146,47 @@
 - `toArray(new Object[0])` 후 캐스팅 시 ClassCastException 발생 가능
 - 호출자가 타입을 명시하는 오버로드(`toArray(list, array)`)로 타입 안전성 확보
 - 기존 `toArray()`는 Object[] 반환하며 필요 시 캐스팅
+
+## 17. StringUtil 리팩토링 (23~24단계)
+**결정**: 
+- 스트림/루프 구현 병행, `useStream()`으로 런타임 랜덤 분기
+- `stringify`: switch expression 적용
+- `head`/`tail`: 음수 size 지원 (head: 역방향 인덱스, tail: 앞에서 제외)
+- `trimLeadingZero`: 정규식/루프 구현 병행, `useRegex()`로 랜덤 분기
+- `repeat(char)` 제거, `repeat(String)`만 유지, 스트림/루프 랜덤 분기
+- `lpad`/`rpad`/`pad`: pad 파라미터 `String` 변경, 길이 1 검증(`validatePad`), 스트림/루프 랜덤 분기
+- `lpad2`/`rpad2`/`pad2` 제거 (기본 pad가 String으로 대체)
+- `split`: 불변 리스트(`List.of`) 반환
+- `isBlank`, `repeat`, `join`, `lpad`/`rpad`/`pad`: 스트림/루프 랜덤 분기
+**근거**: 
+- 함수형/명령형 스타일 비교 가능, 테스트 커버리지 향상
+- switch expression으로 가독성 향상
+- 음수 인덱스 지원으로 Pythonic 슬라이싱 제공
+- 정규식으로 성능/가독성 선택 가능
+- char repeat는 String repeat로 대체 가능 (중복 제거)
+- pad 타입 통일로 API 일관성 확보
+- 불변 리스트 반환으로 방어적 프로그래밍
+
+## 18. CollectionUtil 리팩토링 (25~26단계)
+**결정**: 
+- 모든 반환 리스트/맵을 불변으로 변경 (`Collections.unmodifiableList/Map`)
+- 스트림/루프 구현 병행, `useStream()`으로 런타임 랜덤 분기
+- `head`/`tail`: 음수 size 지원 (StringUtil과 동일: head 역방향, tail 앞에서 제외)
+- 스트림 구현에서 `HashMap::new` 등 팩토리 사용 후 `Collections.unmodifiableMap` 래핑
+- `grouping`: 내부 리스트도 `Collections.unmodifiableList`로 불변화
+- `indexing` 스트림 버전: `HashMap::new` 후 `unmodifiableMap` 래핑
+- `asMap` 스트림 버전: `HashMap::new` 후 `unmodifiableMap` 래핑
+- 모든 반환 컬렉션에 `UnsupportedOperationException` 검증 테스트 추가
+**근거**: 
+- 방어적 프로그래밍, 부작용 방지
+- 함수형/명령형 스타일 비교 가능
+- StringUtil과 일관된 음수 인덱스 시맨틱
+- 스트림 컬렉터의 기본 맵이 불변일 수 있어 팩토리 명시 필요
+- 불변성 테스트로 런타임 보장
+
+## 19. split 메서드 불변 리스트 반환
+**결정**: `split` 메서드가 `ArrayList` 대신 `List.of(parts)` 반환
+**근거**: 
+- 방어적 프로그래밍, 호출자가 결과 수정 불가
+- Java 9+ `List.of`로 간결하게 불변 리스트 생성
+- StringUtil/CollectionUtil 일관성

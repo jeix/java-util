@@ -36,9 +36,21 @@
 - **패딩**: `lpad`/`rpad`/`pad` (char), `lpad2`/`rpad2`/`pad2` (String)
 - **리스트 연산**: `join` (List<T>, delimiter), `split` (String, regex)
 
-#### 3.3 테스트 클래스
+#### 3.3 튜플 타입 클래스 (s.type.tuple 패키지)
+- **Pair<T, U>**: 2개 요소 튜플
+- **Triplet<T, U, V>**: 3개 요소 튜플
+- **Quartet<T, U, V, W>**: 4개 요소 튜플
+- 공통 특징:
+  - `@EqualsAndHashCode` 적용 (Lombok)
+  - private 생성자 + static factory method `of()`
+  - 불변 객체 (final 필드)
+  - JSON 직렬화용 getter: `ord1()`, `ord2()`, `ord3()`, `ord4()` (`@JsonProperty` 적용)
+  - `toString()`: `(t, u, v, w)` 형식
+
+#### 3.4 테스트 클래스
 - **HelloTest**: 정상/경계 케이스, Lombok 생성 메서드 검증 (3개 테스트)
 - **StringUtilTest**: @Slf4j 적용, 모든 public 메서드 검증 (23개 테스트)
+- **TupleTest**: @Slf4j 적용, 생성/조회, equals/hashCode, null 값, 불변성, JSON 직렬화 검증 (9개 테스트)
 
 ### 4. 비기능 요구사항
 - Maven Wrapper 제공으로 별도 설치 없이 빌드 가능

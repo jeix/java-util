@@ -12,7 +12,13 @@
 - [x] 9단계: StringUtil 클래스 구현 (모든 메서드)
 - [x] 10단계: StringUtilTest 클래스 구현 (@Slf4j, 테스트 메서드)
 - [x] 11단계: 빌드 및 테스트 검증 (StringUtil)
-- [x] 12단계: 문서 갱신
+- [x] 12단계: 문서 갱신 (1차)
+- [x] 13단계: s.type.tuple 패키지 디렉토리 생성
+- [x] 14단계: 튜플 클래스 구현 (Pair, Triplet, Quartet)
+- [x] 15단계: TupleTest 클래스 구현 (@Slf4j, 테스트 메서드)
+- [x] 16단계: @JsonProperty 추가로 JSON 직렬화 지원
+- [x] 17단계: 빌드 및 테스트 검증 (Tuple)
+- [x] 18단계: 문서 갱신 (2차)
 
 ## 단계별 상세
 
@@ -82,7 +88,43 @@
 - **실행 명령**: ./mvnw clean test
 - **완료 기준**: BUILD SUCCESS, Tests run: 26, Failures: 0
 
-### 12단계: 문서 갱신 ✅
+### 12단계: 문서 갱신 (1차) ✅
+- **입력**: 완료된 프로젝트
+- **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
+- **수정 파일**: 4개 마크다운 파일
+- **완료 기준**: 모든 문서가 현재 상태 반영
+
+### 13단계: s.type.tuple 패키지 디렉토리 생성 ✅
+- **입력**: 프로젝트 루트
+- **출력**: src/main/java/s/type/tuple, src/test/java/s/type/tuple
+- **수정 파일**: 없음 (디렉토리만 생성)
+- **완료 기준**: 디렉토리 존재 확인
+
+### 14단계: 튜플 클래스 구현 ✅
+- **입력**: 디렉토리 구조, PRD 기능 요구사항
+- **출력**: Pair.java, Triplet.java, Quartet.java
+- **수정 파일**: 3개 파일
+- **완료 기준**: @EqualsAndHashCode, private 생성자, of(), ord1~4(), toString() 구현
+
+### 15단계: TupleTest 클래스 구현 ✅
+- **입력**: 튜플 클래스 3종
+- **출력**: src/test/java/s/type/tuple/TupleTest.java
+- **수정 파일**: TupleTest.java
+- **완료 기준**: @Slf4j 적용, 8개 테스트 메서드 (생성/조회, equals/hashCode, null, 불변성)
+
+### 16단계: @JsonProperty 추가로 JSON 직렬화 지원 ✅
+- **입력**: 튜플 클래스 3종
+- **출력**: getter에 @JsonProperty("1")~("4") 추가
+- **수정 파일**: Pair.java, Triplet.java, Quartet.java
+- **완료 기준**: Jackson 직렬화 시 {"1":...,"2":...} 형식 출력
+
+### 17단계: 빌드 및 테스트 검증 (Tuple) ✅
+- **입력**: 전체 소스 코드 (Hello + StringUtil + Tuple)
+- **출력**: target/classes, target/test-classes, 테스트 리포트
+- **실행 명령**: ./mvnw test
+- **완료 기준**: BUILD SUCCESS, Tests run: 35, Failures: 0
+
+### 18단계: 문서 갱신 (2차) ✅
 - **입력**: 완료된 프로젝트
 - **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
 - **수정 파일**: 4개 마크다운 파일

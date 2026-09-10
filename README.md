@@ -54,15 +54,19 @@ mvnw / mvnw.cmd                              # Maven 실행 스크립트
 - `isBlank`는 null 또는 Java `String.isBlank()` 기준 공백을, `isEmpty`는 null 또는 빈 문자열을 판별해요.
 - Supplier는 필요한 순서대로 한 번씩 호출해요. null Supplier는 null 값으로 취급하고 내부 예외는 전달해요.
 - `firstNonBlankOrLast`는 유효값이 없으면 마지막 값을 그대로 반환해요. `OrEmpty`/`OrNull`은 각각 `""`/null을 반환해요.
+- 반복 처리가 필요한 첫 유효값 탐색과 `join`은 for-loop와 stream 구현 중 하나를 실행 시 무작위로 선택해요. 두 구현의 반환값과 Supplier 평가 순서는 같아요.
+- Supplier stream 구현은 `peek`의 부수효과에 의존하지 않고 후보 자체를 최종 결과로 선택해요. 자세한 배경은 [Java Stream의 부수효과 안내](https://docs.oracle.com/javase/jp/21/docs/api/java.base/java/util/stream/package-summary.html#SideEffects)를 참고해요.
 - `stringify(null)`은 `""`, `Date`는 시스템 기본 시간대 기준 `yyyy-MM-dd`, `BigDecimal`은 `toPlainString()`, 다른 객체는 `toString()` 결과를 반환해요.
 - `StringUtilTest`는 Lombok `@Slf4j`를 사용해요. 테스트 범위의 `slf4j-api`와 `slf4j-simple`로 로그를 출력해요 ([SLF4J 설정 참고](https://www.slf4j.org/manual.html)).
-- `slice`/`head`/`tail`/`trimLeadingZero`/`reverse`/패딩은 null 입력을 유지해요. `slice`의 잘못된 범위는 `""`, `head`/`tail`의 0 이하 크기는 `""`, 원문보다 큰 크기는 원문을 반환해요.
-- `trimLeadingZero`는 부호 있는 정수·소수를 지원하고 정수부에 0 하나는 남겨요. 숫자가 아닌 값은 원문을 유지해요.
-- `repeat`는 `char`를 받아요. 0 이하 횟수는 `""`를 반환해요.
-- `lpad`/`rpad`/`pad`는 `char`, 이름이 `2`로 끝나는 메서드는 문자열 패턴을 받아요. 단일 바이트 문자열을 전제로 하며 길이는 UTF-16 단위예요.
+- `slice`의 음수 인덱스는 문자열 끝에서부터 세며 모든 인덱스를 `0..length`로 제한해요. 변환한 end가 begin보다 작으면 `""`를 반환해요.
+- `head(s, -n)`은 뒤에서 `n`자를 제외하고, `tail(s, -n)`은 앞에서 `n`자를 제외해요. 범위를 벗어난 size는 문자열 길이에 맞춰 제한해요.
+- `slice`/`head`/`tail`/`trimLeadingZero`/`reverse`/패딩은 null 입력을 유지해요.
+- `trimLeadingZero`는 부호 있는 정수·소수를 지원하고 정수부에 0 하나는 남겨요. loop와 정규식 치환 구현을 실행 시 무작위로 선택하며 숫자가 아닌 값은 원문을 유지해요.
+- `repeat`는 `String`을 받아요. null은 null, 0 이하 횟수는 `""`를 반환해요.
+- `lpad`/`rpad`/`pad`는 UTF-8 기준 single-byte 문자 하나로 구성된 `String`만 받아요. null, `""`, `"가"`, `"do"` 같은 pad는 원문을 반환해요. 이름이 `2`로 끝나는 메서드는 임의의 문자열 패턴을 받아요.
 - `pad`/`pad2`는 가운데 정렬하고 남는 한 칸은 오른쪽에 채워요. 각 방향에서 패턴을 처음부터 반복하고 필요한 길이만 사용해요. 원문이 이미 충분히 길거나 패턴이 null/빈 문자열이면 원문을 유지해요.
 - `join`은 null 리스트를 `""`, null 요소·구분자를 `""`로 취급해요.
-- `split`은 끝의 빈 항목을 유지하는 수정 가능한 리스트를 반환해요. null 문자열은 빈 리스트, null 정규식은 원문 하나를 반환하고 잘못된 정규식은 예외를 전달해요.
+- `split`은 끝의 빈 항목을 유지하는 불변 리스트를 반환해요. null 문자열은 빈 리스트, null 정규식은 원문 하나를 반환하고 잘못된 정규식은 예외를 전달해요.
 
 설정 참고: [Maven Wrapper](https://maven.apache.org/tools/wrapper/index.html),
 [Lombok Maven 설정](https://projectlombok.org/setup/maven),

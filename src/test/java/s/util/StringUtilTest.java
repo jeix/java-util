@@ -305,26 +305,39 @@ class StringUtilTest {
         assertNull(StringUtil.slice(null, 1, 2));
         assertEquals("bc", StringUtil.slice("abcd", 1, 3));
         assertEquals("bcd", StringUtil.slice("abcd", 1));
+        assertEquals("cde", StringUtil.slice("abcdef", -4, -1));
+        assertEquals("f", StringUtil.slice("abcdef", -1));
+        assertEquals("abcdef", StringUtil.slice("abcdef", -99, 99));
+        assertEquals("ab", StringUtil.slice("abcdef", -99, 2));
         assertEquals("abcd", StringUtil.slice("abcd", 0, 4));
         assertEquals("", StringUtil.slice("abcd", 4));
         assertEquals("", StringUtil.slice("abcd", 2, 2));
         assertEquals("", StringUtil.slice("", 0));
         assertEquals("", StringUtil.slice("abcd", -1, 3));
         assertEquals("", StringUtil.slice("abcd", 3, 2));
-        assertEquals("", StringUtil.slice("abcd", 0, 5));
+        assertEquals("abcd", StringUtil.slice("abcd", 0, 5));
         assertEquals("", StringUtil.slice("abcd", Integer.MAX_VALUE));
+        assertEquals("abcd", StringUtil.slice("abcd", Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
-    void headAndTailClampLengths() {
+    void headAndTailInterpretNegativeSizes() {
         assertNull(StringUtil.head(null, 1));
         assertNull(StringUtil.tail(null, 1));
         assertEquals("ab", StringUtil.head("abcd", 2));
         assertEquals("cd", StringUtil.tail("abcd", 2));
-        for (int size : new int[] {0, -1, Integer.MIN_VALUE}) {
-            assertEquals("", StringUtil.head("abcd", size));
-            assertEquals("", StringUtil.tail("abcd", size));
-        }
+        assertEquals("", StringUtil.head("abcd", 0));
+        assertEquals("abc", StringUtil.head("abcd", -1));
+        assertEquals("a", StringUtil.head("abcd", -3));
+        assertEquals("", StringUtil.head("abcd", -4));
+        assertEquals("", StringUtil.head("abcd", -5));
+        assertEquals("", StringUtil.head("abcd", Integer.MIN_VALUE));
+        assertEquals("", StringUtil.tail("abcd", 0));
+        assertEquals("bcd", StringUtil.tail("abcd", -1));
+        assertEquals("d", StringUtil.tail("abcd", -3));
+        assertEquals("", StringUtil.tail("abcd", -4));
+        assertEquals("", StringUtil.tail("abcd", -5));
+        assertEquals("", StringUtil.tail("abcd", Integer.MIN_VALUE));
         for (int size : new int[] {4, 5, Integer.MAX_VALUE}) {
             assertEquals("abcd", StringUtil.head("abcd", size));
             assertEquals("abcd", StringUtil.tail("abcd", size));
@@ -337,7 +350,8 @@ class StringUtilTest {
     @CsvSource({"000123,123", "000,0", "0,0", "123,123", "-0012,-12", "+0012,+12",
             "000.050,0.050", "-000.00,-0.00", "001a,001a", "1e3,1e3", "00.1.2,00.1.2"})
     void trimsNumericLeadingZeros(String input, String expected) {
-        assertEquals(expected, StringUtil.trimLeadingZero(input));
+        IntStream.range(0, 100)
+                .forEach(ignored -> assertEquals(expected, StringUtil.trimLeadingZero(input)));
     }
 
     @ParameterizedTest
@@ -349,9 +363,12 @@ class StringUtilTest {
 
     @Test
     void repeatAndReverse() {
-        assertEquals("aaa", StringUtil.repeat('a', 3));
-        assertEquals("", StringUtil.repeat('a', 0));
-        assertEquals("", StringUtil.repeat('a', -1));
+        assertEquals("aaa", StringUtil.repeat("a", 3));
+        assertEquals("ababab", StringUtil.repeat("ab", 3));
+        assertEquals("", StringUtil.repeat("a", 0));
+        assertEquals("", StringUtil.repeat("a", -1));
+        assertEquals("", StringUtil.repeat("", 3));
+        assertNull(StringUtil.repeat(null, 3));
         assertNull(StringUtil.reverse(null));
         assertEquals("", StringUtil.reverse(""));
         assertEquals("cba", StringUtil.reverse("abc"));
@@ -360,19 +377,24 @@ class StringUtilTest {
 
     @Test
     void padsWithOneCharacter() {
-        assertEquals("000ab", StringUtil.lpad(5, "ab", '0'));
-        assertEquals("ab000", StringUtil.rpad(5, "ab", '0'));
-        assertEquals("0ab00", StringUtil.pad(5, "ab", '0'));
-        assertEquals("0ab0", StringUtil.pad(4, "ab", '0'));
-        assertEquals("ab0", StringUtil.pad(3, "ab", '0'));
-        assertEquals("000", StringUtil.pad(3, "", '0'));
-        assertNull(StringUtil.lpad(3, null, '0'));
-        assertNull(StringUtil.rpad(3, null, '0'));
-        assertNull(StringUtil.pad(3, null, '0'));
+        assertEquals("000ab", StringUtil.lpad(5, "ab", "0"));
+        assertEquals("ab000", StringUtil.rpad(5, "ab", "0"));
+        assertEquals("0ab00", StringUtil.pad(5, "ab", "0"));
+        assertEquals("0ab0", StringUtil.pad(4, "ab", "0"));
+        assertEquals("ab0", StringUtil.pad(3, "ab", "0"));
+        assertEquals("000", StringUtil.pad(3, "", "0"));
+        assertNull(StringUtil.lpad(3, null, "0"));
+        assertNull(StringUtil.rpad(3, null, "0"));
+        assertNull(StringUtil.pad(3, null, "0"));
         for (int size : new int[] {-1, 0, 1, 2}) {
-            assertEquals("ab", StringUtil.lpad(size, "ab", '0'));
-            assertEquals("ab", StringUtil.rpad(size, "ab", '0'));
-            assertEquals("ab", StringUtil.pad(size, "ab", '0'));
+            assertEquals("ab", StringUtil.lpad(size, "ab", "0"));
+            assertEquals("ab", StringUtil.rpad(size, "ab", "0"));
+            assertEquals("ab", StringUtil.pad(size, "ab", "0"));
+        }
+        for (String invalid : Arrays.asList(null, "", "가", "do")) {
+            assertEquals("ab", StringUtil.lpad(5, "ab", invalid));
+            assertEquals("ab", StringUtil.rpad(5, "ab", invalid));
+            assertEquals("ab", StringUtil.pad(5, "ab", invalid));
         }
     }
 
@@ -405,7 +427,9 @@ class StringUtilTest {
     void joinsGenericLists() {
         assertEquals("", StringUtil.join(null, ","));
         assertEquals("", StringUtil.join(List.of(), ","));
-        assertEquals("1|2|3", StringUtil.join(List.of(1, 2, 3), "|"));
+        IntStream.range(0, 100)
+                .forEach(ignored -> assertEquals(
+                        "1|2|3", StringUtil.join(List.of(1, 2, 3), "|")));
         assertEquals("a,,b", StringUtil.join(Arrays.asList("a", null, "b"), ","));
         assertEquals("ab", StringUtil.join(List.of("a", "b"), null));
         assertEquals("ab", StringUtil.join(List.of("a", "b"), ""));
@@ -414,13 +438,23 @@ class StringUtilTest {
 
     @Test
     void splitsByRegexAndPreservesEmptyFields() {
-        assertEquals(List.of(), StringUtil.split(null, ","));
-        assertEquals(List.of(""), StringUtil.split("", ","));
-        assertEquals(List.of("a,b"), StringUtil.split("a,b", null));
-        assertEquals(List.of("a", "b", "c"), StringUtil.split("a  b\tc", "\\s+"));
-        assertEquals(List.of("", "a", "", ""), StringUtil.split(",a,,", ","));
-        assertEquals(List.of("a", "b"), StringUtil.split("a.b", "\\."));
-        assertEquals(List.of("a", "b", ""), StringUtil.split("ab", ""));
+        List<List<String>> results = List.of(
+                StringUtil.split(null, ","),
+                StringUtil.split("", ","),
+                StringUtil.split("a,b", null),
+                StringUtil.split("a  b\tc", "\\s+"),
+                StringUtil.split(",a,,", ","),
+                StringUtil.split("a.b", "\\."),
+                StringUtil.split("ab", ""));
+        assertEquals(List.of(), results.get(0));
+        assertEquals(List.of(""), results.get(1));
+        assertEquals(List.of("a,b"), results.get(2));
+        assertEquals(List.of("a", "b", "c"), results.get(3));
+        assertEquals(List.of("", "a", "", ""), results.get(4));
+        assertEquals(List.of("a", "b"), results.get(5));
+        assertEquals(List.of("a", "b", ""), results.get(6));
+        results.forEach(result -> assertThrows(UnsupportedOperationException.class,
+                () -> result.add("changed")));
         assertThrows(PatternSyntaxException.class, () -> StringUtil.split("abc", "["));
     }
 }

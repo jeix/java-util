@@ -3,8 +3,9 @@
 ## 현재 기준
 
 - 저장소: `https://github.com/jeix/java-util.git`, 작업 브랜치: `codex`.
-- 최신 커밋: `317a25c` — `컬렉션 유틸리티와 테스트 추가`.
-- 튜플 타입과 기존 CollectionUtil 연동 변경은 구현·검증을 마쳤고 사용자 요청에 따라 커밋 후 `origin/codex`로 push해요.
+- 작업 시작 기준 커밋: `abb8284` — `튜플 타입과 JSON 변환 추가`.
+- `codex`는 `origin/codex`를 추적하고 최신 커밋까지 push됐어요.
+- StringUtil 후속 변경의 구현·검증을 완료했어요.
 
 ## 완료
 
@@ -14,11 +15,12 @@
 - 컨텍스트 정리: `AGENTS.md`·`PRD.md` 생성, `README.md`·`PLAN.md`·`DECISION.md` 현행화.
 - private 메서드의 `_` 접두사 규칙과 기존 코드 소급 적용을 `eb2492c`에 커밋.
 - CollectionUtil과 테스트를 `317a25c`에 커밋.
+- 튜플 타입과 JSON 변환을 `abb8284`에 커밋하고 `origin/codex`로 push.
 
 ## 검증 결과
 
 - 2026-09-10, JDK 21.0.11에서 오프라인 `clean verify` 성공 및 JAR 생성.
-- Tuple 테스트 7개 + CollectionUtil 테스트 20개 + StringUtil 테스트 61개 + Hello 테스트 2개 = 총 90개 통과, 실패·오류·건너뜀 0개.
+- StringUtil 후속 변경 후 Tuple 테스트 7개 + CollectionUtil 테스트 20개 + StringUtil 테스트 61개 + Hello 테스트 2개 = 총 90개 통과, 실패·오류·건너뜀 0개.
 - 결과 파일은 `target/surefire-reports/`에 있으며 생성물이므로 커밋하지 않아요.
 
 ## 검증 환경 재사용
@@ -58,4 +60,12 @@ MAVEN_USER_HOME=/tmp/java-util-maven-home ./mvnw -B -ntp -Dmaven.repo.local=/tmp
 - 기존 `s.util.Pair` record를 제거하고 새 Pair로 `CollectionUtil.zip`과 테스트를 변경했어요.
 - 세 타입에 `@EqualsAndHashCode`, `of(...)`, `ordN()`, 지정 형식의 `toString()`을 구현했어요. Jackson annotation으로 JSON 직렬화·역직렬화를 지원해요.
 - 2026-09-10 JDK 21.0.11에서 오프라인 `clean verify` 성공: 신규 Tuple 테스트 7개를 포함한 전체 90개 테스트 통과. Tuple·CollectionUtil 대상 테스트 27개도 별도로 통과했어요.
-- 다음 단계: 전체 검증 후 관련 파일만 커밋하고 새 upstream `origin/codex`로 push해요.
+- 커밋 및 push 완료: `abb8284` (`튜플 타입과 JSON 변환 추가`), `origin/codex`.
+
+## StringUtil 후속 변경
+
+- 구현 완료: loop/stream 무작위 분기, 삼항 연산자와 switch 적용, 음수 slice/head/tail 규칙, trimLeadingZero 정규식 분기, String 기반 repeat·단일 문자 pad, 불변 split 결과.
+- 검토 반영: Supplier stream 구현에서 실행이 보장되지 않는 `peek` 부수효과를 제거하고, 인덱스·값 후보를 stream 결과로 선택하도록 변경했어요.
+- 테스트 갱신: 음수·범위 초과 인덱스, `Integer.MIN_VALUE`, 문자열 반복, 잘못된 pad 반례 `"가"`·`"do"`, split 불변성을 확인해요. trimLeadingZero는 반복 호출로 두 구현의 동일한 결과를 확인해요.
+- 2026-09-10 JDK 21.0.11에서 `clean verify` 성공: 전체 테스트 90개 통과, 실패·오류·건너뜀 0개.
+- push는 별도 요청이 있을 때만 해요.

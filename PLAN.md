@@ -243,6 +243,17 @@
   - lpad2/rpad2/pad2: 멀티바이트 pad 지원 메서드 추가 (join 앞)
   - 컴파일 성공, 테스트 통과
 
+### 30단계: CollectionUtil 추가 리팩토링 ✅
+- **입력**: 기존 CollectionUtil 클래스
+- **출력**: 리팩토링된 CollectionUtil.java
+- **수정 파일**: CollectionUtil.java, StringUtilTest.java
+- **완료 기준**:
+  - private 메서드 `_` 접두사 통일 (useStream → _useStream)
+  - zip 메서드: if/else로 랜덤 분기 (들여쓰기 균형)
+  - slice(2 params): 3-params 버전 호출 (list.size() 사용)
+  - StringUtilTest: nonNullOf/nonBlankOf/nonEmptyOf supplier null 시 dfltSupplier 반환 검증
+  - 컴파일 성공, 테스트 통과 (3회 연속)
+
 ## 다음 단계 (향후 확장 시)
 - [ ] CI/CD 파이프라인 구성 (GitHub Actions 등)
 - [ ] 코드 품질 도구 추가 (SpotBugs, Checkstyle, PMD)

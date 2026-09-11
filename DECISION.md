@@ -217,3 +217,15 @@
 - 메서드 위임으로 DRY 원칙 준수
 - substring 단일 호출로 성능/가독성 향상
 - 멀티바이트 문자(한글, 이모지 등) 패딩 지원
+
+## 21. CollectionUtil 추가 리팩토링 (30단계)
+**결정**: 
+- private 메서드 `_` 접두사 통일 (`useStream` → `_useStream`)
+- `zip` 메서드: if/else로 랜덤 분기 (스트림/루프 구현의 들여쓰기 균형)
+- `slice(begin)`: 3-parameter 버전(`slice(list, begin, list.size())`) 호출 (`Integer.MAX_VALUE` → `list.size()`)
+- `StringUtilTest`: nonNullOf/nonBlankOf/nonEmptyOf supplier null 시 dfltSupplier 반환 검증 수정
+**근거**: 
+- 코드 스타일 일관성 (`_` 접두사 통일)
+- if/else로 두 구현의 시각적 균형 맞춤
+- `list.size()`로 명확한 범위 지정, 불필요한 큰 상수 제거
+- Supplier null 시 기본값 제공 로직이 변경되어 테스트 기대값 수정

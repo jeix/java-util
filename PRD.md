@@ -33,7 +33,7 @@
 - **문자열 변환**: `stringify` (Date → yyyy-MM-dd, BigDecimal → toPlainString) - switch expression 사용
 - **슬라이싱**: `slice` (begin/end), `head`, `tail` - 음수 인덱스 지원 (head: 역방향, tail: 앞에서 제외)
 - **숫자/문자열 조작**: `trimLeadingZero` (정규식/루프 랜덤 분기), `repeat` (String만, 스트림/루프 랜덤 분기), `reverse`
-- **패딩**: `lpad`/`rpad`/`pad` (String pad, 길이 1 검증, 스트림/루프 랜덤 분기) - lpad2/rpad2/pad2 제거
+- **패딩**: `lpad`/`rpad`/`pad` (String pad, 길이 1 검증, 스트림/루프 랜덤 분기), `lpad2`/`rpad2`/`pad2` (멀티바이트 pad 지원, 스트림/루프 랜덤 분기)
 - **리스트 연산**: `join` (List<T>, delimiter, 스트림/루프 랜덤 분기), `split` (String, regex, 불변 리스트 반환)
 
 #### 3.3 튜플 타입 클래스 (s.type.tuple 패키지)

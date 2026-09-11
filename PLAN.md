@@ -175,7 +175,7 @@
   - trimLeadingZero 정규식/루프 랜덤 분기
   - repeat(char) 제거, repeat(String)만 유지
   - lpad/rpad/pad pad 파라미터 String 변경, 길이 1 검증
-  - lpad2/rpad2/pad2 제거
+  - lpad2/rpad2/pad2 추가 (멀티바이트 pad 지원)
   - split 불변 리스트 반환
 - **완료 기준**: 컴파일 성공, 기존 테스트 통과
 
@@ -225,6 +225,23 @@
 - **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
 - **수정 파일**: 4개 마크다운 파일
 - **완료 기준**: 모든 문서가 현재 상태 반영
+
+### 29단계: StringUtil 추가 리팩토링 ✅
+- **입력**: 기존 StringUtil 클래스
+- **출력**: 리팩토링된 StringUtil.java
+- **수정 파일**: StringUtil.java
+- **완료 기준**:
+  - private 메서드 `_` 접두사 통일
+  - isBlank: `s.isBlank()` + 3항 연산자 사용
+  - nonNullOf/nonBlankOf/nonEmptyOf (Supplier): supplier null 시 dfltSupplier 사용
+  - firstNonBlankOrLastStream: Stream import, stream 구현 추가
+  - _firstNonBlankOrLast/Empty/Null: varargs 변경, Empty/Null은 Last 호출로 위임
+  - _firstNonBlankOrLast: stream 구현 추가 및 랜덤 분기 (if/else 들여쓰기 균형)
+  - stringify: null 체크를 switch 안으로
+  - slice(2 params): 3-params 버전 호출
+  - head/tail: substring 마지막에 한 번만 호출
+  - lpad2/rpad2/pad2: 멀티바이트 pad 지원 메서드 추가 (join 앞)
+  - 컴파일 성공, 테스트 통과
 
 ## 다음 단계 (향후 확장 시)
 - [ ] CI/CD 파이프라인 구성 (GitHub Actions 등)

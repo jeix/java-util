@@ -155,7 +155,7 @@
 - `trimLeadingZero`: 정규식/루프 구현 병행, `useRegex()`로 랜덤 분기
 - `repeat(char)` 제거, `repeat(String)`만 유지, 스트림/루프 랜덤 분기
 - `lpad`/`rpad`/`pad`: pad 파라미터 `String` 변경, 길이 1 검증(`validatePad`), 스트림/루프 랜덤 분기
-- `lpad2`/`rpad2`/`pad2` 제거 (기본 pad가 String으로 대체)
+- `lpad2`/`rpad2`/`pad2` 추가 (멀티바이트 pad 지원)
 - `split`: 불변 리스트(`List.of`) 반환
 - `isBlank`, `repeat`, `join`, `lpad`/`rpad`/`pad`: 스트림/루프 랜덤 분기
 **근거**: 
@@ -165,6 +165,7 @@
 - 정규식으로 성능/가독성 선택 가능
 - char repeat는 String repeat로 대체 가능 (중복 제거)
 - pad 타입 통일로 API 일관성 확보
+- lpad2/rpad2/pad2로 멀티바이트 문자 패딩 지원
 - 불변 리스트 반환으로 방어적 프로그래밍
 
 ## 18. CollectionUtil 리팩토링 (25~26단계)
@@ -190,3 +191,29 @@
 - 방어적 프로그래밍, 호출자가 결과 수정 불가
 - Java 9+ `List.of`로 간결하게 불변 리스트 생성
 - StringUtil/CollectionUtil 일관성
+
+## 20. StringUtil 추가 리팩토링 (29단계)
+**결정**: 
+- private 메서드 `_` 접두사 완전 통일 (`useStream`→`_useStream`, `useRegex`→`_useRegex`, `trimLeadingZeroLoop`→`_trimLeadingZeroLoop` 등)
+- `isBlank`: `s == null ? true : s.isBlank()` (3항 연산자, `isEmpty`와 일관성)
+- `nonNullOf`/`nonBlankOf`/`nonEmptyOf` (Supplier 버전): supplier null 시 `dfltSupplier` 호출 (기존: null 반환)
+- `firstNonBlankOrLastStream`: `java.util.stream.Stream` import, stream 구현 추가
+- `_firstNonBlankOrLast`/`OrEmpty`/`OrNull`: `Supplier<String>[]` → `Supplier<String>...` varargs 변경
+- `_firstNonBlankOrEmpty`/`_firstNonBlankOrNull`: 직접 구현 제거, `_firstNonBlankOrLast` 호출로 위임 (빈 문자열/null 반환용 supplier 추가)
+- `_firstNonBlankOrLast`: stream 구현(`_firstNonBlankOrLastStream`) 추가, 랜덤 분기 (if/else로 들여쓰기 균형)
+- `stringify`: null 체크를 switch 표현식 안으로 이동
+- `slice(begin)`: 3-parameter 버전(`slice(s, begin, Integer.MAX_VALUE)`) 호출
+- `head`/`tail`: `s.substring` 마지막에 한 번만 호출하도록 리팩토링 (start/end 계산 후 단일 호출)
+- `lpad2`/`rpad2`/`pad2`: 멀티바이트 pad 지원 메서드 추가 (join 앞 배치), `_repeatPad2`가 정확한 길이로 패딩 생성
+**근거**: 
+- 코드 스타일 일관성 (`_` 접두사 통일)
+- Java 11+ `String.isBlank()` 활용으로 가독성/성능 향상
+- Supplier null 시 기본값 제공 로직 통일 (null 반환 대신 기본값 사용)
+- Stream API import로 코드 간결화
+- varargs로 호출 편의성 증대
+- 중복 코드 제거 (Empty/Null이 Last 호출로 위임)
+- 스트림/루프 구현 병행으로 테스트 커버리지 향상
+- switch expression 내 null 처리로 가독성 향상
+- 메서드 위임으로 DRY 원칙 준수
+- substring 단일 호출로 성능/가독성 향상
+- 멀티바이트 문자(한글, 이모지 등) 패딩 지원

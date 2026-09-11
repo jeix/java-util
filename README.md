@@ -52,13 +52,14 @@ src/main/java
 | **변환** | `stringify(obj)` - Date→yyyy-MM-dd, BigDecimal→toPlainString |
 | **슬라이싱** | `slice(s, begin)`, `slice(s, begin, end)`, `head(s, size)`, `tail(s, size)` |
 | **조작** | `trimLeadingZero(s)`, `repeat(s, n)`, `reverse(s)` |
-| **패딩** | `lpad(len, s, pad)`, `rpad(len, s, pad)`, `pad(len, s, pad)` (pad는 길이 1 문자열) |
+| **패딩** | `lpad(len, s, pad)`, `rpad(len, s, pad)`, `pad(len, s, pad)` (pad는 길이 1 문자열), `lpad2(len, s, pad)`, `rpad2(len, s, pad)`, `pad2(len, s, pad)` (멀티바이트 pad 지원) |
 | **분할/결합** | `join(list, delim)`, `split(s, regex)` (불변 리스트 반환) |
 
 **특징:**
 - `head`/`tail`: 음수 size 지원 (head: 역방향 인덱스, tail: 앞에서 제외)
 - `trimLeadingZero`: 정규식/루프 구현 랜덤 분기
 - `isBlank`, `repeat`, `join`, `lpad/rpad/pad`: 스트림/루프 구현 랜덤 분기
+- `lpad2`/`rpad2`/`pad2`: 멀티바이트 pad 지원 (한글, 이모지 등)
 - `split`: 불변 리스트(`List.of`) 반환
 
 ```java
@@ -68,6 +69,8 @@ StringUtil.tail("hello", -1)       // "ello" (앞에서 1개 제외)
 StringUtil.trimLeadingZero("00.123") // "0.123"
 StringUtil.repeat("ab", 3)         // "ababab"
 StringUtil.lpad(7, "hi", "0")      // "00000hi"
+StringUtil.lpad2(7, "hi", "00")    // "00000hi" (멀티바이트 pad)
+StringUtil.pad2(9, "hi", "xy")     // "xyxyhixyx"
 StringUtil.split("a,b,c", ",")     // List.of("a", "b", "c") - 불변
 ```
 

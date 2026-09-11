@@ -42,7 +42,7 @@ class StringUtilTest {
 
         assertEquals("supplied", StringUtil.nonNullOf((Supplier<String>) () -> "supplied", () -> "default"));
         assertEquals("default", StringUtil.nonNullOf((Supplier<String>) () -> null, () -> "default"));
-        assertNull(StringUtil.nonNullOf((Supplier<String>) null, () -> "default"));
+        assertEquals("default", StringUtil.nonNullOf((Supplier<String>) null, () -> "default"));
         assertNull(StringUtil.nonNullOf((Supplier<String>) () -> null, (Supplier<String>) null));
         log.info("nonNullOf tests passed");
     }
@@ -58,7 +58,8 @@ class StringUtilTest {
         assertEquals("supplied", StringUtil.nonBlankOf((Supplier<String>) () -> "supplied", () -> "default"));
         assertEquals("default", StringUtil.nonBlankOf((Supplier<String>) () -> "", () -> "default"));
         assertEquals("default", StringUtil.nonBlankOf((Supplier<String>) () -> null, () -> "default"));
-        assertNull(StringUtil.nonBlankOf((Supplier<String>) null, () -> "default"));
+        assertEquals("default", StringUtil.nonBlankOf((Supplier<String>) null, () -> "default"));
+        assertNull(StringUtil.nonBlankOf((Supplier<String>) null, (Supplier<String>) null));
         log.info("nonBlankOf tests passed");
     }
 
@@ -74,7 +75,8 @@ class StringUtilTest {
         assertEquals("default", StringUtil.nonEmptyOf((Supplier<String>) () -> "", () -> "default"));
         assertEquals(" ", StringUtil.nonEmptyOf((Supplier<String>) () -> " ", () -> "default"));
         assertEquals("default", StringUtil.nonEmptyOf((Supplier<String>) () -> null, () -> "default"));
-        assertNull(StringUtil.nonEmptyOf((Supplier<String>) null, () -> "default"));
+        assertEquals("default", StringUtil.nonEmptyOf((Supplier<String>) null, () -> "default"));
+        assertNull(StringUtil.nonEmptyOf((Supplier<String>) null, (Supplier<String>) null));
         log.info("nonEmptyOf tests passed");
     }
 

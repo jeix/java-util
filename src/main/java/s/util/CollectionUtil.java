@@ -39,7 +39,7 @@ public final class CollectionUtil {
         return map != null ? map : Collections.emptyMap();
     }
 
-    private static boolean useStream() {
+    private static boolean _useStream() {
         return ThreadLocalRandom.current().nextBoolean();
     }
 
@@ -48,16 +48,17 @@ public final class CollectionUtil {
             return Collections.emptyList();
         }
         final int size = Math.min(list1.size(), list2.size());
-        if (useStream()) {
+        if (_useStream()) {
             return IntStream.range(0, size)
                     .mapToObj(i -> Pair.of(list1.get(i), list2.get(i)))
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+        } else {
+            final List<Pair<T, U>> result = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                result.add(Pair.of(list1.get(i), list2.get(i)));
+            }
+            return Collections.unmodifiableList(result);
         }
-        final List<Pair<T, U>> result = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            result.add(Pair.of(list1.get(i), list2.get(i)));
-        }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T, U, R> List<R> zip(final List<T> list1, final List<U> list2, final BiFunction<T, U, R> mixer) {
@@ -65,16 +66,17 @@ public final class CollectionUtil {
             return Collections.emptyList();
         }
         final int size = Math.min(list1.size(), list2.size());
-        if (useStream()) {
+        if (_useStream()) {
             return IntStream.range(0, size)
                     .mapToObj(i -> mixer.apply(list1.get(i), list2.get(i)))
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+        } else {
+            final List<R> result = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                result.add(mixer.apply(list1.get(i), list2.get(i)));
+            }
+            return Collections.unmodifiableList(result);
         }
-        final List<R> result = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            result.add(mixer.apply(list1.get(i), list2.get(i)));
-        }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T> T[] toArray(final List<T> list, final T[] array) {
@@ -95,33 +97,35 @@ public final class CollectionUtil {
         if (list == null || filter == null) {
             return null;
         }
-        if (useStream()) {
+        if (_useStream()) {
             return list.stream().filter(filter).findFirst().orElse(null);
-        }
-        for (final T item : list) {
-            if (filter.test(item)) {
-                return item;
+        } else {
+            for (final T item : list) {
+                if (filter.test(item)) {
+                    return item;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     public static <T> List<T> findAll(final List<T> list, final Predicate<T> filter) {
         if (list == null || filter == null) {
             return Collections.emptyList();
         }
-        if (useStream()) {
+        if (_useStream()) {
             return list.stream()
                     .filter(filter)
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
-        }
-        final List<T> result = new ArrayList<>();
-        for (final T item : list) {
-            if (filter.test(item)) {
-                result.add(item);
+        } else {
+            final List<T> result = new ArrayList<>();
+            for (final T item : list) {
+                if (filter.test(item)) {
+                    result.add(item);
+                }
             }
+            return Collections.unmodifiableList(result);
         }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T> List<T> unionOf(final List<T> list1, final List<T> list2) {
@@ -131,36 +135,38 @@ public final class CollectionUtil {
         if (isEmpty(list2)) {
             return Collections.unmodifiableList(new ArrayList<>(list1));
         }
-        if (useStream()) {
+        if (_useStream()) {
             return new HashSet<>(list1).stream()
                     .collect(Collectors.collectingAndThen(Collectors.toSet(), s -> {
                         s.addAll(list2);
                         return Collections.unmodifiableList(new ArrayList<>(s));
                     }));
+        } else {
+            final Set<T> set = new HashSet<>(list1);
+            set.addAll(list2);
+            return Collections.unmodifiableList(new ArrayList<>(set));
         }
-        final Set<T> set = new HashSet<>(list1);
-        set.addAll(list2);
-        return Collections.unmodifiableList(new ArrayList<>(set));
     }
 
     public static <T> List<T> intersectionOf(final List<T> list1, final List<T> list2) {
         if (isEmpty(list1) || isEmpty(list2)) {
             return Collections.emptyList();
         }
-        if (useStream()) {
+        if (_useStream()) {
             final Set<T> set2 = new HashSet<>(list2);
             return list1.stream()
                     .filter(set2::contains)
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
-        }
-        final Set<T> set2 = new HashSet<>(list2);
-        final List<T> result = new ArrayList<>();
-        for (final T item : list1) {
-            if (set2.contains(item)) {
-                result.add(item);
+        } else {
+            final Set<T> set2 = new HashSet<>(list2);
+            final List<T> result = new ArrayList<>();
+            for (final T item : list1) {
+                if (set2.contains(item)) {
+                    result.add(item);
+                }
             }
+            return Collections.unmodifiableList(result);
         }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T> List<T> differenceOf(final List<T> list1, final List<T> list2) {
@@ -170,20 +176,21 @@ public final class CollectionUtil {
         if (isEmpty(list2)) {
             return Collections.unmodifiableList(new ArrayList<>(list1));
         }
-        if (useStream()) {
+        if (_useStream()) {
             final Set<T> set2 = new HashSet<>(list2);
             return list1.stream()
                     .filter(item -> !set2.contains(item))
                     .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
-        }
-        final Set<T> set2 = new HashSet<>(list2);
-        final List<T> result = new ArrayList<>();
-        for (final T item : list1) {
-            if (!set2.contains(item)) {
-                result.add(item);
+        } else {
+            final Set<T> set2 = new HashSet<>(list2);
+            final List<T> result = new ArrayList<>();
+            for (final T item : list1) {
+                if (!set2.contains(item)) {
+                    result.add(item);
+                }
             }
+            return Collections.unmodifiableList(result);
         }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T> List<T> symmetricDifferenceOf(final List<T> list1, final List<T> list2) {
@@ -202,20 +209,7 @@ public final class CollectionUtil {
     }
 
     public static <T> List<T> slice(final List<T> list, final int begin) {
-        if (list == null) {
-            return Collections.emptyList();
-        }
-        if (begin >= list.size()) {
-            return Collections.emptyList();
-        }
-        int b = begin;
-        if (b < 0) {
-            b = list.size() + b;
-            if (b < 0) {
-                b = 0;
-            }
-        }
-        return Collections.unmodifiableList(list.subList(b, list.size()));
+        return slice(list, begin, Integer.MAX_VALUE);
     }
 
     public static <T> List<T> slice(final List<T> list, final int begin, final int end) {
@@ -294,7 +288,7 @@ public final class CollectionUtil {
         if (list == null || indexer == null) {
             return Collections.emptyMap();
         }
-        if (useStream()) {
+        if (_useStream()) {
             return Collections.unmodifiableMap(
                     list.stream()
                             .filter(item -> indexer.apply(item) != null)
@@ -305,22 +299,23 @@ public final class CollectionUtil {
                                     HashMap::new
                             ))
             );
-        }
-        final Map<String, T> result = new HashMap<>();
-        for (final T item : list) {
-            final String key = indexer.apply(item);
-            if (key != null) {
-                result.put(key, item);
+        } else {
+            final Map<String, T> result = new HashMap<>();
+            for (final T item : list) {
+                final String key = indexer.apply(item);
+                if (key != null) {
+                    result.put(key, item);
+                }
             }
+            return Collections.unmodifiableMap(result);
         }
-        return Collections.unmodifiableMap(result);
     }
 
     public static <T> Map<String, List<T>> grouping(final List<T> list, final Function<T, String> classifier) {
         if (list == null || classifier == null) {
             return Collections.emptyMap();
         }
-        if (useStream()) {
+        if (_useStream()) {
             return list.stream()
                     .collect(Collectors.collectingAndThen(
                             Collectors.groupingBy(classifier),
@@ -333,20 +328,21 @@ public final class CollectionUtil {
                                             ))
                             )
                     ));
+        } else {
+            final Map<String, List<T>> result = new HashMap<>();
+            for (final T item : list) {
+                final String key = classifier.apply(item);
+                result.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
+            }
+            return Collections.unmodifiableMap(
+                    result.entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    Map.Entry::getKey,
+                                    e -> Collections.unmodifiableList(e.getValue()),
+                                    (v1, v2) -> v2
+                            ))
+            );
         }
-        final Map<String, List<T>> result = new HashMap<>();
-        for (final T item : list) {
-            final String key = classifier.apply(item);
-            result.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
-        }
-        return Collections.unmodifiableMap(
-                result.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                e -> Collections.unmodifiableList(e.getValue()),
-                                (v1, v2) -> v2
-                        ))
-        );
     }
 
     @SafeVarargs
@@ -357,7 +353,7 @@ public final class CollectionUtil {
         if (items.length % 2 != 0) {
             throw new IllegalArgumentException("Number of items must be even (key, value pairs)");
         }
-        if (useStream()) {
+        if (_useStream()) {
             return Collections.unmodifiableMap(
                     IntStream.range(0, items.length / 2)
                             .boxed()
@@ -368,12 +364,13 @@ public final class CollectionUtil {
                                     HashMap::new
                             ))
             );
+        } else {
+            final Map<Object, Object> result = new HashMap<>();
+            for (int i = 0; i < items.length; i += 2) {
+                result.put(items[i], items[i + 1]);
+            }
+            return Collections.unmodifiableMap(result);
         }
-        final Map<Object, Object> result = new HashMap<>();
-        for (int i = 0; i < items.length; i += 2) {
-            result.put(items[i], items[i + 1]);
-        }
-        return Collections.unmodifiableMap(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -391,7 +388,7 @@ public final class CollectionUtil {
         if (items.length % 2 != 0) {
             throw new IllegalArgumentException("Number of items must be even (key, value pairs)");
         }
-        if (useStream()) {
+        if (_useStream()) {
             return Collections.unmodifiableMap(
                     IntStream.range(0, items.length / 2)
                             .boxed()
@@ -402,21 +399,22 @@ public final class CollectionUtil {
                                     HashMap::new
                             ))
             );
+        } else {
+            final Map<K, V> result = new HashMap<>();
+            for (int i = 0; i < items.length; i += 2) {
+                final K key = keyClass.cast(items[i]);
+                final V value = valueClass.cast(items[i + 1]);
+                result.put(key, value);
+            }
+            return Collections.unmodifiableMap(result);
         }
-        final Map<K, V> result = new HashMap<>();
-        for (int i = 0; i < items.length; i += 2) {
-            final K key = keyClass.cast(items[i]);
-            final V value = valueClass.cast(items[i + 1]);
-            result.put(key, value);
-        }
-        return Collections.unmodifiableMap(result);
     }
 
     public static <K, V> Map<K, V> asMap(final List<Map.Entry<K, V>> entries) {
         if (entries == null || entries.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (useStream()) {
+        if (_useStream()) {
             return entries.stream()
                     .collect(Collectors.collectingAndThen(
                             Collectors.toMap(
@@ -426,12 +424,13 @@ public final class CollectionUtil {
                             ),
                             Collections::unmodifiableMap
                     ));
+        } else {
+            final Map<K, V> result = new HashMap<>();
+            for (final Map.Entry<K, V> entry : entries) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+            return Collections.unmodifiableMap(result);
         }
-        final Map<K, V> result = new HashMap<>();
-        for (final Map.Entry<K, V> entry : entries) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-        return Collections.unmodifiableMap(result);
     }
 
     public static <K, V> Map<K, V> copyOf(final Map<K, V> origin) {

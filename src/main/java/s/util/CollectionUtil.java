@@ -209,7 +209,7 @@ public final class CollectionUtil {
     }
 
     public static <T> List<T> slice(final List<T> list, final int begin) {
-        return slice(list, begin, Integer.MAX_VALUE);
+        return slice(list, begin, list == null ? 0 : list.size());
     }
 
     public static <T> List<T> slice(final List<T> list, final int begin, final int end) {

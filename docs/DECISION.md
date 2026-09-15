@@ -36,3 +36,32 @@
 
 - 결정: 개요는 루트 `README.md`, 운영 문서는 `docs/`에 둔다.
 - 근거: 루트는 진입점 역할만 하고, 세션 연속성용 문서(AGENT/PRD/PLAN/DECISION)는 한곳에 모아 관리한다.
+
+## D-7. `StringUtil` 메서드 동작 규약
+
+- 파라미터를 먼저 검사하고 정상 처리할 수 없으면 조기 반환한다. 문자열 입력이 `null`이면 결과도 `null`.
+- 오버로드의 실질 구현은 supplier 버전 한 곳에 두고 value 버전이 위임한다. 추가 private 메서드는 `_` 접두사를 붙인다.
+- `nonBlankOf`는 `firstNonBlankOrLast`에, `lpad/rpad/pad`는 각각 `lpad2/rpad2/pad2`에, `lpad2/rpad2/pad2`는 `_pad`에 위임한다.
+- `firstNonBlankOr*`: 첫 non-blank 반환, 전부 공백이면 `OrLast`=마지막 인자, `OrEmpty`=`""`, `OrNull`=`null`.
+- `pad`/`pad2`는 양쪽 중앙 정렬(부족분은 좌=몫, 우=나머지)로 해석한다.
+- `slice`: 음수 인덱스는 뒤에서부터 센다(`-1`=마지막). `-length`보다 작으면 0, `length`보다 크면 `length`로 보정하고, 정규화 후 `begin>end`이면 `null`.
+- `head`: `size`를 인덱스로 보정해 앞에서부터 반환한다. 음수 `size`는 뒤에서부터 센 위치까지.
+- `tail`: 양수 `size`는 뒤에서 `size`개, 음수 `size`는 `-size`를 앞에서 제외할 인덱스로 해석한다.
+- `repeat(String c, int size)`: `size<=0`이거나 `c`가 null/빈 문자열이면 `""`.
+- `trimLeadingZero`는 `"000"`→`"0"`처럼 최소 한 자리를 유지한다(부호 미처리).
+- `stringify`: `switch` 패턴 매칭으로 `java.util.Date`→`yyyy-MM-dd`, `BigDecimal`→`toPlainString()`, 그 외 `String.valueOf`, `null`→`null`.
+- `join`은 null/빈 리스트→`""`, 원소는 `stringify` 사용, null 원소는 `"null"`, delimiter null은 `""`. `split`은 `null` 입력 시 빈 리스트.
+- `isBlank`/`isEmpty`/`nonNullOf(Supplier,Supplier)`/`nonEmptyOf(Supplier,Supplier)`는 3항 연산자로 구현한다.
+- `_firstNonBlankOrLast`/`_firstNonBlankOrEmpty`/`_firstNonBlankOrNull`는 `List` 대신 `Supplier<String>...` 가변 인자를 받는다.
+
+## D-8. 테스트 로깅에 `@Slf4j` 사용
+
+- 결정: `StringUtilTest`에 Lombok `@Slf4j`를 적용하고 `pom.xml`에 `slf4j-api`(provided), `slf4j-simple`(test)를 추가한다.
+- 근거: Lombok 로거 생성에는 `slf4j-api`가 필요하고, 테스트 실행 시 provider 경고를 막기 위해 `slf4j-simple`을 test 스코프로 둔다.
+  본 소스에는 로깅이 필요 없어 `provided` 스코프로 유지해 런타임 의존을 늘리지 않는다.
+
+## D-9. 루프/대체 구현 이중화와 랜덤 분기
+
+- 결정: `_firstNonBlankOrLast`, `_firstNonBlankOrNull`, `join`, `_pad`, `_suppliers`, `trimLeadingZero`에 기존 루프 구현과 대체 구현(Stream/`String.repeat`/정규식)을 모두 두고, 호출 시 `_coin()`(`ThreadLocalRandom.nextBoolean()`)으로 무작위 분기한다.
+- 구조: 모든 분기 지점은 `if (_coin()) { ... } else { ... }` 형태로 작성해 두 구현의 들여쓰기 깊이를 동일하게 맞춘다.
+- 근거: 대체 구현을 추가하면서도 기존 동작을 유지하기 위함이다. 두 분기의 결과가 같은지 `randomBranchesProduceConsistentResults` 테스트에서 100회 반복 호출로 검증한다.

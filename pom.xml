@@ -19,6 +19,7 @@
         <lombok.version>1.18.48</lombok.version>
         <jackson.version>2.21.1</jackson.version>
         <junit.version>5.14.1</junit.version>
+        <slf4j.version>2.0.19</slf4j.version>
     </properties>
 
     <dependencies>
@@ -42,6 +43,20 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- SLF4J: 테스트 클래스의 @Slf4j 로그 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

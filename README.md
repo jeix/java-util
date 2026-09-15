@@ -40,9 +40,11 @@
     ├── main/java/s/type/tuple/Triplet.java
     ├── main/java/s/type/tuple/Quartet.java
     ├── main/java/s/util/StringUtil.java    # 문자열 유틸리티
+    ├── main/java/s/util/CollectionUtil.java # 리스트/맵 유틸리티
     ├── test/java/s/HelloTest.java          # JUnit 5 테스트 예시
     ├── test/java/s/type/tuple/TupleTest.java
-    └── test/java/s/util/StringUtilTest.java
+    ├── test/java/s/util/StringUtilTest.java
+    └── test/java/s/util/CollectionUtilTest.java
 ```
 
 유틸리티 클래스는 `src/main/java/s` 아래에, 테스트 클래스는 `src/test/java/s` 아래에 같은 패키지 구조로 추가합니다.
@@ -67,6 +69,28 @@
 - 같은 기능이 이미 다른 메서드에 있으면 그 메서드를 호출합니다.
 - 오버로드된 메서드는 실질적인 구현 메서드 하나로 위임하고, 구현 메서드가 private이면 이름 앞에 `_`를 붙입니다.
 - 단순 분기는 3항 연산자를 사용하고, 반복문 구현과 스트림 구현을 함께 두는 메서드는 실행 시 랜덤하게 분기합니다.
+
+## s.util.CollectionUtil
+
+| 메서드 | 설명 |
+| --- | --- |
+| `isEmpty(list)`, `emptyIfNull(list)` | `null`/빈 리스트 판별과 `null` 대체 |
+| `zip(list1, list2)`, `zip(list1, list2, mixer)` | 짧은 쪽 길이에 맞춰 `Pair` 목록 또는 믹서 결과 생성 |
+| `toArray(list)` | 배열로 변환(런타임 배열 타입은 `Object[]`) |
+| `findOne(list, filter)`, `findAll(list, filter)` | 조건에 맞는 첫 항목/모든 항목 |
+| `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf` | 집합 연산(요청한 수식 순서 유지, `list1`의 중복 유지) |
+| `slice`, `head`, `tail` | 음수 인덱스를 역방향으로 해석하는 부분 리스트 |
+| `indexing(list, indexer)`, `grouping(list, classifier)` | 색인 맵, 분류 맵 |
+| `isEmpty(map)`, `emptyIfNull(map)` | `null`/빈 맵 판별과 `null` 대체 |
+| `asMap(items)`, `asMap(keyClass, valueClass, items)`, `asMap(entries)` | `key, value` 쌍·타입 검사·`Map.Entry` 목록으로 맵 생성 |
+| `castKeyValue(origin)`, `copyOf(origin)` | 키/값 타입 캐스팅, 불변 복사 |
+
+- 새로 만든 결과 컬렉션은 불변 컬렉션입니다. `emptyIfNull`과 `castKeyValue`는 원본을 그대로 반환합니다.
+- `asMap`에 홀수 개 항목을 넘기면 `IllegalArgumentException`, `asMap(keyClass, valueClass, ...)`에서 타입이 다르면
+  `ClassCastException`이 발생합니다.
+- `indexing`은 같은 색인에 대해 먼저 나온 항목을 유지하고, `grouping`은 항목 순서를 유지합니다.
+- `zip(list1, list2, mixer)`, `findOne`, `indexing`, `grouping`, `asMap(items)`, `asMap(entries)`는 반복문 구현과
+  스트림 구현을 함께 두고 실행 시 랜덤하게 분기합니다. 두 구현은 같은 결과를 냅니다.
 
 ## s.type.tuple
 

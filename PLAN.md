@@ -24,6 +24,9 @@
 | 14 | 문서 갱신(README 튜플 섹션, PRD 요구사항 R11·R12, PLAN·DECISION) | 완료 |
 | 15 | `@JsonProperty`를 필드에서 `ordN()` 메서드로 이동하고, 프로퍼티 순서에 의존하지 않도록 JSON 테스트를 트리 비교로 변경 | 완료 |
 | 16 | JSON 키명을 `cat`, `dog`, `elk`, `fox`에서 `ord1`~`ord4`로 변경 | 완료 |
+| 17 | `s.util.CollectionUtil` 구현(리스트 기본, zip, 검색, 집합 연산, 부분 리스트, 색인·분류, 맵 생성·복사) | 완료 |
+| 18 | `s.util.CollectionUtilTest` 작성(26개 테스트 실행, 전체 80개 테스트 통과) 및 문서 갱신 | 완료 |
+| 19 | `CollectionUtil`의 `zip`/`findOne`/`indexing`/`grouping`/`asMap` 두 오버로드에 스트림 구현 추가 및 랜덤 분기 적용(랜덤 분기 검증 테스트 6개 추가, 전체 86개 테스트 통과) | 완료 |
 
 ## 다음 단계
 

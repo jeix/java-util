@@ -254,8 +254,8 @@ class StringUtilTest {
         void firstNonBlankOrEmptyValue() {
             assertAll(
                     () -> assertEquals("a", StringUtil.firstNonBlankOrEmpty("a", "b")),
-                    () -> assertEquals("b", StringUtil.firstNonBlankOrEmpty(" ", "b", null)),
-                    () -> assertEquals("", StringUtil.firstNonBlankOrEmpty("", " ", null)),
+                    () -> assertEquals("b", StringUtil.firstNonBlankOrEmpty(" ", "b", (String[]) null)),
+                    () -> assertEquals("", StringUtil.firstNonBlankOrEmpty("", " ", (String[]) null)),
                     () -> assertEquals("", StringUtil.firstNonBlankOrEmpty(null, null)));
         }
 
@@ -306,7 +306,7 @@ class StringUtilTest {
             assertAll(
                     () -> assertEquals("a", StringUtil.firstNonBlankOrNull(null, "a")),
                     () -> assertEquals("b", StringUtil.firstNonBlankOrNull("", " ", "b")),
-                    () -> assertNull(StringUtil.firstNonBlankOrNull("", " ", null)),
+                    () -> assertNull(StringUtil.firstNonBlankOrNull("", " ", (String[]) null)),
                     () -> assertNull(StringUtil.firstNonBlankOrNull(null, null)));
         }
 

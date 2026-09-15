@@ -126,3 +126,54 @@
 - 근거: 메서드 애노테이션으로 직렬화하면 Jackson이 리플렉션에서 발견한 순서를 사용해 선언 순서와 다를 수 있고
   (`{"dog":2,"cat":"cat"}`), JSON 객체의 프로퍼티 순서는 의미가 없습니다. 순서를 고정하고 싶다면
   `@JsonPropertyOrder`를 추가하면 됩니다.
+
+## 16. CollectionUtil은 StringUtil과 같은 구현 규칙을 따르되 결과를 불변으로 반환한다
+
+- 결정: 파라미터 검사 후 정상 처리, 기존 메서드 재사용, 오버로드는 단일 구현으로 위임, 단순 분기는 3항 연산자,
+  private 메서드는 `_` 접두사를 사용합니다. 새로 만든 리스트/맵은 `Collections.unmodifiableList`/`unmodifiableMap`
+  으로 감싸 반환하고, `emptyIfNull`과 `castKeyValue`는 이름대로 원본을 그대로 반환합니다.
+- 대안: 결과를 가변 컬렉션으로 반환, 모든 메서드가 복사본을 반환.
+- 근거: 호출부에서 결과를 수정해 원본이 바뀌는 사고를 막고, `null` 대체와 캐스팅은 원본 참조가 유지되는 편이
+  예측 가능합니다. `List.copyOf`/`Map.copyOf` 대신 `unmodifiableList`/`unmodifiableMap`을 사용해
+  `null` 요소·값을 허용합니다.
+
+## 17. 집합 연산은 요청한 수식을 그대로 위임 구현한다
+
+- 결정: `differenceOf`를 기준 구현으로 두고, `unionOf`는 `list1 + differenceOf(list2, list1)`,
+  `intersectionOf`는 `differenceOf(list1, differenceOf(list1, list2))`,
+  `symmetricDifferenceOf`는 `differenceOf(list1, list2) + differenceOf(list2, list1)`로 구현합니다.
+- 대안: 각 연산을 독립적으로 구현, `Set` 기반 구현.
+- 근거: 요청한 수식(`list1 + (list2 - list1)` 등)과 코드가 1:1로 대응해 읽기 쉽고, 중복 처리 규칙이 한 곳에서 정해집니다.
+  `Set`을 쓰면 `list1`의 중복과 순서를 유지할 수 없습니다.
+
+## 18. 맵 생성 계열은 용도별로 동작을 나눈다
+
+- 결정: `asMap(items)`은 `key, value` 쌍을 요구하고 홀수 개면 `IllegalArgumentException`을 던집니다.
+  `asMap(keyClass, valueClass, items)`는 `asMap(items)`를 재사용한 뒤 `Class.cast`로 키/값 타입을 검사해
+  `ClassCastException`으로 실패하게 합니다. `castKeyValue`는 원본 맵을 타입만 바꾼 뷰로 반환하고,
+  `copyOf`는 새 불변 맵으로 복사합니다. `asMap(entries)`에서 `null` 항목은 건너뜁니다.
+- 대안: 홀수 항목을 무시, `castKeyValue`에서도 복사, 잘못된 타입을 그대로 통과.
+- 근거: 짝이 맞지 않는 항목이나 타입이 다른 값은 호출부 버그이므로 조용히 넘기기보다 빨리 실패하는 편이 안전합니다.
+  반면 `castKeyValue`는 이름 그대로 캐스팅이 목적이므로 복사하지 않습니다.
+
+## 19. toArray는 런타임에 Object[]을 반환한다
+
+- 결정: `toArray(List<T>)`는 `T[]`로 선언하되 내부에서는 `new Object[size]`를 사용합니다.
+- 대안: `toArray(List<T>, Class<T>)` 오버로드 추가, 리스트 첫 요소의 클래스로 배열 생성.
+- 근거: 제네릭만으로는 런타임 컴포넌트 타입을 알 수 없어 진짜 `T[]`를 만들 수 없습니다. 첫 요소 클래스를 쓰면
+  이종 요소 리스트에서 `ArrayStoreException`이 날 수 있어 예측 가능한 `Object[]`을 택했습니다.
+  구체 타입 배열이 필요하면 `List#toArray(T[])`를 사용하고, 요청이 있으면 `Class<T>` 인자를 받는 오버로드를 추가합니다.
+
+## 20. zip, findOne, indexing, grouping, asMap도 반복문/스트림 구현을 두고 랜덤 분기한다
+
+- 결정: `zip(list1, list2, mixer)`, `findOne`, `indexing`, `grouping`, `asMap(items)`, `asMap(entries)`를
+  반복문 구현(`_zipByLoop` 등)과 스트림 구현(`_zipByStream` 등)으로 나누고,
+  `ThreadLocalRandom.current().nextBoolean()`으로 실행 시점에 하나를 선택합니다.
+- 대안: 반복문만 유지, 스트림만 사용, 랜덤 대신 고정 분기.
+- 근거: `StringUtil`의 `firstNonBlankOrLast`와 같은 스타일을 유지하고, 두 구현이 같은 결과를 내는지 테스트로
+  확인할 수 있습니다. `CollectionUtilTest$랜덤분기`에서 메서드마다 100회 반복해 결과가 항상 같은지 검증합니다.
+- 구현 주의점: 두 구현의 결과가 달라지지 않도록 `Collectors.toMap`/`Collectors.groupingBy`를 피했습니다.
+  `toMap`은 값이 `null`이면 `NullPointerException`이 나고, `groupingBy`는 분류가 `null`이면 예외가 납니다.
+  대신 `indexing`은 `_indexFirst`(먼저 나온 항목 유지), `grouping`은 `_addGroup`/`_mergeGroups`를 공유하는
+  `collect(LinkedHashMap::new, ...)`를 사용하고, `findOne`은 `Optional::ofNullable`로 감싸 `findFirst()`의
+  `null` 예외를 피합니다.

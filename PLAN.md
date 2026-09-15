@@ -19,6 +19,11 @@
 | 9 | 문서 갱신(README 기능 목록, PRD 요구사항 R7·R8, PLAN·DECISION) | 완료 |
 | 10 | `StringUtil` 스타일 변경(3항 연산자, 반복문/스트림 랜덤 분기, 음수 인덱스 역방향 해석, `repeat(String, int)`) | 완료 |
 | 11 | 변경된 동작에 맞춰 `StringUtilTest` 갱신 후 10회 반복 실행(모두 성공) | 완료 |
+| 12 | `s.type.tuple`에 `Pair`, `Triplet`, `Quartet` 데이터 타입 추가(스태틱 팩터리 `of`, 인스턴스 `ordN()`, `toString`, `@EqualsAndHashCode`, `@JsonProperty`) | 완료 |
+| 13 | `s.type.tuple.TupleTest` 작성(10개 테스트: 값 접근, `toString`, equals/hashCode, JSON 변환, null 값) | 완료 |
+| 14 | 문서 갱신(README 튜플 섹션, PRD 요구사항 R11·R12, PLAN·DECISION) | 완료 |
+| 15 | `@JsonProperty`를 필드에서 `ordN()` 메서드로 이동하고, 프로퍼티 순서에 의존하지 않도록 JSON 테스트를 트리 비교로 변경 | 완료 |
+| 16 | JSON 키명을 `cat`, `dog`, `elk`, `fox`에서 `ord1`~`ord4`로 변경 | 완료 |
 
 ## 다음 단계
 

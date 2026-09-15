@@ -95,3 +95,34 @@
 - 대안: `char`를 받는 오버로드를 함께 유지.
 - 근거: 여러 문자 단위를 반복하는 경우까지 같은 메서드로 처리할 수 있고, 결과 길이를 넘으면 잘라냅니다
   (`repeat("ab", 3)` → `"aba"`).
+
+## 13. 튜플은 데이터 타입으로 구현한다
+
+- 결정: `Pair`, `Triplet`, `Quartet`은 `private final` 필드(`cat`, `dog`, `elk`, `fox`)와 private 생성자를 두고,
+  `of(...)` 스태틱 팩터리로만 인스턴스를 만듭니다. 값은 인스턴스 메서드 `ord1()`~`ordN()`으로 읽고,
+  `toString()`은 `(값1, 값2, ...)` 형식으로 직접 구현합니다.
+- 대안: `record` 사용, Lombok `@Value`/`@Getter`/`@AllArgsConstructor` 사용, public 생성자 제공.
+- 근거: 유틸리티가 아닌 데이터 타입이므로 접근자를 인스턴스 메서드로 두라는 요청을 따랐고,
+  생성자를 private으로 막아 `of`로만 만들도록 통일했습니다. `toString`은 Lombok 기본 형식
+  (`Quartet(cat=..., dog=...)`)이 아니라 요청한 `(t, u, v, w)` 형식이 필요해 직접 구현했습니다.
+  값 비교는 Lombok `@EqualsAndHashCode`가 필드 전체를 사용합니다.
+
+## 14. ordN() 메서드를 Jackson 변환 대상으로 지정한다
+
+- 결정: `ord1()`, `ord2()`, `ord3()`, `ord4()` 메서드에 각각 `@JsonProperty("ord1")`, `@JsonProperty("ord2")`,
+  `@JsonProperty("ord3")`, `@JsonProperty("ord4")`를 붙입니다. 필드에는 애노테이션을 두지 않습니다.
+- 대안: 필드에 `@JsonProperty` 지정(이전 구현), getter 이름을 `getCat()` 형태로 변경, 애노테이션 없이 두고
+  호출부에서 필드 가시성을 열어 처리.
+- 근거: 접근자 이름이 `ordN()`이라 Jackson 기본 규칙(getter/공개 필드)으로는 값을 찾지 못해 직렬화에 실패합니다.
+  요청대로 `ordN()`을 JSON 변환 대상으로 지정하고, `private final` 필드는 값 저장 용도로만 남겼습니다.
+  JSON 키명을 필드명(`cat`, `dog`, `elk`, `fox`)이 아니라 메서드명과 같은 `ordN`으로 두어 값의 위치가 키에 드러나고,
+  다른 튜플 타입과도 키 규칙이 일치합니다.
+  private 생성자만 있어 역직렬화는 지원하지 않으며, 필요해지면 `@JsonCreator`를 추가합니다.
+
+## 15. JSON 테스트는 프로퍼티 순서에 의존하지 않게 작성한다
+
+- 결정: `TupleTest`의 JSON 검증은 직렬화 문자열을 그대로 비교하지 않고 `ObjectMapper.readTree` 결과를 비교합니다.
+- 대안: 문자열 비교 유지, `@JsonPropertyOrder`로 순서 고정.
+- 근거: 메서드 애노테이션으로 직렬화하면 Jackson이 리플렉션에서 발견한 순서를 사용해 선언 순서와 다를 수 있고
+  (`{"dog":2,"cat":"cat"}`), JSON 객체의 프로퍼티 순서는 의미가 없습니다. 순서를 고정하고 싶다면
+  `@JsonPropertyOrder`를 추가하면 됩니다.

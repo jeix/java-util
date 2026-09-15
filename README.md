@@ -36,8 +36,12 @@
 ├── pom.xml
 └── src
     ├── main/java/s/Hello.java              # Lombok + Jackson 사용 예시
+    ├── main/java/s/type/tuple/Pair.java    # 튜플 데이터 타입
+    ├── main/java/s/type/tuple/Triplet.java
+    ├── main/java/s/type/tuple/Quartet.java
     ├── main/java/s/util/StringUtil.java    # 문자열 유틸리티
     ├── test/java/s/HelloTest.java          # JUnit 5 테스트 예시
+    ├── test/java/s/type/tuple/TupleTest.java
     └── test/java/s/util/StringUtilTest.java
 ```
 
@@ -63,6 +67,20 @@
 - 같은 기능이 이미 다른 메서드에 있으면 그 메서드를 호출합니다.
 - 오버로드된 메서드는 실질적인 구현 메서드 하나로 위임하고, 구현 메서드가 private이면 이름 앞에 `_`를 붙입니다.
 - 단순 분기는 3항 연산자를 사용하고, 반복문 구현과 스트림 구현을 함께 두는 메서드는 실행 시 랜덤하게 분기합니다.
+
+## s.type.tuple
+
+| 타입 | 필드 | 메서드 |
+| --- | --- | --- |
+| `Pair<T, U>` | `cat`, `dog` | `of`, `ord1`, `ord2`, `toString` |
+| `Triplet<T, U, V>` | `cat`, `dog`, `elk` | `of`, `ord1`~`ord3`, `toString` |
+| `Quartet<T, U, V, W>` | `cat`, `dog`, `elk`, `fox` | `of`, `ord1`~`ord4`, `toString` |
+
+- 유틸리티가 아니라 데이터 타입이므로, 값은 `of(...)` 스태틱 팩터리로 만들고 `ord1()`~`ordN()` 인스턴스 메서드로 읽습니다.
+- `toString()`은 `(값1, 값2, ...)` 형식입니다.
+- 값 비교는 Lombok `@EqualsAndHashCode`를 사용하고, `ord1()`~`ordN()` 메서드에 Jackson `@JsonProperty`를 붙여
+  JSON 변환 대상으로 지정합니다. JSON 키명은 `ord1`~`ord4`이므로 `Quartet.of("cat", 2, true, "fox")`는
+  `{"ord1":"cat","ord2":2,"ord3":true,"ord4":"fox"}`로 변환됩니다(프로퍼티 순서는 보장하지 않습니다).
 
 ## 문서
 

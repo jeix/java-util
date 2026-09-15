@@ -25,6 +25,8 @@
 | R8 | `StringUtil`의 모든 public 메서드를 `s.util.StringUtilTest`에서 검증하고, 테스트 클래스는 Lombok `@Slf4j`를 사용한다. |
 | R9 | `slice`, `head`, `tail`은 음수 인덱스를 역방향 인덱스로 해석하고, `repeat`은 `String` 단위를 결과 길이까지 반복한다. |
 | R10 | 단순 분기는 3항 연산자를 사용하고, `firstNonBlankOrLast` 계열은 반복문 구현과 스트림 구현을 두고 실행 시 랜덤하게 분기한다. |
+| R11 | `s.type.tuple`에 값 2·3·4개를 묶는 `Pair`, `Triplet`, `Quartet` 데이터 타입을 제공한다. 값은 `of` 스태틱 팩터리로 만들고 `ord1()`~`ordN()` 인스턴스 메서드로 읽으며, `toString()`은 `(값1, 값2, ...)` 형식이다. |
+| R12 | 튜플 타입은 Lombok `@EqualsAndHashCode`로 값 비교를 하고, `ord1()`~`ordN()` 메서드에 Jackson `@JsonProperty`를 붙여 JSON 키명을 `ord1`~`ordN`으로 지정하며, 이를 `TupleTest`에서 검증한다. |
 
 ## 범위 밖
 

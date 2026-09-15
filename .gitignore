@@ -1,0 +1,28 @@
+# 빌드 산출물
+target/
+
+# 컴파일된 클래스
+*.class
+
+# 로그
+*.log
+
+# IDE 설정
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+
+# 로컬 환경 변수·자격 증명 (커밋 금지)
+.env
+.env*
+!.env.example
+
+# 이 프로젝트와 무관한 도구별 디렉터리
+.agents/
+.codex/

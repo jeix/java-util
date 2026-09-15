@@ -35,11 +35,34 @@
 ├── .mvn/wrapper/maven-wrapper.properties
 ├── pom.xml
 └── src
-    ├── main/java/s/Hello.java         # Lombok + Jackson 사용 예시
-    └── test/java/s/HelloTest.java     # JUnit 5 테스트 예시
+    ├── main/java/s/Hello.java              # Lombok + Jackson 사용 예시
+    ├── main/java/s/util/StringUtil.java    # 문자열 유틸리티
+    ├── test/java/s/HelloTest.java          # JUnit 5 테스트 예시
+    └── test/java/s/util/StringUtilTest.java
 ```
 
 유틸리티 클래스는 `src/main/java/s` 아래에, 테스트 클래스는 `src/test/java/s` 아래에 같은 패키지 구조로 추가합니다.
+
+## s.util.StringUtil
+
+| 메서드 | 설명 |
+| --- | --- |
+| `isBlank`, `isEmpty` | `null`을 포함한 공백/빈 문자열 판별 |
+| `nonNullOf`, `nonBlankOf`, `nonEmptyOf` | 값이 없을 때 기본값 선택 (값/공급자 오버로드) |
+| `firstNonBlankOrLast`, `firstNonBlankOrEmpty`, `firstNonBlankOrNull` | 공백이 아닌 첫 번째 값 선택 (값 2개 + 가변 인자, 공급자 2~5개 오버로드) |
+| `stringify` | `null`은 `null`, `Date`는 `yyyy-MM-dd`, `BigDecimal`은 `toPlainString()`으로 변환 |
+| `slice`, `head`, `tail` | 음수 인덱스는 역방향으로 해석하고, 범위를 벗어나면 보정해 잘라내기 |
+| `trimLeadingZero`, `repeat`, `reverse` | 문자열 가공(`repeat`은 `String` 단위를 결과 길이까지 반복) |
+| `lpad`, `rpad`, `pad` | 단일 문자 패딩 |
+| `lpad2`, `rpad2`, `pad2` | 여러 문자 패딩 |
+| `join`, `split` | 목록 연결과 분리 |
+
+구현 규칙은 다음과 같습니다.
+
+- 파라미터를 먼저 검사하고, 정상적으로 처리할 수 없는 경우는 그대로 리턴합니다.
+- 같은 기능이 이미 다른 메서드에 있으면 그 메서드를 호출합니다.
+- 오버로드된 메서드는 실질적인 구현 메서드 하나로 위임하고, 구현 메서드가 private이면 이름 앞에 `_`를 붙입니다.
+- 단순 분기는 3항 연산자를 사용하고, 반복문 구현과 스트림 구현을 함께 두는 메서드는 실행 시 랜덤하게 분기합니다.
 
 ## 문서
 

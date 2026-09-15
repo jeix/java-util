@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-프로젝트 구조 초기화 완료. 브랜치 `codex-deepseek`에서 작업 중이며, 리모트에는 아직 없는 브랜치입니다.
+프로젝트 구조 초기화와 `s.util.StringUtil` 구현 및 테스트 완료. 브랜치 `codex-deepseek`에서 작업 중이며, 리모트에는 아직 없는 브랜치입니다.
 
 ## 수행 결과
 
@@ -14,10 +14,15 @@
 | 4 | `s.Hello`, `s.HelloTest` 샘플 추가 | 완료 |
 | 5 | `./mvnw clean test`, `./mvnw clean package`로 검증 | 완료 |
 | 6 | 프로젝트 문서(README, AGENTS, PRD, PLAN, DECISION) 작성 | 완료 |
+| 7 | `s.util.StringUtil` 구현(공백 판별, 기본값 선택, 첫 값 선택, 문자열 가공, 패딩, 목록 변환) | 완료 |
+| 8 | `s.util.StringUtilTest` 작성(44개 테스트 실행, `@Slf4j` 로깅 확인) | 완료 |
+| 9 | 문서 갱신(README 기능 목록, PRD 요구사항 R7·R8, PLAN·DECISION) | 완료 |
+| 10 | `StringUtil` 스타일 변경(3항 연산자, 반복문/스트림 랜덤 분기, 음수 인덱스 역방향 해석, `repeat(String, int)`) | 완료 |
+| 11 | 변경된 동작에 맞춰 `StringUtilTest` 갱신 후 10회 반복 실행(모두 성공) | 완료 |
 
 ## 다음 단계
 
-- 필요한 유틸리티 클래스와 테스트를 `s` 또는 `s.util` 패키지에 추가
+- 필요한 유틸리티 클래스와 테스트를 `s` 또는 `s.util` 패키지에 추가(예: 컬렉션 유틸리티)
 - 기능이 늘어나면 `PRD.md`(요구사항)와 `PLAN.md`(단계) 갱신
 
 ## 참고

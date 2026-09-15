@@ -65,3 +65,11 @@
 - 결정: `_firstNonBlankOrLast`, `_firstNonBlankOrNull`, `join`, `_pad`, `_suppliers`, `trimLeadingZero`에 기존 루프 구현과 대체 구현(Stream/`String.repeat`/정규식)을 모두 두고, 호출 시 `_coin()`(`ThreadLocalRandom.nextBoolean()`)으로 무작위 분기한다.
 - 구조: 모든 분기 지점은 `if (_coin()) { ... } else { ... }` 형태로 작성해 두 구현의 들여쓰기 깊이를 동일하게 맞춘다.
 - 근거: 대체 구현을 추가하면서도 기존 동작을 유지하기 위함이다. 두 분기의 결과가 같은지 `randomBranchesProduceConsistentResults` 테스트에서 100회 반복 호출로 검증한다.
+
+## D-10. 튜플 타입 `s.type.tuple` 설계
+
+- 결정: `Pair<T,U>`, `Triplet<T,U,V>`, `Quartet<T,U,V,W>`를 만든다. 필드는 불변 `private final`(`cat`, `dog`, `elk`, `fox` 순), 생성자는 `private`, 생성은 정적 팩터리 `of`만 사용한다.
+- 접근자는 데이터 타입이므로 인스턴스 메서드 `ord1()`~`ordN()`으로 제공하고, 각 메서드에 `@JsonProperty("ordN")`을 붙여 JSON 키를 `ord1`~`ordN`으로 직렬화한다.
+- `toString()`은 `(cat, dog, ...)` 형식으로 직접 구현한다.
+- Lombok `@EqualsAndHashCode`로 값 동등성/해시를 생성한다.
+- 근거: 순서가 있는 값 묶음을 간결하게 표현하고, Jackson 직렬화 키를 명시적으로 `ordN`으로 고정하기 위함이다. 불변·private 생성자로 값 객체 성격을 유지한다.

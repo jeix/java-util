@@ -32,8 +32,18 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
 │   ├── PLAN.md
 │   └── PRD.md
 └── src/
-    ├── main/java/s/Hello.java
-    └── test/java/s/HelloTest.java
+    ├── main/java/
+    │   ├── s/Hello.java
+    │   ├── s/type/tuple/Pair.java
+    │   ├── s/type/tuple/Triplet.java
+    │   ├── s/type/tuple/Quartet.java
+    │   ├── s/util/StringUtil.java
+    │   └── s/util/CollectionUtil.java
+    └── test/java/
+        ├── s/HelloTest.java
+        ├── s/type/tuple/TupleTest.java
+        ├── s/util/StringUtilTest.java
+        └── s/util/CollectionUtilTest.java
 ```
 
 ## 의존성
@@ -42,15 +52,33 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
 | --- | --- | --- | --- |
 | 코드 생성 | `org.projectlombok:lombok` | 1.18.48 | provided |
 | JSON 직렬화 | `com.fasterxml.jackson.core:jackson-databind` | 2.17.1 | compile |
+| 로깅 API | `org.slf4j:slf4j-api` | 2.0.19 | provided |
 | 테스트 | `org.junit.jupiter:junit-jupiter` | 5.14.1 | test |
+| 테스트 로깅 | `org.slf4j:slf4j-simple` | 2.0.19 | test |
+
+## 주요 클래스
+
+| 클래스 | 설명 |
+| --- | --- |
+| `s.util.StringUtil` | 문자열 판별/기본값/선택/변환/패딩/조인·분리 |
+| `s.util.CollectionUtil` | 리스트·맵 판별, 집합 연산, 슬라이스, 색인·분류, 변환 (결과 컬렉션은 불변) |
+| `s.type.tuple.Pair` / `Triplet` / `Quartet` | 순서 있는 값 묶음, `@EqualsAndHashCode`, JSON 키 `ord1`~`ordN` |
 
 ## 사용 예
 
 ```java
-Hello hello = new Hello("world");
+// 문자열
+StringUtil.nonBlankOf("  ", "fallback"); // "fallback"
+StringUtil.lpad(5, "ab", "0");           // "000ab"
 
-hello.greet();  // "Hello, world!"
-hello.toJson(); // {"name":"world"}
+// 컬렉션 (반환값은 불변)
+CollectionUtil.unionOf(List.of(1, 2), List.of(2, 3)); // [1, 2, 3]
+CollectionUtil.asMap("foo", 42);                      // {foo=42}
+
+// 튜플
+Quartet<Integer, String, Long, Boolean> quartet = Quartet.of(1, "a", 2L, true);
+quartet.ord1();   // 1
+quartet.toString(); // "(1, a, 2, true)"
 ```
 
 ## 문서

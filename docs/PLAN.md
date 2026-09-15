@@ -27,15 +27,23 @@
 - [x] `TupleTest` 작성 (of/ordN/equals·hashCode/toString/JSON 직렬화 14건)
 - [x] `./mvnw test` 통과 (Tests run: 78, Failures: 0, Errors: 0)
 
-### M3. 유틸리티 클래스 추가 확충 — 미착수
+### M3. `s.util.CollectionUtil` 구현 — 완료
 
-- [ ] 다음 유틸리티 클래스 후보 정의 (예: `CollectionUtil`, `NumberUtil`)
+- [x] `s.util.CollectionUtil` 구현 (List/Map 판별·선택·집합·슬라이스·변환)
+- [x] `s.util.CollectionUtilTest` 작성 (`@Slf4j`, 정상·경계 43건)
+- [x] 집합 연산은 `LinkedHashSet` 기반 중복 제거, `slice/head/tail` 음수 인덱스 지원
+- [x] 반환 List/Map 불변화, for/while → Stream 대체 구현 + `_coin()` 랜덤 분기(if/else)
+- [x] `./mvnw test` 통과 (Tests run: 121, Failures: 0, Errors: 0, 5회 반복 확인)
+
+### M4. 유틸리티 클래스 추가 확충 — 미착수
+
+- [ ] 다음 유틸리티 클래스 후보 정의 (예: `NumberUtil`, `DateUtil`)
 - [ ] 클래스별 정상/경계 테스트 작성
 - [ ] `./mvnw test` 회귀 확인
 
 ## 다음 단계
 
-1. M3에서 다룰 유틸리티 클래스 범위를 정한다.
+1. M4에서 다룰 유틸리티 클래스 범위를 정한다.
 2. 클래스 1개 단위로 구현 → 테스트 → 회귀 확인 순서로 진행한다.
 
 ## 확인 방법
@@ -53,3 +61,5 @@
 | 2026-09-16 | M1 리팩터링(음수 인덱스, Stream/정규식 랜덤 분기, 3항·switch) 후 테스트 64건 5회 통과 |
 | 2026-09-16 | M1 랜덤 분기를 `if/else`로 정리(들여쓰기 균형), 테스트 64건 재확인 |
 | 2026-09-16 | M2 `s.type.tuple` 튜플 타입 3종 및 `TupleTest` 구현, 테스트 78건 통과 |
+| 2026-09-16 | M3 `s.util.CollectionUtil` 및 `CollectionUtilTest` 구현, 테스트 120건 통과 |
+| 2026-09-16 | M3 반환 컬렉션 불변화, Stream 이중 구현·랜덤 분기(if/else) 후 테스트 121건 5회 통과 |

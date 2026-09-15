@@ -73,3 +73,19 @@
 - `toString()`은 `(cat, dog, ...)` 형식으로 직접 구현한다.
 - Lombok `@EqualsAndHashCode`로 값 동등성/해시를 생성한다.
 - 근거: 순서가 있는 값 묶음을 간결하게 표현하고, Jackson 직렬화 키를 명시적으로 `ordN`으로 고정하기 위함이다. 불변·private 생성자로 값 객체 성격을 유지한다.
+
+## D-11. `CollectionUtil` 동작 규약
+
+- 정적 메서드, `final` + private 생성자, 파라미터 선검사 조기 반환, private 헬퍼 `_` 접두사. `StringUtil`과 동일 규약.
+- 반환하는 List/Map은 불변이다. 빈 결과는 `List.of()`/`Map.of()`, 그 외에는 `_immutableList`/`_immutableMap`/`_immutableGrouping`(`Collections.unmodifiableList/Map` + 방어적 복사)으로 감싼다. `emptyIfNull`도 값이 있으면 불변 복사본을 반환한다. `null` 입력 시 List 반환은 빈 리스트, Map 반환은 빈 맵, `findOne`/`toArray`는 `null`을 반환한다.
+- 집합 연산(`unionOf`/`intersectionOf`/`differenceOf`/`symmetricDifferenceOf`)은 `LinkedHashSet` 기반으로 중복을 제거하고 첫 등장 순서를 유지한다. `unionOf`는 `list1 + (list2 - list1)`, `intersectionOf`는 `list1 - (list1 - list2)`, `symmetricDifferenceOf`는 `(list1 - list2) + (list2 - list1)`로 구현하며 기존 메서드(`differenceOf`)를 재사용한다.
+- `slice`/`head`/`tail`은 `StringUtil`과 동일한 음수 인덱스 정규화(`_index`)를 적용한다. `head`는 `slice(list,0,size)`, `tail`은 양수면 `slice(list, length-size)`, 음수면 `slice(list, -size)`에 위임한다. `slice`는 `subList` 결과를 복사한 불변 리스트를 반환한다.
+- `toArray`는 `(T[]) list.toArray()`의 unchecked cast를 사용한다(런타임 배열 타입은 `Object[]`).
+- `asMap(Object...)`/`asMap(Class,Class,Object...)`는 key/value 쌍을 요구하며 홀수면 `IllegalArgumentException`. `castKeyValue`는 `Map<?,?>`를 `Map<K,V>`로 unchecked cast한다.
+- `indexing`/`grouping`은 `LinkedHashMap`으로 순서를 유지하며, `indexing`의 중복 키는 마지막 값이 이긴다.
+
+## D-12. `CollectionUtil` 루프/Stream 이중화와 랜덤 분기
+
+- 결정: for/while 문이 있는 `zip`(2종), `findOne`, `findAll`, `indexing`, `grouping`, `asMap`(3종)에 Stream(`IntStream`/`forEach`/`toList`) 구현을 추가하고, 호출 시 `_coin()`(`ThreadLocalRandom.nextBoolean()`)으로 무작위 분기한다.
+- 구조: 두 구현은 `if (_coin()) { ... } else { ... }` 형태로 작성해 들여쓰기 깊이를 맞춘다(D-9와 동일).
+- 근거: D-9와 같은 방침으로 이중 구현을 유지하며, 테스트 5회 반복 실행으로 양쪽 분기를 검증한다. `Collectors.toMap` 대신 `put`/`computeIfAbsent`를 사용해 null 키·값을 허용하고 두 분기의 동작을 일치시킨다.

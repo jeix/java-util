@@ -2,7 +2,9 @@
 
 ## 현재 상태
 
-프로젝트 구조 초기화와 `s.util.StringUtil` 구현 및 테스트 완료. 브랜치 `codex-deepseek`에서 작업 중이며, 리모트에는 아직 없는 브랜치입니다.
+- 브랜치 `codex-deepseek`에서 작업 중이고 `origin`에 push되어 추적 중입니다(upstream: `origin/codex-deepseek`).
+- `s.Hello`, `s.util.StringUtil`(문자열 유틸리티 + `pipe`/`Pipeline`), `s.util.CollectionUtil`, `s.type.tuple`(Pair/Triplet/Quartet) 구현과 테스트를 마쳤습니다.
+- `./mvnw -o clean package` 기준 전체 테스트 91개가 통과합니다.
 
 ## 수행 결과
 
@@ -27,11 +29,15 @@
 | 17 | `s.util.CollectionUtil` 구현(리스트 기본, zip, 검색, 집합 연산, 부분 리스트, 색인·분류, 맵 생성·복사) | 완료 |
 | 18 | `s.util.CollectionUtilTest` 작성(26개 테스트 실행, 전체 80개 테스트 통과) 및 문서 갱신 | 완료 |
 | 19 | `CollectionUtil`의 `zip`/`findOne`/`indexing`/`grouping`/`asMap` 두 오버로드에 스트림 구현 추가 및 랜덤 분기 적용(랜덤 분기 검증 테스트 6개 추가, 전체 86개 테스트 통과) | 완료 |
+| 20 | `StringUtil`에 `pipe(Function...)`, `pipe()`, `Pipeline` 클래스 추가(codelet 예제 재현 테스트 포함, 전체 90개 테스트 통과) 및 문서 갱신 | 완료 |
+| 21 | 배치 정리: `pipe(Function...)`과 `pipe()`를 `Pipeline` 클래스 바로 앞으로 이동 | 완료 |
+| 22 | `pipe(Function...)`에 codelet의 impl. 1(입력값 축소 구현) 추가 및 랜덤 분기 적용(랜덤 분기 검증 테스트 추가, 전체 91개 테스트 통과) | 완료 |
 
 ## 다음 단계
 
-- 필요한 유틸리티 클래스와 테스트를 `s` 또는 `s.util` 패키지에 추가(예: 컬렉션 유틸리티)
+- 필요한 유틸리티 클래스와 테스트를 `s` 또는 `s.util` 패키지에 계속 추가
 - 기능이 늘어나면 `PRD.md`(요구사항)와 `PLAN.md`(단계) 갱신
+- `codex-deepseek` 브랜치를 병합할 대상(예: `main`)을 정하고 PR 생성
 
 ## 참고
 

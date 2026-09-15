@@ -62,6 +62,8 @@
 | `lpad`, `rpad`, `pad` | 단일 문자 패딩 |
 | `lpad2`, `rpad2`, `pad2` | 여러 문자 패딩 |
 | `join`, `split` | 목록 연결과 분리 |
+| `pipe(fns)` | 함수들을 순서대로 적용하는 `Function<String, String>`을 만듭니다. |
+| `pipe()` | `then`으로 함수를 이어 붙이는 `Pipeline`을 만듭니다. |
 
 구현 규칙은 다음과 같습니다.
 
@@ -69,6 +71,29 @@
 - 같은 기능이 이미 다른 메서드에 있으면 그 메서드를 호출합니다.
 - 오버로드된 메서드는 실질적인 구현 메서드 하나로 위임하고, 구현 메서드가 private이면 이름 앞에 `_`를 붙입니다.
 - 단순 분기는 3항 연산자를 사용하고, 반복문 구현과 스트림 구현을 함께 두는 메서드는 실행 시 랜덤하게 분기합니다.
+
+`pipe`는 같은 작업을 두 가지 스타일로 표현할 수 있습니다.
+
+```java
+String input = "2025-03-19 12:26:41.012345000";
+
+Function<String, String> piped = StringUtil.pipe(
+        s -> StringUtil.slice(s, 20),
+        StringUtil::reverse,
+        StringUtil::trimLeadingZero,
+        StringUtil::reverse);
+String a = piped.apply(input); // "012345"
+
+String b = StringUtil.pipe()
+        .then(s -> StringUtil.slice(s, 20))
+        .then(StringUtil::reverse)
+        .then(StringUtil::trimLeadingZero)
+        .then(StringUtil::reverse)
+        .apply(input); // "012345"
+```
+
+`pipe(fns)`는 함수 합성 구현(`_pipeByCompose`)과 입력값 축소 구현(`_pipeByReduce`)을 두고 실행 시 랜덤하게 분기합니다.
+두 구현은 같은 결과를 냅니다.
 
 ## s.util.CollectionUtil
 

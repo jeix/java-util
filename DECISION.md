@@ -177,3 +177,19 @@
   대신 `indexing`은 `_indexFirst`(먼저 나온 항목 유지), `grouping`은 `_addGroup`/`_mergeGroups`를 공유하는
   `collect(LinkedHashMap::new, ...)`를 사용하고, `findOne`은 `Optional::ofNullable`로 감싸 `findFirst()`의
   `null` 예외를 피합니다.
+
+## 21. pipe는 두 구현을 두고 랜덤 분기하고, fluent 방식은 Pipeline으로 제공한다
+
+- 결정: `pipe(Function<String, String>...)`는 codelet의 impl. 2인 함수 합성 구현(`_pipeByCompose`,
+  `reduce(Function.identity(), Function::andThen)`)과 impl. 1인 입력값 축소 구현(`_pipeByReduce`,
+  `reduce(input, (value, fn) -> fn.apply(value), (left, right) -> right)`)을 함께 두고,
+  `ThreadLocalRandom.current().nextBoolean()`으로 실행 시점에 하나를 선택합니다.
+  `pipe()`는 `Pipeline`을 반환하고, `Pipeline`은 `then(Function)`으로 함수를 이어 붙이고 `apply(String)`으로 실행합니다.
+- 대안: impl. 2만 사용, impl. 1만 사용, `Pipeline`이 `Function`을 구현하도록 변경,
+  private 팩터리 이름을 codelet대로 `init`으로 유지.
+- 근거: 두 구현이 같은 결과를 내는지 테스트로 확인할 수 있고(`StringUtilTest$파이프.pipeRandomBranch`에서 100회 반복 검증),
+  `firstNonBlankOrLast`와 `CollectionUtil` 계열에 적용한 스타일과 맞습니다.
+  impl. 2는 `Function`을 반환하므로 `.andThen(...)`으로 합성할 수 있고, impl. 1은 입력값을 축소의 시작값으로 씁니다.
+  `null` 함수는 두 구현 모두 걸러 `CollectionUtil.asMap(entries)`의 `null` 항목 처리와 규칙을 맞췄고,
+  `Pipeline`의 private 팩터리는 프로젝트 규칙(private 메서드 `_` 접두사)에 따라 `_init`으로 두었습니다.
+  `Pipeline`을 `Function`으로 구현하는 것은 필요해지면 추가할 수 있습니다(현재는 `then`/`apply`만 제공).

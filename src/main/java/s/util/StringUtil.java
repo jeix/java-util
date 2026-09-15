@@ -3,9 +3,11 @@ package s.util;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -770,5 +772,109 @@ public final class StringUtil {
             builder.append(unit);
         }
         return builder.substring(0, size);
+    }
+
+    /**
+     * 함수들을 앞에서부터 순서대로 적용하는 파이프라인 함수를 만듭니다.
+     *
+     * <p>{@code pipe(slice, reverse, trimLeadingZero, reverse).apply(s)}처럼 사용합니다.
+     * {@code null} 함수는 건너뛰고, 함수가 하나도 없으면 입력을 그대로 반환합니다.
+     * 함수 합성 구현과 입력값 축소 구현을 두고 실행 시점에 랜덤하게 분기합니다.
+     *
+     * @param fns 순서대로 적용할 함수들
+     * @return 입력을 받아 함수들을 순서대로 적용하는 함수
+     */
+    @SafeVarargs
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        if (fns == null || fns.length == 0) {
+            return Function.identity();
+        }
+        return ThreadLocalRandom.current().nextBoolean()
+                ? _pipeByCompose(fns)
+                : _pipeByReduce(fns);
+    }
+
+    /**
+     * {@code pipe}의 함수 합성 구현입니다. 함수들을 하나의 함수로 합쳐 반환합니다.
+     *
+     * @param fns 순서대로 적용할 함수들
+     * @return 입력을 받아 함수들을 순서대로 적용하는 함수
+     */
+    private static Function<String, String> _pipeByCompose(Function<String, String>... fns) {
+        return Arrays.stream(fns)
+                .filter(fn -> fn != null)
+                .reduce(Function.identity(), Function::andThen);
+    }
+
+    /**
+     * {@code pipe}의 입력값 축소 구현입니다. 반환한 함수를 실행할 때 입력값에서 시작해 함수를 차례로 적용합니다.
+     * 병렬로 실행되지 않으므로 combiner는 사용되지 않습니다.
+     *
+     * @param fns 순서대로 적용할 함수들
+     * @return 입력을 받아 함수들을 순서대로 적용하는 함수
+     */
+    private static Function<String, String> _pipeByReduce(Function<String, String>... fns) {
+        return input -> Arrays.stream(fns)
+                .filter(fn -> fn != null)
+                .reduce(input, (value, fn) -> fn.apply(value), (left, right) -> right);
+    }
+
+    /**
+     * 함수를 이어 붙일 빈 {@link Pipeline}을 만듭니다.
+     *
+     * @return 빈 파이프라인
+     */
+    public static Pipeline pipe() {
+        return Pipeline._init();
+    }
+
+    /**
+     * {@link StringUtil#pipe()}로 만들고 {@link #then(Function)}으로 함수를 이어 붙이는 파이프라인입니다.
+     *
+     * <p>{@code StringUtil.pipe().then(reverse).then(trimLeadingZero).apply(s)}처럼 사용합니다.
+     */
+    public static class Pipeline {
+
+        /** 지금까지 이어 붙인 함수입니다. */
+        private final Function<String, String> fn;
+
+        /**
+         * 함수를 받는 생성자입니다. {@link #_init()}을 사용합니다.
+         *
+         * @param fn 이어 붙인 함수
+         */
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        /**
+         * 항등 함수로 시작하는 빈 파이프라인을 만듭니다.
+         *
+         * @return 빈 파이프라인
+         */
+        private static Pipeline _init() {
+            return new Pipeline(Function.identity());
+        }
+
+        /**
+         * 다음에 적용할 함수를 이어 붙인 새 파이프라인을 반환합니다.
+         * {@code next}가 {@code null}이면 이어 붙이지 않고 현재 파이프라인을 반환합니다.
+         *
+         * @param next 다음에 적용할 함수
+         * @return 함수를 이어 붙인 파이프라인
+         */
+        public Pipeline then(Function<String, String> next) {
+            return next == null ? this : new Pipeline(fn.andThen(next));
+        }
+
+        /**
+         * 입력에 파이프라인을 적용합니다.
+         *
+         * @param input 입력
+         * @return 함수들을 순서대로 적용한 결과
+         */
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

@@ -29,6 +29,7 @@
 | R12 | 튜플 타입은 Lombok `@EqualsAndHashCode`로 값 비교를 하고, `ord1()`~`ordN()` 메서드에 Jackson `@JsonProperty`를 붙여 JSON 키명을 `ord1`~`ordN`으로 지정하며, 이를 `TupleTest`에서 검증한다. |
 | R13 | `s.util.CollectionUtil`에서 리스트/맵의 `null` 처리, `zip`, 항목 검색, 집합 연산, 부분 리스트, 색인·분류, 맵 생성·복사를 제공하고 `CollectionUtilTest`에서 검증한다. |
 | R14 | `CollectionUtil`의 `zip(list1, list2, mixer)`, `findOne`, `indexing`, `grouping`, `asMap(items)`, `asMap(entries)`는 반복문 구현과 스트림 구현을 두고 실행 시 랜덤하게 분기하며, 두 구현은 같은 결과를 낸다. |
+| R15 | `StringUtil.pipe(fns)`는 함수들을 순서대로 적용하는 `Function<String, String>`을 만들고, `StringUtil.pipe()`는 `then`으로 함수를 이어 붙이는 `Pipeline`을 만든다. 두 방식 모두 `null` 함수를 건너뛰고 빈 파이프라인은 입력을 그대로 반환하며, `pipe(fns)`는 함수 합성 구현과 입력값 축소 구현을 두고 실행 시 랜덤하게 분기한다(두 구현은 같은 결과). |
 
 ## 범위 밖
 

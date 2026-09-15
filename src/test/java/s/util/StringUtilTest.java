@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -589,6 +590,84 @@ class StringUtilTest {
                     () -> assertEquals(List.of(), StringUtil.split("", ",")),
                     () -> assertEquals(List.of(), StringUtil.split(null, ",")),
                     () -> assertEquals(List.of(), StringUtil.split("a,b", null)));
+        }
+    }
+
+    @Nested
+    @DisplayName("파이프")
+    class 파이프 {
+
+        @Test
+        @DisplayName("pipe(fns): 함수들을 순서대로 적용한다")
+        void pipeWithFunctions() {
+            String s = "2025-03-19 12:26:41.012345000";
+
+            String result = StringUtil.pipe(
+                    (input) -> StringUtil.slice(input, 20),
+                    StringUtil::reverse,
+                    StringUtil::trimLeadingZero,
+                    StringUtil::reverse).apply(s);
+
+            log.info("pipe 결과: {}", result);
+
+            assertEquals("012345", result);
+        }
+
+        @Test
+        @DisplayName("pipe(fns): 함수가 없거나 null이면 입력을 그대로 반환한다")
+        void pipeWithoutFunctions() {
+            Function<String, String>[] nullFns = null;
+
+            assertAll(
+                    () -> assertEquals("abc", StringUtil.pipe().apply("abc"), "빈 파이프라인은 항등이다"),
+                    () -> assertEquals("abc", StringUtil.pipe(nullFns).apply("abc")),
+                    () -> assertEquals("abc", StringUtil.pipe((Function<String, String>) null).apply("abc"),
+                            "null 함수는 건너뛴다"),
+                    () -> assertEquals("cba", StringUtil.pipe(null, StringUtil::reverse).apply("abc")));
+        }
+
+        @Test
+        @DisplayName("pipe(fns): 결과를 다른 함수와 합성할 수 있다")
+        void pipeIsComposable() {
+            Function<String, String> twice = StringUtil.pipe(StringUtil::reverse).andThen(StringUtil::reverse);
+
+            assertEquals("abc", twice.apply("abc"));
+        }
+
+        @Test
+        @DisplayName("pipe(fns): 함수 합성 구현과 입력값 축소 구현이 같은 결과를 반환한다")
+        void pipeRandomBranch() {
+            List<String> results = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                results.add(StringUtil.pipe(
+                        input -> StringUtil.slice(input, 20),
+                        StringUtil::reverse,
+                        StringUtil::trimLeadingZero,
+                        StringUtil::reverse).apply("2025-03-19 12:26:41.012345000"));
+                results.add(StringUtil.pipe(null, StringUtil::reverse).apply("abc"));
+                results.add(StringUtil.pipe((Function<String, String>) null).apply("abc"));
+            }
+
+            assertAll(
+                    () -> assertEquals(3, results.stream().distinct().count(), "012345, cba, abc만 나온다"),
+                    () -> assertTrue(results.contains("012345")),
+                    () -> assertTrue(results.contains("cba")),
+                    () -> assertTrue(results.contains("abc")));
+        }
+
+        @Test
+        @DisplayName("Pipeline: then으로 함수를 이어 붙여 적용한다")
+        void pipeline() {
+            String result = StringUtil.pipe()
+                    .then(StringUtil::reverse)
+                    .then(input -> input + "!")
+                    .apply("abc");
+
+            assertAll(
+                    () -> assertEquals("cba!", result),
+                    () -> assertEquals("abc", StringUtil.pipe().apply("abc"), "빈 파이프라인은 항등이다"),
+                    () -> assertEquals("cba", StringUtil.pipe().then(StringUtil::reverse).then(null).apply("abc"),
+                            "null 함수는 건너뛴다"));
         }
     }
 }

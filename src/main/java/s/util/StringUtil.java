@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,6 +73,33 @@ public final class StringUtil {
         return _firstNonBlankOrLast(supplier1, supplier2, supplier3, supplier4, supplier5);
     }
 
+    private static String _firstNonBlankOrLast(Supplier<String> supplier1, Supplier<String> supplier2,
+            Supplier<String>... suppliers) {
+        if (_coin()) {
+            List<String> values = _supplierValues(supplier1, supplier2, suppliers);
+            return values.stream()
+                    .filter(value -> !isBlank(value))
+                    .findFirst()
+                    .orElseGet(() -> values.isEmpty() ? null : values.get(values.size() - 1));
+        } else {
+            String last = _value(supplier1);
+            if (!isBlank(last)) {
+                return last;
+            }
+            last = _value(supplier2);
+            if (!isBlank(last)) {
+                return last;
+            }
+            for (Supplier<String> supplier : suppliers) {
+                last = _value(supplier);
+                if (!isBlank(last)) {
+                    return last;
+                }
+            }
+            return last;
+        }
+    }
+
     public static String firstNonBlankOrEmpty(String value1, String value2, String... values) {
         return _firstNonBlankOrEmpty(() -> value1, () -> value2, _suppliers(values));
     }
@@ -95,6 +123,11 @@ public final class StringUtil {
         return _firstNonBlankOrEmpty(supplier1, supplier2, supplier3, supplier4, supplier5);
     }
 
+    private static String _firstNonBlankOrEmpty(Supplier<String> supplier1, Supplier<String> supplier2,
+            Supplier<String>... suppliers) {
+        return nonNullOf(_firstNonBlankOrNull(supplier1, supplier2, suppliers), "");
+    }
+
     public static String firstNonBlankOrNull(String value1, String value2, String... values) {
         return _firstNonBlankOrNull(() -> value1, () -> value2, _suppliers(values));
     }
@@ -116,6 +149,62 @@ public final class StringUtil {
     public static String firstNonBlankOrNull(Supplier<String> supplier1, Supplier<String> supplier2,
             Supplier<String> supplier3, Supplier<String> supplier4, Supplier<String> supplier5) {
         return _firstNonBlankOrNull(supplier1, supplier2, supplier3, supplier4, supplier5);
+    }
+
+    private static String _firstNonBlankOrNull(Supplier<String> supplier1, Supplier<String> supplier2,
+            Supplier<String>... suppliers) {
+        if (_coin()) {
+            return _supplierValues(supplier1, supplier2, suppliers).stream()
+                    .filter(value -> !isBlank(value))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            String value = _value(supplier1);
+            if (!isBlank(value)) {
+                return value;
+            }
+            value = _value(supplier2);
+            if (!isBlank(value)) {
+                return value;
+            }
+            for (Supplier<String> supplier : suppliers) {
+                value = _value(supplier);
+                if (!isBlank(value)) {
+                    return value;
+                }
+            }
+            return null;
+        }
+    }
+
+    private static List<String> _supplierValues(Supplier<String> supplier1, Supplier<String> supplier2,
+            Supplier<String>... suppliers) {
+        return Stream.concat(Stream.of(supplier1, supplier2), Arrays.stream(suppliers))
+                .map(StringUtil::_value)
+                .toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Supplier<String>[] _suppliers(String... values) {
+        if (values == null || values.length == 0) {
+            return new Supplier[0];
+        }
+        if (_coin()) {
+            return Arrays.stream(values)
+                    .map(value -> (Supplier<String>) () -> value)
+                    .toArray(Supplier[]::new);
+        } else {
+            Supplier<String>[] suppliers = new Supplier[values.length];
+            for (int i = 0; i < values.length; i++) {
+                String value = values[i];
+                suppliers[i] = () -> value;
+            }
+            return suppliers;
+        }
+    }
+
+    private static String _value(Supplier<String> supplier) {
+        return supplier == null ? null : supplier.get();
     }
 
     public static String stringify(Object obj) {
@@ -151,6 +240,17 @@ public final class StringUtil {
             return null;
         }
         return s.substring(0, _index(size, s.length()));
+    }
+
+    private static int _index(int index, int length) {
+        int value = index < 0 ? length + index : index;
+        if (value < 0) {
+            return 0;
+        }
+        if (value > length) {
+            return length;
+        }
+        return value;
     }
 
     public static String tail(String s, int size) {
@@ -244,6 +344,22 @@ public final class StringUtil {
         return _pad(left, pad) + s + _pad(right, pad);
     }
 
+    private static String _pad(int amount, String pad) {
+        if (amount <= 0 || isEmpty(pad)) {
+            return "";
+        }
+        if (_coin()) {
+            int count = (amount + pad.length() - 1) / pad.length();
+            return pad.repeat(count).substring(0, amount);
+        } else {
+            StringBuilder builder = new StringBuilder(amount);
+            while (builder.length() < amount) {
+                builder.append(pad);
+            }
+            return builder.substring(0, amount);
+        }
+    }
+
     public static <T> String join(List<T> list, String delimiter) {
         if (list == null || list.isEmpty()) {
             return "";
@@ -273,122 +389,44 @@ public final class StringUtil {
         return Arrays.asList(s.split(regex));
     }
 
-    private static String _firstNonBlankOrLast(Supplier<String> supplier1, Supplier<String> supplier2,
-            Supplier<String>... suppliers) {
-        if (_coin()) {
-            List<String> values = _supplierValues(supplier1, supplier2, suppliers);
-            return values.stream()
-                    .filter(value -> !isBlank(value))
-                    .findFirst()
-                    .orElseGet(() -> values.isEmpty() ? null : values.get(values.size() - 1));
-        } else {
-            String last = _value(supplier1);
-            if (!isBlank(last)) {
-                return last;
-            }
-            last = _value(supplier2);
-            if (!isBlank(last)) {
-                return last;
-            }
-            for (Supplier<String> supplier : suppliers) {
-                last = _value(supplier);
-                if (!isBlank(last)) {
-                    return last;
-                }
-            }
-            return last;
-        }
-    }
-
-    private static String _firstNonBlankOrEmpty(Supplier<String> supplier1, Supplier<String> supplier2,
-            Supplier<String>... suppliers) {
-        return nonNullOf(_firstNonBlankOrNull(supplier1, supplier2, suppliers), "");
-    }
-
-    private static String _firstNonBlankOrNull(Supplier<String> supplier1, Supplier<String> supplier2,
-            Supplier<String>... suppliers) {
-        if (_coin()) {
-            return _supplierValues(supplier1, supplier2, suppliers).stream()
-                    .filter(value -> !isBlank(value))
-                    .findFirst()
-                    .orElse(null);
-        } else {
-            String value = _value(supplier1);
-            if (!isBlank(value)) {
-                return value;
-            }
-            value = _value(supplier2);
-            if (!isBlank(value)) {
-                return value;
-            }
-            for (Supplier<String> supplier : suppliers) {
-                value = _value(supplier);
-                if (!isBlank(value)) {
-                    return value;
-                }
-            }
-            return null;
-        }
-    }
-
-    private static List<String> _supplierValues(Supplier<String> supplier1, Supplier<String> supplier2,
-            Supplier<String>... suppliers) {
-        return Stream.concat(Stream.of(supplier1, supplier2), Arrays.stream(suppliers))
-                .map(StringUtil::_value)
-                .toList();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Supplier<String>[] _suppliers(String... values) {
-        if (values == null || values.length == 0) {
-            return new Supplier[0];
-        }
-        if (_coin()) {
-            return Arrays.stream(values)
-                    .map(value -> (Supplier<String>) () -> value)
-                    .toArray(Supplier[]::new);
-        } else {
-            Supplier<String>[] suppliers = new Supplier[values.length];
-            for (int i = 0; i < values.length; i++) {
-                String value = values[i];
-                suppliers[i] = () -> value;
-            }
-            return suppliers;
-        }
-    }
-
-    private static int _index(int index, int length) {
-        int value = index < 0 ? length + index : index;
-        if (value < 0) {
-            return 0;
-        }
-        if (value > length) {
-            return length;
-        }
-        return value;
-    }
-
-    private static String _pad(int amount, String pad) {
-        if (amount <= 0 || isEmpty(pad)) {
-            return "";
-        }
-        if (_coin()) {
-            int count = (amount + pad.length() - 1) / pad.length();
-            return pad.repeat(count).substring(0, amount);
-        } else {
-            StringBuilder builder = new StringBuilder(amount);
-            while (builder.length() < amount) {
-                builder.append(pad);
-            }
-            return builder.substring(0, amount);
-        }
-    }
-
-    private static String _value(Supplier<String> supplier) {
-        return supplier == null ? null : supplier.get();
-    }
-
     private static boolean _coin() {
         return ThreadLocalRandom.current().nextBoolean();
+    }
+
+    public static Pipeline pipe() {
+        return Pipeline.init();
+    }
+
+    @SafeVarargs
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        if (_coin()) {
+            return input -> Stream.of(fns).reduce(
+                    input,
+                    (result, fn) -> fn.apply(result),
+                    (left, right) -> right);
+        } else {
+            return Arrays.stream(fns).reduce(Function.identity(), Function::andThen);
+        }
+    }
+
+    public static class Pipeline {
+
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline init() {
+            return new Pipeline(Function.identity());
+        }
+
+        public Pipeline then(Function<String, String> next) {
+            return new Pipeline(fn.andThen(next));
+        }
+
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

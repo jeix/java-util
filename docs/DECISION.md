@@ -89,3 +89,15 @@
 - 결정: for/while 문이 있는 `zip`(2종), `findOne`, `findAll`, `indexing`, `grouping`, `asMap`(3종)에 Stream(`IntStream`/`forEach`/`toList`) 구현을 추가하고, 호출 시 `_coin()`(`ThreadLocalRandom.nextBoolean()`)으로 무작위 분기한다.
 - 구조: 두 구현은 `if (_coin()) { ... } else { ... }` 형태로 작성해 들여쓰기 깊이를 맞춘다(D-9와 동일).
 - 근거: D-9와 같은 방침으로 이중 구현을 유지하며, 테스트 5회 반복 실행으로 양쪽 분기를 검증한다. `Collectors.toMap` 대신 `put`/`computeIfAbsent`를 사용해 null 키·값을 허용하고 두 분기의 동작을 일치시킨다.
+
+## D-13. `StringUtil.pipe`/`Pipeline` 함수 합성
+
+- 결정: `pipe(Function<String,String>...)`는 함수들을 합성한 `Function<String,String>`을 반환하고, `pipe()`는 `Pipeline`을 반환한다. `Pipeline`은 `then()`으로 함수를 누적하고 `apply()`로 실행한다.
+- `pipe(Function...)`는 impl.1(`Stream.of(fns).reduce(input, ...)`)과 impl.2(`Arrays.stream(fns).reduce(Function.identity(), Function::andThen)`) 두 구현을 `_coin()`으로 무작위 분기하며, `@SafeVarargs`를 붙인다.
+- 근거: 코드릿의 두 구현을 모두 유지하면서, 기존 이중 구현·랜덤 분기 방침(D-9, D-12)과 일관되게 하기 위함이다. `Pipeline`은 가독성 좋은 빌더 스타일 합성을 제공한다.
+
+## D-14. `StringUtil` 메서드 배치 규약
+
+- `pipe()`/`pipe(Function...)`는 `Pipeline` 클래스 바로 앞에 둔다.
+- private 헬퍼(`_` 접두사)는 이를 호출하는 메서드(군) 다음에 배치한다. 공유 헬퍼(`_supplierValues`, `_suppliers`, `_value`, `_index`, `_pad`)는 해당 메서드군 뒤에, 최다 공유 헬퍼 `_coin()`은 마지막 호출부인 pipe 섹션 직전에 둔다.
+- 근거: 호출 관계가 가까운 위치에 보이도록 해 가독성과 유지보수성을 높인다. 동작 변경 없는 순수 재배치이며 테스트로 회귀를 확인한다.

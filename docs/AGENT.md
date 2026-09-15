@@ -28,12 +28,12 @@
 
 ## 현재 상태
 
-- 브랜치: `opencode-deepseek` (리모트에 없는 신규 브랜치)
+- 브랜치: `opencode-deepseek` (origin에 푸시되어 추적됨)
 - 구현 완료:
   - Maven Wrapper, `pom.xml`
   - 예제 `s.Hello` / `s.HelloTest`
-  - `s.util.StringUtil` / `StringUtilTest`
+  - `s.util.StringUtil` / `StringUtilTest` (`pipe`/`Pipeline` 포함)
   - `s.type.tuple.Pair`·`Triplet`·`Quartet` / `TupleTest`
   - `s.util.CollectionUtil` / `CollectionUtilTest`
-- 테스트: `./mvnw test` → Tests run: 121, Failures: 0, Errors: 0
+- 테스트: `./mvnw test` → Tests run: 124, Failures: 0, Errors: 0
 - 다음 작업: `docs/PLAN.md`의 M4

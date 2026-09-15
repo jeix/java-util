@@ -421,6 +421,40 @@ class StringUtilTest {
     }
 
     @Test
+    void pipeComposesFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+
+        String result = StringUtil.pipe(
+                value -> StringUtil.slice(value, 20),
+                StringUtil::reverse,
+                StringUtil::trimLeadingZero,
+                StringUtil::reverse)
+                .apply(s);
+
+        assertEquals("012345", result);
+    }
+
+    @Test
+    void pipelineComposesFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+
+        String result = StringUtil.pipe()
+                .then(value -> StringUtil.slice(value, 20))
+                .then(StringUtil::reverse)
+                .then(StringUtil::trimLeadingZero)
+                .then(StringUtil::reverse)
+                .apply(s);
+
+        assertEquals("012345", result);
+    }
+
+    @Test
+    void pipeIdentityReturnsInput() {
+        assertEquals("abc", StringUtil.pipe().apply("abc"));
+        assertNull(StringUtil.pipe().apply(null));
+    }
+
+    @Test
     void randomBranchesProduceConsistentResults() {
         IntStream.range(0, 100).forEach(i -> {
             assertEquals("123", StringUtil.trimLeadingZero("00123"));
@@ -433,6 +467,11 @@ class StringUtilTest {
             assertEquals("000ab", StringUtil.lpad(5, "ab", "0"));
             assertEquals("12121ab", StringUtil.lpad2(7, "ab", "12"));
             assertEquals("a,null,b-c", StringUtil.join(Arrays.asList("a", null, "b-c"), ","));
+            assertEquals("012345", StringUtil.pipe(
+                    value -> StringUtil.slice(value, 20),
+                    StringUtil::reverse,
+                    StringUtil::trimLeadingZero,
+                    StringUtil::reverse).apply("2025-03-19 12:26:41.012345000"));
         });
     }
 }

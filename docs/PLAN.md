@@ -18,6 +18,7 @@
 - [x] `pom.xml`에 `slf4j-api`(provided), `slf4j-simple`(test) 추가
 - [x] 음수 인덱스 정규화(slice/head/tail), `repeat(String)`, 3항·switch 적용
 - [x] 루프/대체 구현(Stream·정규식) 이중화 및 랜덤 분기, private 가변 인자화
+- [x] `pipe(Function...)`/`Pipeline` 함수 합성 추가 (이중 구현 + 랜덤 분기)
 - [x] `./mvnw test` 통과 (Tests run: 64, Failures: 0, Errors: 0, 5회 반복 확인)
 
 ### M2. 튜플 타입 `s.type.tuple` — 완료
@@ -63,3 +64,5 @@
 | 2026-09-16 | M2 `s.type.tuple` 튜플 타입 3종 및 `TupleTest` 구현, 테스트 78건 통과 |
 | 2026-09-16 | M3 `s.util.CollectionUtil` 및 `CollectionUtilTest` 구현, 테스트 120건 통과 |
 | 2026-09-16 | M3 반환 컬렉션 불변화, Stream 이중 구현·랜덤 분기(if/else) 후 테스트 121건 5회 통과 |
+| 2026-09-16 | M1 `StringUtil.pipe`/`Pipeline` 추가(이중 구현·랜덤 분기), 테스트 124건 5회 통과 |
+| 2026-09-16 | M1 `StringUtil` 메서드 재배치(pipe는 Pipeline 앞, private은 호출부 뒤), 테스트 124건 통과 |

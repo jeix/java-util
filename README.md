@@ -60,7 +60,7 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
 
 | 클래스 | 설명 |
 | --- | --- |
-| `s.util.StringUtil` | 문자열 판별/기본값/선택/변환/패딩/조인·분리 |
+| `s.util.StringUtil` | 문자열 판별/기본값/선택/변환/패딩/조인·분리, 함수 합성(`pipe`/`Pipeline`) |
 | `s.util.CollectionUtil` | 리스트·맵 판별, 집합 연산, 슬라이스, 색인·분류, 변환 (결과 컬렉션은 불변) |
 | `s.type.tuple.Pair` / `Triplet` / `Quartet` | 순서 있는 값 묶음, `@EqualsAndHashCode`, JSON 키 `ord1`~`ordN` |
 
@@ -70,6 +70,14 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
 // 문자열
 StringUtil.nonBlankOf("  ", "fallback"); // "fallback"
 StringUtil.lpad(5, "ab", "0");           // "000ab"
+
+// 함수 합성
+StringUtil.pipe()
+        .then(value -> StringUtil.slice(value, 20))
+        .then(StringUtil::reverse)
+        .then(StringUtil::trimLeadingZero)
+        .then(StringUtil::reverse)
+        .apply("2025-03-19 12:26:41.012345000"); // "012345"
 
 // 컬렉션 (반환값은 불변)
 CollectionUtil.unionOf(List.of(1, 2), List.of(2, 3)); // [1, 2, 3]

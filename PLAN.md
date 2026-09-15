@@ -48,8 +48,14 @@
 - [x] `DECISIONS.md` — 결정 12개와 근거
 - [x] `PRD.md` · `PLAN.md`
 
+## 6. `s.util.StringUtil.pipe` 추가
+
+- [x] `pipe(Function...)` — 코드릿의 두 구현(적용 방식 / 합성 방식)을 무작위로 분기
+- [x] `pipe()` → `Pipeline` 빌더 (`then` / `apply`)
+- [x] null 함수 검사를 붙이는 자리로 앞당겨 두 구현의 실패 시점을 맞춤
+- [x] 가변인자 배열을 `List` 에 옮겨 담아 `[varargs]` 경고 제거
+- [x] `StringUtilTest` 에 `pipe` 그룹 7개 추가, 리플렉션으로 두 구현 비교, 테스트 5회 반복
+
 ## 남은 것
 
-- [ ] 문서 커밋 — `README.md` 는 수정, `CLAUDE.md` · `DECISIONS.md` · `PRD.md` · `PLAN.md` 는 새 파일
-- [ ] 브랜치 푸시 — `claude-deepseek` 는 아직 리모트에 없다
 - [ ] 랜덤 분기 두 구현의 동등성 검사를 테스트로 남길지 검토 — 지금은 리플렉션으로 한 번씩 확인만 한다

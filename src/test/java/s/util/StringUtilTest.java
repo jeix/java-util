@@ -3,6 +3,7 @@ package s.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
@@ -493,6 +495,78 @@ class StringUtilTest {
         void splitBlankRegex() {
             assertEquals(List.of("a,b"), StringUtil.split("a,b", null));
             assertEquals(List.of("a,b"), StringUtil.split("a,b", ""));
+        }
+    }
+
+    @Nested
+    @DisplayName("pipe")
+    class Pipe {
+
+        private static final String INPUT = "2025-03-19 12:26:41.012345000";
+
+        @Test
+        @DisplayName("붙인 순서대로 적용한다")
+        void appliesInOrder() {
+            Function<String, String> piped = StringUtil.pipe(
+                    s -> StringUtil.slice(s, 20),
+                    StringUtil::reverse,
+                    StringUtil::trimLeadingZero,
+                    StringUtil::reverse);
+
+            String result = piped.apply(INPUT);
+            log.info("pipe 결과: {}", result);
+
+            assertEquals("012345", result);
+        }
+
+        @Test
+        @DisplayName("Pipeline 으로 이어 붙여도 같은 결과")
+        void pipeline() {
+            String result = StringUtil.pipe()
+                    .then(s -> StringUtil.slice(s, 20))
+                    .then(StringUtil::reverse)
+                    .then(StringUtil::trimLeadingZero)
+                    .then(StringUtil::reverse)
+                    .apply(INPUT);
+
+            assertEquals("012345", result);
+        }
+
+        @Test
+        @DisplayName("붙인 함수가 없으면 입력값 그대로")
+        void empty() {
+            assertEquals(INPUT, StringUtil.pipe().apply(INPUT));
+        }
+
+        @Test
+        @DisplayName("함수 하나만 붙일 수도 있다")
+        void single() {
+            assertEquals("cba", StringUtil.pipe(StringUtil::reverse).apply("abc"));
+        }
+
+        @Test
+        @DisplayName("붙인 순서가 바뀌면 결과도 바뀐다")
+        void orderMatters() {
+            assertEquals("32100", StringUtil.pipe(StringUtil::reverse, StringUtil::trimLeadingZero).apply("001230"));
+            assertEquals("0321", StringUtil.pipe(StringUtil::trimLeadingZero, StringUtil::reverse).apply("001230"));
+        }
+
+        @Test
+        @DisplayName("then 은 앞의 파이프라인을 바꾸지 않는다")
+        void thenReturnsNewPipeline() {
+            StringUtil.Pipeline base = StringUtil.pipe();
+            StringUtil.Pipeline reversed = base.then(StringUtil::reverse);
+
+            assertEquals("abc", base.apply("abc"));
+            assertEquals("cba", reversed.apply("abc"));
+        }
+
+        @Test
+        @DisplayName("함수가 null 이면 실패")
+        void nullFunction() {
+            assertThrows(NullPointerException.class, () -> StringUtil.pipe((Function<String, String>[]) null));
+            assertThrows(NullPointerException.class, () -> StringUtil.pipe((Function<String, String>) null));
+            assertThrows(NullPointerException.class, () -> StringUtil.pipe().then(null));
         }
     }
 }

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
  *   <li>문자열을 받아 문자열을 돌려주는 메서드는 입력이 {@code null} 이면 {@code null} 을 돌려준다.
  *       (단 {@link #stringify(Object)} 는 {@code null} 을 {@code null} 로 돌려준다.)</li>
  *   <li>목록을 받거나 돌려주는 메서드는 {@code null} 과 빈 목록을 같게 다룬다.</li>
+ *   <li>함수를 받는 메서드는 {@code null} 함수를 받지 않는다({@link Objects#requireNonNull}).</li>
  *   <li>음수 인덱스는 뒤에서부터 세는 역방향 인덱스로 본다({@code -1} 이 마지막 글자).</li>
  *   <li>인덱스가 문자열 범위를 넘어가면 예외를 던지지 않고 가능한 만큼만 처리한다.</li>
  * </ul>
@@ -755,5 +758,103 @@ public final class StringUtil {
             return new ArrayList<>(List.of(s));
         }
         return new ArrayList<>(Arrays.asList(s.split(regex)));
+    }
+
+    // ------------------------------------------------------------------
+    // 함수 이어 붙이기
+    // ------------------------------------------------------------------
+
+    /**
+     * 함수들을 차례로 적용하는 함수를 만든다. 앞에 있는 함수부터 적용한다.
+     *
+     * <pre>
+     * String s = "2025-03-19 12:26:41.012345000";
+     * s = StringUtil.pipe(
+     *         s1 -&gt; StringUtil.slice(s1, 20),
+     *         StringUtil::reverse,
+     *         StringUtil::trimLeadingZero,
+     *         StringUtil::reverse
+     * ).apply(s);   // "012345"
+     * </pre>
+     *
+     * <p>붙일 함수가 없으면 입력값을 그대로 돌려주는 함수가 된다.
+     * 이어 붙이는 방식으로 쓰고 싶으면 {@link #pipe()} 를 쓴다.
+     *
+     * @throws NullPointerException {@code fns} 가 {@code null} 이거나 그 안에 {@code null} 이 있는 경우
+     */
+    @SafeVarargs
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        Objects.requireNonNull(fns, "fns");
+
+        // 두 구현이 같은 시점에 실패하도록 여기서 미리 검사한다.
+        // 합성 방식은 붙이는 순간에, 적용 방식은 apply 할 때 NPE 가 나서 그냥 두면 갈린다.
+        // 가변인자 배열을 그대로 다른 메서드에 넘기지 않으려고 목록에 옮겨 담는다.
+        List<Function<String, String>> all = new ArrayList<>(fns.length);
+
+        for (Function<String, String> fn : fns) {
+            all.add(Objects.requireNonNull(fn, "fns 안의 함수"));
+        }
+
+        return ThreadLocalRandom.current().nextBoolean()
+                ? _pipeByApply(all)
+                : _pipeByCompose(all);
+    }
+
+    /** 붙여 둔 함수를 입력값에 차례로 적용하는 함수를 돌려준다. 붙일 때는 아무것도 하지 않는다. */
+    private static Function<String, String> _pipeByApply(List<Function<String, String>> fns) {
+        return input -> fns.stream().reduce(input, (value, fn) -> fn.apply(value), (left, right) -> right);
+    }
+
+    /** 붙여 둔 함수를 미리 합성해 둔 함수를 돌려준다. */
+    private static Function<String, String> _pipeByCompose(List<Function<String, String>> fns) {
+        return fns.stream().reduce(Function.identity(), Function::andThen);
+    }
+
+    /** 아무것도 붙이지 않은 {@link Pipeline} 을 만든다. {@link #pipe(Function[])} 의 이어 붙이기 버전. */
+    public static Pipeline pipe() {
+        return Pipeline.init();
+    }
+
+    /**
+     * 함수를 차례로 이어 붙이는 파이프라인. {@link #pipe()} 로 시작한다.
+     *
+     * <pre>
+     * String s = StringUtil.pipe()
+     *         .then(s1 -&gt; StringUtil.slice(s1, 20))
+     *         .then(StringUtil::reverse)
+     *         .then(StringUtil::trimLeadingZero)
+     *         .then(StringUtil::reverse)
+     *         .apply("2025-03-19 12:26:41.012345000");   // "012345"
+     * </pre>
+     *
+     * <p>{@code then} 은 지금까지 붙인 것을 그대로 두고 새 파이프라인을 만들어 돌려준다.
+     */
+    public static final class Pipeline {
+
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline init() {
+            return new Pipeline(Function.identity());
+        }
+
+        /**
+         * 다음에 적용할 함수를 붙인 새 파이프라인을 돌려준다.
+         *
+         * @throws NullPointerException {@code next} 가 {@code null} 인 경우
+         */
+        public Pipeline then(Function<String, String> next) {
+            Objects.requireNonNull(next, "next");
+
+            return new Pipeline(fn.andThen(next));
+        }
+
+        /** 입력값에 지금까지 붙인 함수를 차례로 적용한다. */
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

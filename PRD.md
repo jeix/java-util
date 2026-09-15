@@ -20,7 +20,7 @@
 
 ### R2. 문자열 유틸리티 `s.util.StringUtil`
 
-스태틱 메서드 39개. 요청받은 메서드는 다음과 같다.
+스태틱 메서드 41개. 다음과 같다.
 
 | 묶음 | 메서드 |
 |---|---|
@@ -32,6 +32,7 @@
 | 가공 | `trimLeadingZero(s)`, `repeat(c, size)`, `reverse(s)` |
 | 채우기 | `lpad`, `rpad`, `pad`, `lpad2`, `rpad2`, `pad2` |
 | 목록 | `join(list, delimiter)`, `split(s, regex)` |
+| 함수 이어 붙이기 | `pipe(fns...)` → `Function<String,String>`, `pipe()` → `Pipeline`(`then` / `apply`) |
 
 ### R3. 컬렉션 유틸리티 `s.util.CollectionUtil`
 

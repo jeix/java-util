@@ -23,7 +23,7 @@
 | 위치 | 내용 |
 |---|---|
 | `s.Hello` | 프로젝트 뼈대가 도는지 확인하는 예제 (lombok · Jackson · JUnit) |
-| `s.util.StringUtil` | 문자열 유틸리티 — 검사, 대체값 고르기, firstNonBlank 계열, stringify, 자르기, 채우기, join/split |
+| `s.util.StringUtil` | 문자열 유틸리티 — 검사, 대체값 고르기, firstNonBlank 계열, stringify, 자르기, 채우기, join/split, pipe(함수 이어 붙이기) |
 | `s.util.CollectionUtil` | 리스트·맵 유틸리티 — 검사, zip, 찾기, 집합 연산, 자르기, 색인/분류, asMap 계열 |
 | `s.type.tuple.Pair` · `Triplet` · `Quartet` | 값을 2·3·4개 묶는 튜플 타입. JSON 으로 바꾸면 `{"ord1": ..., "ord2": ...}` 모양 |
 

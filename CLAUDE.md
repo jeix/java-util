@@ -36,6 +36,10 @@
   필요하면 종단 연산(`forEach`)을 쓴다.
 - `Collectors.toMap` 은 값이 `null` 이면, `Collectors.groupingBy` 는 분류가 `null` 이면 예외를
   던진다. 그런 자리에서는 `forEach` 로 담는다.
+- 가변인자 배열을 다른 메서드에 그대로 넘기지 않는다 — javac 이 `[varargs]` heap pollution
+  경고를 낸다. `List` 에 옮겨 담아 넘긴다.
+- 두 구현이 실패하는 시점도 맞춘다. 한쪽은 부를 때, 다른 쪽은 쓸 때 예외가 나면 무작위 분기가
+  관찰 가능해진다.
 
 ## 이 저장소의 구성
 

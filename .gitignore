@@ -1,0 +1,22 @@
+# Build output
+target/
+
+# Other branch configs (unrelated to this branch)
+.agents/
+.codex/
+.env-claude
+.env-cline
+.env-codex
+.cline/
+
+# Maven wrapper cache
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

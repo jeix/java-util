@@ -1,12 +1,13 @@
 # PLAN (Execution Plan)
 
-## 현재 상태: 1단계 완료 (문자열 유틸리티)
+## 현재 상태: 2단계 완료 (문자열 유틸리티 + 튜플 타입)
 
 ### 진행 상황
 | 단계 | 설명 | 상태 | 완료일 |
 |------|------|------|--------|
 | 0 | 프로젝트 구조 초기화 | ✅ 완료 | 2026-09-21 |
-| 1 | 문자열 유틸리티 (StringUtil) | ✅ 완료 | 2026-09-21 |
+| 1 | 문자열 유틸리트 (StringUtil) | ✅ 완료 | 2026-09-21 |
+| 2 | 튜플 타입 (Pair/Triplet/Quartet) | ✅ 완료 | 2026-09-21 |
 
 ## 실행 단계
 
@@ -58,23 +59,34 @@
 **계획:**
 - `s.util.CollectionUtil` 클래스 작성
   - `isNullOrEmpty(List)` - 리스트가 null/비어있는지 확인
-  - `join(List, String)` - 리스트를 구분자로 연결 (StringUtil.join의 확장)
 - `s.util.CollectionUtilTest` 작성
 - `./mvnw test` 검증
 
-### 3단계: 튜플 타입 [예정]
-**목표:** `s.type.Tuple` 등 커스텀 데이터 타입 제공
+### 3단계: 튜플 타입 [완료]
+**목표:** `s.type.tuple` 패키지에 데이터 타입 제공
 
-**계획:**
-- `s.type.Tuple` 클래스 작성 (이중/삼중 튜플)
-- 테스트 작성
-- `./mvnw test` 검증
+**완료된 작업:**
+- `s.type.tuple.Pair<T, U>` 작성
+  - `of(T, U)` static factory, `ord1()`, `ord2()`, `toString()`
+- `s.type.tuple.Triplet<T, U, V>` 작성
+  - `of(T, U, V)` static factory, `ord1()`, `ord2()`, `ord3()`, `toString()`
+- `s.type.tuple.Quartet<T, U, V, W>` 작성
+  - `of(T, U, V, W)` static factory, `ord1()`, `ord2()`, `ord3()`, `ord4()`, `toString()`
+- Lombok `@EqualsAndHashCode` 적용 (인스턴스 메서드, private 생성자)
+- `s.type.tuple.TupleTest` 작성 (15개 JUnit 5 테스트, Lombok @Slf4j)
+- `./mvnw clean test` 실행 → BUILD SUCCESS, 87/87 테스트 통과
+
+**완료 기준:**
+- [x] `./mvnw clean test` 성공
+- [x] 테스트 87개 통과, 0 실패
+- [x] Pair/Triplet/Quartet equals/hashCode 정상 동작
+- [x] toString "(t, u)" / "(t, u, v)" / "(t, u, v, w)" 형식
 
 ## 마일스톤
 
 | 마일스톤 | 목표 | 목표일 | 상태 |
 |----------|------|--------|------|
 | M0 | 프로젝트 초기화 | 2026-09-21 | ✅ 완료 |
-| M1 | 문자열 유틸리티 | 2026-09-21 | ✅ 완료 (재커밋 예정) |
+| M1 | 문자열 유틸리티 | 2026-09-21 | ✅ 완료 |
 | M2 | 컬렉션 유틸리티 | - | 예정 |
-| M3 | 튜플 타입 제공 | - | 예정 |
+| M3 | 튜플 타입 제공 | 2026-09-21 | ✅ 완료 |

@@ -295,3 +295,28 @@ return List.of(s.split(regex));
 ### 근거
 - `List.of()`는 Java 9+ 불변 리스트 생성
 - `Collections.singletonList`이나 `Collections.emptyList()`도 불변이지만 `List.of()` 더 일관됨
+
+---
+
+## 결정 #16: 튜플 타입 클래스 설계 (Pair/Triplet/Quartet)
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: `s.type.tuple` 패키지에 Pair, Triplet, Quartet 데이터 타입 추가.
+
+### 선택
+- **Lombok**: `@EqualsAndHashCode`만 사용 (toString은 커스텀 구현)
+- **생성자**: private (정적 팩토리 메서드 `of()`를 통해서만 생성)
+- **접근자**: `ord1()`, `ord2()`, `ord3()`, `ord4()` (getter가 아닌 의미 있는 이름)
+- **toString**: `"(t, u)"` / `"(t, u, v)"` / `"(t, u, v, w)"` 형식
+- **상속**: 없음 (독립 클래스, 각각 별도 구현)
+- **JSON 직렬화**: `@JsonProperty("ordN")` on `ordN()` getter (Jackson)
+- **JSON 역직렬화**: `@JsonCreator` on `of()` factory with `@JsonProperty("ordN")` on params
+
+### 근거
+- 데이터 타입은 불변(immutable)이어야 하므로 private final 필드 + private 생성자
+- 정적 팩토리 메서드 패턴으로 인스턴스 생성 제어
+- `@EqualsAndHashCode`로 값 기반 동등성 보장
+- `ord1()`~`ord4()`는 순서를 명확히 하는 의미 있는 이름
+- `@JsonCreator`로 private 생성자와 함께 Jackson 역직렬화 지원

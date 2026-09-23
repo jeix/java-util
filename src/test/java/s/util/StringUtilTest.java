@@ -164,7 +164,7 @@ class StringUtilTest {
     void firstNonBlankOrLast_suppliers_twoArgs() {
         assertEquals("first", StringUtil.firstNonBlankOrLast(() -> "first", () -> "second"));
         assertEquals("second", StringUtil.firstNonBlankOrLast(() -> "  ", () -> "second"));
-        assertEquals("  ", StringUtil.firstNonBlankOrLast(() -> null, () -> "  ")); // all blank → last value
+        assertEquals("  ", StringUtil.firstNonBlankOrLast(() -> null, () -> "  "));
     }
 
     @Test
@@ -265,14 +265,15 @@ class StringUtilTest {
         assertTrue(result.matches("\\d{4}-\\d{2}-\\d{2}"));
     }
 
-    // ---- slice ----
+    // ---- slice (Python-style negative indices) ----
 
     @Test
     void slice_beginOnly() {
         assertEquals("llo", StringUtil.slice("hello", 2));
         assertEquals("hello", StringUtil.slice("hello", 0));
         assertEquals("", StringUtil.slice("hello", 5));
-        assertEquals("hello", StringUtil.slice("hello", -1));
+        assertEquals("o", StringUtil.slice("hello", -1));
+        assertEquals("hello", StringUtil.slice("hello", -10));
         assertNull(StringUtil.slice(null, 0));
     }
 
@@ -286,6 +287,14 @@ class StringUtilTest {
         assertNull(StringUtil.slice(null, 0, 5));
     }
 
+    @Test
+    void slice_negativeIndices() {
+        assertEquals("lo", StringUtil.slice("hello", -2));
+        assertEquals("ell", StringUtil.slice("hello", -4, -1));
+        assertEquals("hello", StringUtil.slice("hello", -10, 5));
+        assertEquals("", StringUtil.slice("hello", -10, -10));
+    }
+
     // ---- head / tail ----
 
     @Test
@@ -293,8 +302,14 @@ class StringUtilTest {
         assertEquals("hel", StringUtil.head("hello", 3));
         assertEquals("hello", StringUtil.head("hello", 10));
         assertEquals("", StringUtil.head("hello", 0));
-        assertEquals("", StringUtil.head("hello", -1));
         assertNull(StringUtil.head(null, 3));
+    }
+
+    @Test
+    void head_negativeSize() {
+        assertEquals("hell", StringUtil.head("hello", -1));
+        assertEquals("hel", StringUtil.head("hello", -2));
+        assertEquals("", StringUtil.head("hello", -10));
     }
 
     @Test
@@ -302,8 +317,14 @@ class StringUtilTest {
         assertEquals("llo", StringUtil.tail("hello", 3));
         assertEquals("hello", StringUtil.tail("hello", 10));
         assertEquals("", StringUtil.tail("hello", 0));
-        assertEquals("", StringUtil.tail("hello", -1));
         assertNull(StringUtil.tail(null, 3));
+    }
+
+    @Test
+    void tail_negativeSize() {
+        assertEquals("ello", StringUtil.tail("hello", -1));
+        assertEquals("llo", StringUtil.tail("hello", -2));
+        assertEquals("", StringUtil.tail("hello", -10));
     }
 
     // ---- trimLeadingZero ----
@@ -335,9 +356,11 @@ class StringUtilTest {
 
     @Test
     void repeat_normalCase() {
-        assertEquals("aaa", StringUtil.repeat('a', 3));
-        assertEquals("", StringUtil.repeat('a', 0));
-        assertEquals("", StringUtil.repeat('a', -1));
+        assertEquals("aaa", StringUtil.repeat("a", 3));
+        assertEquals("ababab", StringUtil.repeat("ab", 3));
+        assertEquals("", StringUtil.repeat("a", 0));
+        assertEquals("", StringUtil.repeat("a", -1));
+        assertEquals("", StringUtil.repeat(null, 3));
     }
 
     // ---- reverse ----
@@ -406,7 +429,7 @@ class StringUtilTest {
     void join_emptyOrNull() {
         assertEquals("", StringUtil.join(Collections.emptyList(), ","));
         assertEquals("", StringUtil.join(null, ","));
-        assertEquals("abc", StringUtil.join(Arrays.asList("a", "b", "c"), null)); // null delimiter → ""
+        assertEquals("abc", StringUtil.join(Arrays.asList("a", "b", "c"), null));
     }
 
     @Test

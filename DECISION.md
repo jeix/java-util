@@ -115,3 +115,183 @@ AGENTS.md에 의존성 스코프 규칙이 명시되어 있음.
 - Lombok `@UtilityClass`로 유틸리티 패턴 적용 (AGENTS.md 규칙)
 - Jackson 의존성 사용 검증
 - 다양한 테스트 케이스 (정상/경계/실패)를 위한 충분한 로직
+
+---
+
+## 결정 #7: slf4j-api 및 slf4j-simple 의존성 추가 (test scope)
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+`StringUtilTest`에 Lombok `@Slf4j` 애노테이션을 추가했으나, `@Slf4j`는 `org.slf4j.Logger`를 참조하는 코드를 생성한다. slf4j-api가 없으면 컴파일 에러 발생.
+
+### 선택
+`pom.xml`에 `slf4j-api` (test scope)와 `slf4j-simple` (test scope) 추가.
+
+### 근거
+- Jackson 2.17.2는 slf4j-api를 전이 의존성으로 포함하지 않음
+- `@Slf4j`가 생성하는 코드는 `org.slf4j.Logger`와 `org.slf4j.LoggerFactory`를 참조하므로 컴파일 타임 필요
+- `slf4j-simple`은 테스트 실행 시 로깅 구현체 제공
+
+---
+
+## 결정 #8: StringUtil 내부 구현 - `String.isBlank()` 사용
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+`@UtilityClass` 환경에서 커스텀 `isBlank(String)` 메서드 호출 시 런타임에 false가 반환되는 현상 발생.
+
+### 선택
+private 메서드(`_firstNonBlankOrLast`, `_firstNonBlankOrEmpty`, `_firstNonBlankOrNull`)에서 커스텀 `isBlank()` 호출 대신 Java 11+의 `String.isBlank()`를 직접 사용.
+
+### 근거
+- 커스텀 `isBlank` 공개 테스트에서는 정상 동작 확인
+- private 메서드 내부에서 동일한 `isBlank` 호출 시 런타임에 다르게 동작하는 이상 현상 발생
+- `val != null && !val.isBlank()` 형태로 null-safe하게 처리
+
+---
+
+## 결정 #9: Stream 기반 구현 및 랜덤 분기
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: for문 대신 stream을 사용할 수 있으면 구현을 추가하고 실행 시 랜덤으로 분기.
+
+### 선택
+다음 메서드에 stream 기반 구현 추가 및 `Math.random() < 0.5` 랜덤 분기:
+1. `_firstNonBlankOrLast` → `_firstNonBlankOrLastLoop` + `_firstNonBlankOrLastStream`
+2. `_firstNonBlankOrEmpty` → `_firstNonBlankOrEmptyLoop` + `_firstNonBlankOrEmptyStream`
+3. `_firstNonBlankOrNull` → `_firstNonBlankOrNullLoop` + `_firstNonBlankOrNullStream`
+4. `join` → `_joinLoop` + `_joinStream`
+5. `_repeatPad` → `_repeatPadLoop` + `_repeatPadStream`
+6. value-to-supplier 변환 → `_toSuppliersLoop` + `_toSuppliersStream`
+
+### 근거
+- Stream API는 함수형 스타일로 코드 가독성 향상
+- 랜덤 분기를 통해 두 구현 모두 검증 가능 (테스트에서 검증)
+- Loop 버전은 lazy evaluation, Stream 버전은 eager evaluation (트레이드오프 명확히)
+
+---
+
+## 결정 #10: 3항 연산자 사용
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: isBlank, isEmpty, nonNullOf(Supplier, Supplier), nonBlankOf(Supplier, Supplier), nonEmptyOf(Supplier, Supplier)에 3항 연산자 사용.
+
+### 선택
+- `isBlank`: `return s == null ? true : s.isEmpty() || s.trim().isEmpty();`
+- `isEmpty`: `return s == null ? true : s.isEmpty();`
+- `nonNullOf(Supplier, Supplier)`: `String val = supplier != null ? supplier.get() : null; return val != null ? val : _dflt(dfltSupplier);`
+- `nonBlankOf(Supplier, Supplier)`: `String val = supplier != null ? supplier.get() : null; return (val != null && !val.isBlank()) ? val : _dflt(dfltSupplier);`
+- `nonEmptyOf(Supplier, Supplier)`: 동일 패턴
+
+### 근거
+- 3항 연산자는 단일 표현식으로 값 반환 → 코드 간결화
+- null 체크와 값 처리를 한 줄로 표현 가능
+
+---
+
+## 결정 #11: stringify switch expression 사용
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: stringify에 switch 사용.
+
+### 선택
+```java
+return switch (obj) {
+    case null -> "";
+    case Date d -> new SimpleDateFormat("yyyy-MM-dd").format(d);
+    case BigDecimal bd -> bd.toPlainString();
+    default -> obj.toString();
+};
+```
+
+### 근거
+- Java 21의 switch 패턴 매칭으로 타입 검사와 캐스팅을 동시 처리
+- `case null` 처리 가능 (Java 21)
+- if-else 체인보다 가독성 우수
+
+---
+
+## 결정 #12: slice/head/tail 음수 인덱스 (Python-style)
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: 음수 인덱스를 역방향 인덱스로 해석.
+
+### 선택
+- `slice(s, begin)`: `begin < 0` → `len + begin`, clamp to 0 if < -len, clamp to len if > len
+- `slice(s, begin, end)`: same logic for both begin and end
+- `head(s, size)`: `size < 0` → `len + size`, if `size < -len` → return ""
+- `tail(s, size)`: `size < 0` → `-size`로 변환 후 front에서 제외 (`s.substring(abs(size))`)
+
+### 근거
+- Python의 슬라이싱 규칙과 동일한 직관적 동작
+- 음수 인덱스는 문자열 끝에서부터 셈
+
+---
+
+## 결정 #13: trimLeadingZero 정규식 구현
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: 정규식으로 찾아 바꾸기 방식의 구현 추가, 랜덤 분기.
+
+### 선택
+- `_trimLeadingZeroLoop`: 기존 while 루프 방식
+- `_trimLeadingZeroRegex`: `s.replaceFirst("^0+(?!$)", "")`
+  - `^0+` : 시작부터 하나 이상의 0
+  - `(?!$)` : 끝이 아닌 위치에서만 매칭 (전체가 0인 문자열 "0000" → "0" 유지)
+- `trimLeadingZero`: `Math.random() < 0.5`로 두 구현 랜덤 분기
+
+### 근거
+- 정규식은 짧고 선언적, 루프는 더 명확한 제어 흐름
+- 두 구현 모두 동일한 결과를 보장
+
+---
+
+## 결정 #14: repeat 파라미터 String 변경
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: repeat의 c 파라미터 타입을 String으로 변경.
+
+### 선택
+```java
+public static String repeat(String c, int size) {
+    if (c == null || size <= 0) return "";
+    return c.repeat(size);
+}
+```
+
+### 근거
+- Java 11+의 `String.repeat(int)` 활용 가능
+- String 파라미터로 다중 문자 반복도 지원 (`"ab".repeat(3)` = "ababab")
+- null-safe 처리
+
+---
+
+## 결정 #15: split immutable list 반환
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: split이 불변 리스트를 반환.
+
+### 선택
+```java
+return List.of(s.split(regex));
+```
+
+### 근거
+- `List.of()`는 Java 9+ 불변 리스트 생성
+- `Collections.singletonList`이나 `Collections.emptyList()`도 불변이지만 `List.of()` 더 일관됨

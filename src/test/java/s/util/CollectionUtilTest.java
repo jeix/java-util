@@ -3,7 +3,6 @@ package s.util;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +39,11 @@ class CollectionUtilTest {
     }
 
     @Test
-    void emptyIfNull_list_nonNull_returnsSameList() {
+    void emptyIfNull_list_nonNull_returnsUnmodifiableList() {
         List<String> input = List.of("a", "b");
         List<String> result = CollectionUtil.<String>emptyIfNull(input);
-        assertSame(input, result);
+        assertEquals(input, result);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("c"));
     }
 
     // zip
@@ -73,6 +73,14 @@ class CollectionUtilTest {
         List<Integer> list2 = List.of(1, 2);
         List<String> result = CollectionUtil.zip(list1, list2, (s, i) -> s + i);
         assertEquals(List.of("a1", "b2"), result);
+    }
+
+    @Test
+    void zip_returnsUnmodifiableList() {
+        List<String> list1 = List.of("a", "b");
+        List<Integer> list2 = List.of(1, 2);
+        List<Pair<String, Integer>> result = CollectionUtil.zip(list1, list2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add(Pair.of("c", 3)));
     }
 
     // toArray
@@ -116,6 +124,13 @@ class CollectionUtilTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void findAll_returnsUnmodifiableList() {
+        List<String> list = List.of("a", "b", "c");
+        List<String> result = CollectionUtil.findAll(list, (String s) -> s.equals("b"));
+        assertThrows(UnsupportedOperationException.class, () -> result.add("d"));
+    }
+
     // unionOf
 
     @Test
@@ -124,6 +139,14 @@ class CollectionUtilTest {
         List<String> list2 = List.of("b", "c", "d");
         List<String> result = CollectionUtil.unionOf(list1, list2);
         assertEquals(List.of("a", "b", "c", "d"), result);
+    }
+
+    @Test
+    void unionOf_returnsUnmodifiableList() {
+        List<String> list1 = List.of("a", "b");
+        List<String> list2 = List.of("c", "d");
+        List<String> result = CollectionUtil.unionOf(list1, list2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
     }
 
     // intersectionOf
@@ -136,6 +159,14 @@ class CollectionUtilTest {
         assertEquals(List.of("b", "c"), result);
     }
 
+    @Test
+    void intersectionOf_returnsUnmodifiableList() {
+        List<String> list1 = List.of("a", "b");
+        List<String> list2 = List.of("a", "b");
+        List<String> result = CollectionUtil.intersectionOf(list1, list2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
+    }
+
     // differenceOf
 
     @Test
@@ -146,6 +177,14 @@ class CollectionUtilTest {
         assertEquals(List.of("a"), result);
     }
 
+    @Test
+    void differenceOf_returnsUnmodifiableList() {
+        List<String> list1 = List.of("a", "b");
+        List<String> list2 = List.of("c", "d");
+        List<String> result = CollectionUtil.differenceOf(list1, list2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
+    }
+
     // symmetricDifferenceOf
 
     @Test
@@ -154,6 +193,14 @@ class CollectionUtilTest {
         List<String> list2 = List.of("b", "c", "d");
         List<String> result = CollectionUtil.symmetricDifferenceOf(list1, list2);
         assertEquals(List.of("a", "d"), result);
+    }
+
+    @Test
+    void symmetricDifferenceOf_returnsUnmodifiableList() {
+        List<String> list1 = List.of("a", "b");
+        List<String> list2 = List.of("c", "d");
+        List<String> result = CollectionUtil.symmetricDifferenceOf(list1, list2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
     }
 
     // slice
@@ -172,6 +219,41 @@ class CollectionUtilTest {
         assertEquals(List.of("b", "c"), result);
     }
 
+    @Test
+    void slice_negativeBegin_interpretsAsReverseIndex() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.slice(list, -2);
+        assertEquals(List.of("c", "d"), result);
+    }
+
+    @Test
+    void slice_negativeBeginAndEnd_interpretsAsReverseIndex() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.slice(list, -3, -1);
+        assertEquals(List.of("b", "c"), result);
+    }
+
+    @Test
+    void slice_beginLessThanNegativeLen_clampsToZero() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.slice(list, -10);
+        assertEquals(List.of("a", "b", "c", "d"), result);
+    }
+
+    @Test
+    void slice_beginGreaterThanLen_clampsToLen() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.slice(list, 10);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void slice_returnsUnmodifiableList() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.slice(list, 1, 3);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
+    }
+
     // head
 
     @Test
@@ -182,9 +264,31 @@ class CollectionUtilTest {
     }
 
     @Test
-    void head_sizeGreaterThanList_throwsException() {
+    void head_negativeSize_interpretsAsReverseIndex() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.head(list, -2);
+        assertEquals(List.of("a", "b"), result);
+    }
+
+    @Test
+    void head_negativeSizeLessThanNegativeLen_clampsToZero() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.head(list, -10);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void head_sizeGreaterThanLen_clampsToLen() {
         List<String> list = List.of("a", "b");
-        assertThrows(IllegalArgumentException.class, () -> CollectionUtil.head(list, 3));
+        List<String> result = CollectionUtil.head(list, 10);
+        assertEquals(List.of("a", "b"), result);
+    }
+
+    @Test
+    void head_returnsUnmodifiableList() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.head(list, 2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
     }
 
     // tail
@@ -197,9 +301,31 @@ class CollectionUtilTest {
     }
 
     @Test
-    void tail_sizeGreaterThanList_throwsException() {
+    void tail_negativeSize_interpretsAsExcludingFromFront() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.tail(list, -2);
+        assertEquals(List.of("c", "d"), result);
+    }
+
+    @Test
+    void tail_negativeSizeLessThanNegativeLen_clampsToZero() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.tail(list, -10);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void tail_sizeGreaterThanLen_clampsToLen() {
         List<String> list = List.of("a", "b");
-        assertThrows(IllegalArgumentException.class, () -> CollectionUtil.tail(list, 3));
+        List<String> result = CollectionUtil.tail(list, 10);
+        assertEquals(List.of("a", "b"), result);
+    }
+
+    @Test
+    void tail_returnsUnmodifiableList() {
+        List<String> list = List.of("a", "b", "c", "d");
+        List<String> result = CollectionUtil.tail(list, 2);
+        assertThrows(UnsupportedOperationException.class, () -> result.add("e"));
     }
 
     // indexing
@@ -213,6 +339,13 @@ class CollectionUtilTest {
         assertEquals("c", result.get("C"));
     }
 
+    @Test
+    void indexing_returnsUnmodifiableMap() {
+        List<String> list = List.of("a", "b", "c");
+        Map<String, String> result = CollectionUtil.indexing(list, s -> s.toUpperCase());
+        assertThrows(UnsupportedOperationException.class, () -> result.put("D", "d"));
+    }
+
     // grouping
 
     @Test
@@ -221,6 +354,14 @@ class CollectionUtilTest {
         Map<String, List<String>> result = CollectionUtil.grouping(list, s -> s.substring(0, 1));
         assertEquals(List.of("apple", "avocado"), result.get("a"));
         assertEquals(List.of("banana", "blueberry"), result.get("b"));
+    }
+
+    @Test
+    void grouping_returnsUnmodifiableMapAndValues() {
+        List<String> list = List.of("apple", "avocado", "banana");
+        Map<String, List<String>> result = CollectionUtil.grouping(list, s -> s.substring(0, 1));
+        assertThrows(UnsupportedOperationException.class, () -> result.put("c", List.of()));
+        assertThrows(UnsupportedOperationException.class, () -> result.get("a").add("cherry"));
     }
 
     // isEmpty(Map)
@@ -249,10 +390,11 @@ class CollectionUtilTest {
     }
 
     @Test
-    void emptyIfNull_map_nonNull_returnsSameMap() {
+    void emptyIfNull_map_nonNull_returnsUnmodifiableMap() {
         Map<String, String> input = Map.of("a", "1");
         Map<String, String> result = CollectionUtil.<String, String>emptyIfNull(input);
-        assertSame(input, result);
+        assertEquals(input, result);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("b", "2"));
     }
 
     // asMap(Object...)
@@ -269,6 +411,12 @@ class CollectionUtilTest {
         assertThrows(IllegalArgumentException.class, () -> CollectionUtil.asMap("foo", 42, "bar"));
     }
 
+    @Test
+    void asMap_returnsUnmodifiableMap() {
+        Map<Object, Object> result = CollectionUtil.asMap("foo", 42);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("bar", 43));
+    }
+
     // castKeyValue
 
     @Test
@@ -277,6 +425,13 @@ class CollectionUtilTest {
         Map<String, Integer> result = CollectionUtil.castKeyValue(origin);
         assertEquals(42, result.get("foo"));
         assertEquals(43, result.get("bar"));
+    }
+
+    @Test
+    void castKeyValue_returnsUnmodifiableMap() {
+        Map<Object, Object> origin = CollectionUtil.asMap("foo", 42);
+        Map<String, Integer> result = CollectionUtil.castKeyValue(origin);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("bar", 43));
     }
 
     // asMap(Class, Class, Object...)
@@ -294,6 +449,12 @@ class CollectionUtilTest {
                 () -> CollectionUtil.asMap(String.class, Integer.class, "foo", 42, "bar"));
     }
 
+    @Test
+    void asMap_withClasses_returnsUnmodifiableMap() {
+        Map<String, Integer> result = CollectionUtil.asMap(String.class, Integer.class, "foo", 42);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("bar", 43));
+    }
+
     // asMap(List<Map.Entry>)
 
     @Test
@@ -307,6 +468,13 @@ class CollectionUtilTest {
         assertEquals(43, result.get("bar"));
     }
 
+    @Test
+    void asMap_fromEntries_returnsUnmodifiableMap() {
+        List<Map.Entry<String, Integer>> entries = List.of(Map.entry("foo", 42));
+        Map<String, Integer> result = CollectionUtil.asMap(entries);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("bar", 43));
+    }
+
     // copyOf
 
     @Test
@@ -317,5 +485,13 @@ class CollectionUtilTest {
         Map<String, Integer> result = CollectionUtil.copyOf(origin);
         assertEquals(origin, result);
         assertNotSame(origin, result);
+    }
+
+    @Test
+    void copyOf_returnsUnmodifiableMap() {
+        Map<String, Integer> origin = new LinkedHashMap<>();
+        origin.put("foo", 42);
+        Map<String, Integer> result = CollectionUtil.copyOf(origin);
+        assertThrows(UnsupportedOperationException.class, () -> result.put("bar", 43));
     }
 }

@@ -1,23 +1,21 @@
 package s.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import s.type.tuple.Pair;
 
 public final class CollectionUtil {
+
+    private static final Random RANDOM = new Random();
 
     private CollectionUtil() {
     }
@@ -29,7 +27,7 @@ public final class CollectionUtil {
     }
 
     public static <T> List<T> emptyIfNull(List<T> list) {
-        return list == null ? Collections.emptyList() : list;
+        return list == null ? Collections.emptyList() : Collections.unmodifiableList(list);
     }
 
     public static <T, U> List<Pair<T, U>> zip(List<T> list1, List<U> list2) {
@@ -38,7 +36,7 @@ public final class CollectionUtil {
         for (int i = 0; i < size; i++) {
             result.add(Pair.of(list1.get(i), list2.get(i)));
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     public static <T, U, R> List<R> zip(List<T> list1, List<U> list2, BiFunction<T, U, R> mixer) {
@@ -47,7 +45,7 @@ public final class CollectionUtil {
         for (int i = 0; i < size; i++) {
             result.add(mixer.apply(list1.get(i), list2.get(i)));
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -75,38 +73,89 @@ public final class CollectionUtil {
     }
 
     public static <T> List<T> findAll(List<T> list, Predicate<T> filter) {
-        return list.stream()
+        return Collections.unmodifiableList(list.stream()
                 .filter(filter)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public static <T> List<T> unionOf(List<T> list1, List<T> list2) {
-        List<T> result = new ArrayList<>(list1);
-        for (T item : list2) {
-            if (!list1.contains(item)) {
-                result.add(item);
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<T> result = new ArrayList<>(list1);
+            for (T item : list2) {
+                if (!list1.contains(item)) {
+                    result.add(item);
+                }
             }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            List<T> result = new ArrayList<>(list1);
+            list2.stream()
+                    .filter(item -> !list1.contains(item))
+                    .forEach(result::add);
+            return Collections.unmodifiableList(result);
         }
-        return result;
     }
 
     public static <T> List<T> intersectionOf(List<T> list1, List<T> list2) {
-        return list1.stream()
-                .filter(list2::contains)
-                .collect(Collectors.toList());
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<T> result = new ArrayList<>();
+            for (T item : list1) {
+                if (list2.contains(item)) {
+                    result.add(item);
+                }
+            }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableList(list1.stream()
+                    .filter(list2::contains)
+                    .collect(Collectors.toList()));
+        }
     }
 
     public static <T> List<T> differenceOf(List<T> list1, List<T> list2) {
-        return list1.stream()
-                .filter(item -> !list2.contains(item))
-                .collect(Collectors.toList());
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<T> result = new ArrayList<>();
+            for (T item : list1) {
+                if (!list2.contains(item)) {
+                    result.add(item);
+                }
+            }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableList(list1.stream()
+                    .filter(item -> !list2.contains(item))
+                    .collect(Collectors.toList()));
+        }
     }
 
     public static <T> List<T> symmetricDifferenceOf(List<T> list1, List<T> list2) {
-        List<T> result = new ArrayList<>();
-        result.addAll(differenceOf(list1, list2));
-        result.addAll(differenceOf(list2, list1));
-        return result;
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<T> result = new ArrayList<>();
+            for (T item : list1) {
+                if (!list2.contains(item)) {
+                    result.add(item);
+                }
+            }
+            for (T item : list2) {
+                if (!list1.contains(item)) {
+                    result.add(item);
+                }
+            }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            List<T> result = new ArrayList<>();
+            result.addAll(differenceOf(list1, list2));
+            result.addAll(differenceOf(list2, list1));
+            return Collections.unmodifiableList(result);
+        }
     }
 
     public static <T> List<T> slice(List<T> list, int begin) {
@@ -114,21 +163,66 @@ public final class CollectionUtil {
     }
 
     public static <T> List<T> slice(List<T> list, int begin, int end) {
-        return list.subList(begin, end);
+        int len = list.size();
+        // 음수 인덱스를 역방향 인덱스로 해석
+        if (begin < 0) {
+            begin = len + begin;
+        }
+        if (end < 0) {
+            end = len + end;
+        }
+        // 길이의 음수값보다 작으면 0으로
+        if (begin < -len) {
+            begin = 0;
+        }
+        if (end < -len) {
+            end = 0;
+        }
+        // 길이보다 큰 인덱스는 길이로
+        if (begin > len) {
+            begin = len;
+        }
+        if (end > len) {
+            end = len;
+        }
+        if (begin > end) {
+            begin = end;
+        }
+        return Collections.unmodifiableList(list.subList(begin, end));
     }
 
     public static <T> List<T> head(List<T> list, int size) {
-        if (size > list.size()) {
-            throw new IllegalArgumentException("size must not be greater than list size");
+        int len = list.size();
+        // 음수 size를 역방향 인덱스로 해석
+        if (size < 0) {
+            size = len + size;
         }
-        return list.subList(0, size);
+        // 길이의 음수값보다 작으면 0으로
+        if (size < -len) {
+            size = 0;
+        }
+        // 길이보다 크면 길이로
+        if (size > len) {
+            size = len;
+        }
+        return Collections.unmodifiableList(list.subList(0, size));
     }
 
     public static <T> List<T> tail(List<T> list, int size) {
-        if (size > list.size()) {
-            throw new IllegalArgumentException("size must not be greater than list size");
+        int len = list.size();
+        // 음수 size를 양수로 바꾸고 앞에서부터 제외할 인덱스로 해석
+        if (size < 0) {
+            size = len + size; // len - |size|
         }
-        return list.subList(list.size() - size, list.size());
+        // 길이의 음수값보다 작으면 0으로
+        if (size < -len) {
+            size = 0;
+        }
+        // 길이보다 크면 길이로
+        if (size > len) {
+            size = len;
+        }
+        return Collections.unmodifiableList(list.subList(len - size, len));
     }
 
     public static <T> Map<String, T> indexing(List<T> list, Function<T, String> indexer) {
@@ -136,12 +230,14 @@ public final class CollectionUtil {
         for (T item : list) {
             result.put(indexer.apply(item), item);
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     public static <T> Map<String, List<T>> grouping(List<T> list, Function<T, String> classifier) {
-        return list.stream()
-                .collect(Collectors.groupingBy(classifier, LinkedHashMap::new, Collectors.toList()));
+        Map<String, List<T>> result = list.stream()
+                .collect(Collectors.groupingBy(classifier, LinkedHashMap::new,
+                        Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)));
+        return Collections.unmodifiableMap(result);
     }
 
     // Map operations
@@ -151,7 +247,7 @@ public final class CollectionUtil {
     }
 
     public static <K, V> Map<K, V> emptyIfNull(Map<K, V> map) {
-        return map == null ? Collections.emptyMap() : map;
+        return map == null ? Collections.emptyMap() : Collections.unmodifiableMap(map);
     }
 
     public static Map<Object, Object> asMap(Object... items) {
@@ -162,7 +258,7 @@ public final class CollectionUtil {
         for (int i = 0; i < items.length; i += 2) {
             map.put(items[i], items[i + 1]);
         }
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     @SuppressWarnings("unchecked")
@@ -171,7 +267,7 @@ public final class CollectionUtil {
         for (Map.Entry<Object, Object> entry : origin.entrySet()) {
             result.put((K) entry.getKey(), (V) entry.getValue());
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,7 +279,7 @@ public final class CollectionUtil {
         for (int i = 0; i < items.length; i += 2) {
             map.put(keyClass.cast(items[i]), valueClass.cast(items[i + 1]));
         }
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     public static <K, V> Map<K, V> asMap(List<Map.Entry<K, V>> entries) {
@@ -191,10 +287,10 @@ public final class CollectionUtil {
         for (Map.Entry<K, V> entry : entries) {
             map.put(entry.getKey(), entry.getValue());
         }
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     public static <K, V> Map<K, V> copyOf(Map<K, V> origin) {
-        return new LinkedHashMap<>(origin);
+        return Collections.unmodifiableMap(new LinkedHashMap<>(origin));
     }
 }

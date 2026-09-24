@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -459,5 +460,54 @@ public class StringUtil {
             .mapToObj(i -> (Supplier<String>) () -> values[i])
             .toArray(Supplier[]::new);
         return result;
+    }
+
+    // ------------------------------------------------------------------
+    // Function composition (pipe)
+    // ------------------------------------------------------------------
+
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        return Math.random() < 0.5
+            ? _pipeLoop(fns)
+            : _pipeStream(fns);
+    }
+
+    private static Function<String, String> _pipeLoop(Function<String, String>... fns) {
+        return input -> {
+            String result = input;
+            for (Function<String, String> fn : fns) {
+                result = fn.apply(result);
+            }
+            return result;
+        };
+    }
+
+    private static Function<String, String> _pipeStream(Function<String, String>... fns) {
+        return Arrays.stream(fns).reduce(Function.identity(), Function::andThen);
+    }
+
+    public static Pipeline pipe() {
+        return Pipeline.init();
+    }
+
+    public static class Pipeline {
+
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline init() {
+            return new Pipeline(Function.identity());
+        }
+
+        public Pipeline then(Function<String, String> next) {
+            return new Pipeline(fn.andThen(next));
+        }
+
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

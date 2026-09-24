@@ -51,14 +51,14 @@ java-util/
 | 패키지 | 설명 |
 |--------|------|
 | `s.Hello` | 기본 유틸리티 (greet, toJson, isPalindrome) |
-| `s.util.StringUtil` | 문자열 처리 (isBlank, isEmpty, slice, trimLeadingZero, repeat, reverse, lpad/rpad, join, split) |
+| `s.util.StringUtil` | 문자열 처리 (isBlank, isEmpty, slice, trimLeadingZero, repeat, reverse, lpad/rpad, join, split, pipe, Pipeline) |
 | `s.util.CollectionUtil` | 컬렉션 처리 (zip, set operations, slice, asMap, castKeyValue) |
 | `s.type.tuple` | 튜플 타입 (Pair, Triplet, Quartet) - Jackson 직렬화 지원 |
 
 ## 테스트
 
 ```bash
-# 전체 테스트 (151개)
+# 전체 테스트 (163개)
 ./mvnw clean test
 ```
 

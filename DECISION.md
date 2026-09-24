@@ -375,3 +375,28 @@ return List.of(s.split(regex));
 - `Map.copyOf()`의 순서 비보장 문제는 JDK 내부 구현(`MapN` 사용)에 의해 발생
 - `Collections.unmodifiableMap(new LinkedHashMap<>(original))`은 복사본 생성 + 순서 보존 + 불변 뷰 제공
 - Stream + 랜덤 분기 패턴은 StringUtil에서 검증된 접근 방식
+
+---
+
+## 결정 #19: StringUtil pipe / Pipeline 추가
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: 함수 체이닝 유틸리지 `pipe()`와 플루언트 빌더 `Pipeline` 추가.
+
+### 선택
+- **`pipe(Function<String,String>...)` (static varargs)**: Stream reduce로 함수 합성
+  - `_pipeLoop`: for 문 순차 적용
+  - `_pipeStream`: `Arrays.stream(fns).reduce(Function.identity(), Function::andThen)`
+  - `Math.random() < 0.5` 랜덤 분기
+- **`pipe()` (no-arg)**: `Pipeline.init()` 반환 (fluent builder 시작점)
+- **`Pipeline` inner class**: `then(fn)` → 체이닝, `apply(input)` 실행
+  - `private` 생성자, `init()` factory 메서드
+  - `fn.andThen(next)`로 함수 합성
+- 메서드 중복 해결: `pipe()` no-arg → Pipeline, `pipe(fn1, fn2)` varargs → Function
+
+### 근거
+- `Function::andThen`은 Java 8+ 함수 합성의 표준 방식
+- `@UtilityClass` 내에서 static nested class 사용 가능 (Lombok이 중첩 클래스 영향 안 함)
+- 두 API 스타일(선언적/명령적) 모두 제공

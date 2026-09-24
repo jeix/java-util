@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -453,5 +454,74 @@ class StringUtilTest {
     void split_withRegex() {
         List<String> result = StringUtil.split("a1b2c", "\\d");
         assertEquals(Arrays.asList("a", "b", "c"), result);
+    }
+
+    // ---- pipe (Function composition) ----
+
+    @Test
+    void pipe_chainsFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+        Function<String, String> fn = StringUtil.pipe(
+            s1 -> StringUtil.slice(s1, 20),
+            StringUtil::reverse,
+            StringUtil::trimLeadingZero,
+            StringUtil::reverse
+        );
+        assertEquals("012345", fn.apply(s));
+    }
+
+    @Test
+    void pipe_singleFunction() {
+        Function<String, String> fn = StringUtil.pipe(StringUtil::reverse);
+        assertEquals("cba", fn.apply("abc"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void pipe_emptyReturnsIdentity() {
+        Function<String, String> fn = StringUtil.pipe(new Function[0]);
+        assertEquals("hello", fn.apply("hello"));
+    }
+
+    @Test
+    void pipe_randomBranchingProducesSameResult() {
+        for (int i = 0; i < 10; i++) {
+            Function<String, String> fn = StringUtil.pipe(
+                s1 -> StringUtil.slice(s1, 3),
+                StringUtil::reverse
+            );
+            assertEquals("ed", fn.apply("abcde"));
+        }
+    }
+
+    // ---- Pipeline (fluent builder) ----
+
+    @Test
+    void pipeline_chainsFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+        String result = StringUtil.pipe()
+            .then(s1 -> StringUtil.slice(s1, 20))
+            .then(StringUtil::reverse)
+            .then(StringUtil::trimLeadingZero)
+            .then(StringUtil::reverse)
+            .apply(s);
+        assertEquals("012345", result);
+    }
+
+    @Test
+    void pipeline_emptyReturnsInput() {
+        String result = StringUtil.pipe().apply("hello");
+        assertEquals("hello", result);
+    }
+
+    @Test
+    void pipeline_randomBranchingProducesSameResult() {
+        for (int i = 0; i < 10; i++) {
+            String result = StringUtil.pipe()
+                .then(s1 -> StringUtil.slice(s1, 3))
+                .then(StringUtil::reverse)
+                .apply("abcde");
+            assertEquals("ed", result);
+        }
     }
 }

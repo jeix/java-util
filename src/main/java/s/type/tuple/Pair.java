@@ -7,10 +7,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public class Pair<T, U> {
 
-    @JsonProperty("ord1")
     private final T first;
 
-    @JsonProperty("ord2")
     private final U second;
 
     protected Pair(T first, U second) {
@@ -22,10 +20,12 @@ public class Pair<T, U> {
         return new Pair<>(first, second);
     }
 
+    @JsonProperty("ord1")
     public T ord1() {
         return first;
     }
 
+    @JsonProperty("ord2")
     public U ord2() {
         return second;
     }

@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class Triplet<T, U, V> extends Pair<T, U> {
 
-    @JsonProperty("ord3")
     private final V third;
 
     protected Triplet(T first, U second, V third) {
@@ -19,6 +18,7 @@ public class Triplet<T, U, V> extends Pair<T, U> {
         return new Triplet<>(first, second, third);
     }
 
+    @JsonProperty("ord3")
     public V ord3() {
         return third;
     }

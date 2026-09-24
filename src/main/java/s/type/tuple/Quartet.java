@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class Quartet<T, U, V, W> extends Triplet<T, U, V> {
 
-    @JsonProperty("ord4")
     private final W fourth;
 
     protected Quartet(T first, U second, V third, W fourth) {
@@ -19,6 +18,7 @@ public class Quartet<T, U, V, W> extends Triplet<T, U, V> {
         return new Quartet<>(first, second, third, fourth);
     }
 
+    @JsonProperty("ord4")
     public W ord4() {
         return fourth;
     }

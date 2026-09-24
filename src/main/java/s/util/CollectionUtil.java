@@ -10,6 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import s.type.tuple.Pair;
 
@@ -32,20 +33,36 @@ public final class CollectionUtil {
 
     public static <T, U> List<Pair<T, U>> zip(List<T> list1, List<U> list2) {
         int size = Math.min(list1.size(), list2.size());
-        List<Pair<T, U>> result = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            result.add(Pair.of(list1.get(i), list2.get(i)));
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<Pair<T, U>> result = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                result.add(Pair.of(list1.get(i), list2.get(i)));
+            }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableList(IntStream.range(0, size)
+                    .mapToObj(i -> Pair.of(list1.get(i), list2.get(i)))
+                    .collect(Collectors.toList()));
         }
-        return Collections.unmodifiableList(result);
     }
 
     public static <T, U, R> List<R> zip(List<T> list1, List<U> list2, BiFunction<T, U, R> mixer) {
         int size = Math.min(list1.size(), list2.size());
-        List<R> result = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            result.add(mixer.apply(list1.get(i), list2.get(i)));
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            List<R> result = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                result.add(mixer.apply(list1.get(i), list2.get(i)));
+            }
+            return Collections.unmodifiableList(result);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableList(IntStream.range(0, size)
+                    .mapToObj(i -> mixer.apply(list1.get(i), list2.get(i)))
+                    .collect(Collectors.toList()));
         }
-        return Collections.unmodifiableList(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -254,20 +271,43 @@ public final class CollectionUtil {
         if (items.length % 2 != 0) {
             throw new IllegalArgumentException("items length must be even");
         }
-        Map<Object, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i < items.length; i += 2) {
-            map.put(items[i], items[i + 1]);
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            Map<Object, Object> map = new LinkedHashMap<>();
+            for (int i = 0; i < items.length; i += 2) {
+                map.put(items[i], items[i + 1]);
+            }
+            return Collections.unmodifiableMap(map);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableMap(IntStream.range(0, items.length / 2)
+                    .boxed()
+                    .collect(Collectors.toMap(
+                            i -> items[2 * i],
+                            i -> items[2 * i + 1],
+                            (a, b) -> b,
+                            LinkedHashMap::new)));
         }
-        return Collections.unmodifiableMap(map);
     }
 
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> castKeyValue(Map<Object, Object> origin) {
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<Object, Object> entry : origin.entrySet()) {
-            result.put((K) entry.getKey(), (V) entry.getValue());
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            Map<K, V> result = new LinkedHashMap<>();
+            for (Map.Entry<Object, Object> entry : origin.entrySet()) {
+                result.put((K) entry.getKey(), (V) entry.getValue());
+            }
+            return Collections.unmodifiableMap(result);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableMap(origin.entrySet().stream()
+                    .collect(Collectors.toMap(
+                            e -> (K) e.getKey(),
+                            e -> (V) e.getValue(),
+                            (v1, v2) -> v2,
+                            LinkedHashMap::new)));
         }
-        return Collections.unmodifiableMap(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -275,19 +315,42 @@ public final class CollectionUtil {
         if (items.length % 2 != 0) {
             throw new IllegalArgumentException("items length must be even");
         }
-        Map<K, V> map = new LinkedHashMap<>();
-        for (int i = 0; i < items.length; i += 2) {
-            map.put(keyClass.cast(items[i]), valueClass.cast(items[i + 1]));
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            Map<K, V> map = new LinkedHashMap<>();
+            for (int i = 0; i < items.length; i += 2) {
+                map.put(keyClass.cast(items[i]), valueClass.cast(items[i + 1]));
+            }
+            return Collections.unmodifiableMap(map);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableMap(IntStream.range(0, items.length / 2)
+                    .boxed()
+                    .collect(Collectors.toMap(
+                            i -> keyClass.cast(items[2 * i]),
+                            i -> valueClass.cast(items[2 * i + 1]),
+                            (a, b) -> b,
+                            LinkedHashMap::new)));
         }
-        return Collections.unmodifiableMap(map);
     }
 
     public static <K, V> Map<K, V> asMap(List<Map.Entry<K, V>> entries) {
-        Map<K, V> map = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : entries) {
-            map.put(entry.getKey(), entry.getValue());
+        if (RANDOM.nextBoolean()) {
+            // for-loop implementation
+            Map<K, V> map = new LinkedHashMap<>();
+            for (Map.Entry<K, V> entry : entries) {
+                map.put(entry.getKey(), entry.getValue());
+            }
+            return Collections.unmodifiableMap(map);
+        } else {
+            // stream implementation
+            return Collections.unmodifiableMap(entries.stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (a, b) -> b,
+                            LinkedHashMap::new)));
         }
-        return Collections.unmodifiableMap(map);
     }
 
     public static <K, V> Map<K, V> copyOf(Map<K, V> origin) {

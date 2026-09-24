@@ -476,4 +476,44 @@ class StringUtilTest {
         List<String> result = StringUtil.split("a,b,c", ",");
         assertThrows(UnsupportedOperationException.class, () -> result.add("d"));
     }
+
+    // pipe (varargs)
+
+    @Test
+    void pipe_varargs_chainsFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+        String result = StringUtil.pipe(
+                s1 -> StringUtil.slice(s1, 20),
+                StringUtil::reverse,
+                StringUtil::trimLeadingZero,
+                StringUtil::reverse
+        ).apply(s);
+        assertEquals("012345", result);
+    }
+
+    @Test
+    void pipe_varargs_singleFunction() {
+        String result = StringUtil.pipe(StringUtil::reverse).apply("abc");
+        assertEquals("cba", result);
+    }
+
+    // pipe (builder)
+
+    @Test
+    void pipe_builder_chainsFunctions() {
+        String s = "2025-03-19 12:26:41.012345000";
+        String result = StringUtil.pipe()
+                .then(s1 -> StringUtil.slice(s1, 20))
+                .then(StringUtil::reverse)
+                .then(StringUtil::trimLeadingZero)
+                .then(StringUtil::reverse)
+                .apply(s);
+        assertEquals("012345", result);
+    }
+
+    @Test
+    void pipe_builder_identity_returnsInput() {
+        String result = StringUtil.pipe().apply("abc");
+        assertEquals("abc", result);
+    }
 }

@@ -41,3 +41,19 @@
 ## 10. firstNonBlank* varargs 처리
 - **결정**: stream과 for문을 `RANDOM.nextBoolean()`으로 랜덤 분기
 - **근거**: 두 구현 모두 테스트 커버리지 확보
+
+## 11. CollectionUtil 랜덤 분기 (stream 구현 추가)
+- **결정**: `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf`뿐 아니라
+  `zip(Pair)`, `zip(BiFunction)`, `asMap(Object...)`, `castKeyValue`,
+  `asMap(Class, Class, Object...)`, `asMap(List<Map.Entry>)`에도 stream 구현을 추가하고
+  `RANDOM.nextBoolean()`으로 for-loop / stream 구현을 랜덤 분기
+- **근거**: 코드베이스 전반에 걸친 구현 이중화·커버리지 확보, 기존 `firstNonBlank*` 패턴과 일관성 유지
+
+## 12. StringUtil.pipe / Pipeline (함수 체이닝 빌더)
+- **결정**: `pipe(Function<String,String>... fns)` (varargs 합성)와
+  `pipe().then(...).apply(input)` (빌더) 두 형태를 제공하며, varargs 형태는
+  impl 1 (`Stream.of(fns).reduce(input, accumulator, combiner)`)과 impl 2
+  (`Arrays.stream(fns).reduce(Function.identity(), Function::andThen)`) 사이를
+  `RANDOM.nextBoolean()`으로 랜덤 분기
+- **근거**: 두 구현 모두 동일한 좌→우 함수 적용 결과를 보장, 커버리지 확보
+- **참고**: `pipe()` 무인자 호출은 빌더 `Pipeline` 반환( varargs 우선순위 낮음)임에 유의

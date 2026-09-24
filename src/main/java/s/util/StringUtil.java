@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -549,5 +550,42 @@ public class StringUtil {
         }
         String[] parts = s.split(regex, -1);
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(parts)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Function<String, String> pipe(Function<String, String>... fns) {
+        if (RANDOM.nextBoolean()) {
+            // impl. 1: String accumulator reduce
+            return input -> Stream.of(fns)
+                    .reduce(input, (s, fn) -> fn.apply(s), (s1, s2) -> s2);
+        } else {
+            // impl. 2: Function andThen reduce
+            return Arrays.stream(fns)
+                    .reduce(Function.identity(), Function::andThen);
+        }
+    }
+
+    public Pipeline pipe() {
+        return Pipeline.init();
+    }
+
+    public static class Pipeline {
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline init() {
+            return new Pipeline(Function.identity());
+        }
+
+        public Pipeline then(Function<String, String> next) {
+            return new Pipeline(fn.andThen(next));
+        }
+
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

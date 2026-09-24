@@ -6,12 +6,15 @@
 - [x] StringUtil 리팩토링 (stream, 3항 연산자, switch 표현식, head/tail 음수 처리)
 - [x] 튜플 타입 클래스 생성 (Pair, Triplet, Quartet)
 - [x] TupleTest 생성 (16개 테스트 케이스)
-- [x] 전체 빌드 및 테스트 통과 (114개 테스트, 0 실패)
+- [x] 컬렉션 유틸리티 (CollectionUtil) 생성 및 불변 컬렉션 반환, slice/head/tail 음수 인덱스 처리
+- [x] CollectionUtil: unionOf/intersectionOf/differenceOf/symmetricDifferenceOf 에 Stream 랜덤 분기 적용
+- [x] CollectionUtil: zip / asMap / castKeyValue 에 Stream 랜덤 분기 적용
+- [x] 전체 빌드 및 테스트 통과 (179개 테스트, 0 실패)
 - [x] AGENT.md, PRD.md 생성
 
 ## 진행 중 작업
-- [ ] PLAN.md 작성 중
-- [ ] DECISION.md 작성
+- [x] PLAN.md 작성 중
+- [x] DECISION.md 작성
 
 ## 향후 계획
 1. **컬렉션 유틸리티** (CollectionUtil)

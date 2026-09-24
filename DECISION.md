@@ -320,3 +320,58 @@ return List.of(s.split(regex));
 - `@EqualsAndHashCode`로 값 기반 동등성 보장
 - `ord1()`~`ord4()`는 순서를 명확히 하는 의미 있는 이름
 - `@JsonCreator`로 private 생성자와 함께 Jackson 역직렬화 지원
+
+---
+
+## 결정 #17: CollectionUtil 설계 (List + Map 통합)
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: `s.util.CollectionUtil`에 리스트/맵 처리 메서드 21개 추가.
+
+### 선택
+- **@UtilityClass**: StringUtil과 동일한 패턴 (Lombok 정적 메서드 클래스)
+- **List slice**: StringUtil.slice와 동일한 Python-style 음수 인덱스 규칙
+- **Set 연산**: `unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf` - 중복 허용 (list1 순서 우선)
+- **zip**: `Pair<T,U>` 사용 (s.type.tuple.Pair), 짧은 리스트 길이로 결정
+- **asMap 3 overloads**: varargs (Object,Object), typed (Class<K>, Class<V>, Object...), entries (List<Map.Entry>)
+- **toArray**: reflection (Array.newInstance)로 컴포넌트 타입 보존
+- **head/tail**: `slice(list, 0, size)` 위임, `size < 0` → 음수 size 처리
+  - `head`: 음수 size → 역방향 인덱스 (len + size)
+  - `tail`: 음수 size → abs(size), 앞에서부터 제외
+
+### 근거
+- 단일 클래스에 List와 Map 유틸리지를 함께 배치하여 API 발견성 향상
+- Python-style 음수 인덱스로 StringUtil과 일관성 있는 UX
+- `LinkedHashMap`/`LinkedHashSet`으로 삽입 순서 보존
+- `@SuppressWarnings("unchecked")`는 최소화 (toArray, castKeyValue만)
+
+---
+
+## 결정 #18: 불변 컬렉션 반환 + Stream 랜덤 분기
+**일시:** 2026-09-21
+**상태:** 승인됨
+
+### 배경
+요구사항: 컬렉션 유틸리지 메서드가 불변 컬렉션을 반환하고, loop/stream 구현을 랜덤 분기.
+
+### 선택
+- **불변 리스트**: `List.copyOf()` 사용 (삽입 순서 보존)
+- **불변 맵**: `Map.copyOf()` → 순서 불보장 확인 → `Collections.unmodifiableMap(new LinkedHashMap<>(...))` 사용
+  - `Map.copyOf()`는 `LinkedHashMap`의 삽입 순서를 보장하지 않음 (HashMap 정렬 기반)
+  - `Collections.unmodifiableMap()` + `LinkedHashMap` 복사본으로 순서 보존 + 불변성 확보
+- **Stream 랜덤 분기**: `Math.random() < 0.5 ? _loop() : _stream()`
+  - `findAll`, `zip` (2 overloads), `unionOf`, `intersectionOf`, `differenceOf`, `indexing`, `grouping`
+  - **추가**: `asMap` (3 overloads), `castKeyValue`
+
+### 근거
+- 단일 클래스에 List와 Map 유틸리지를 함께 배치하여 API 발견성 향상
+- Python-style 음수 인덱스로 StringUtil과 일관성 있는 UX
+- `LinkedHashMap`/`LinkedHashSet`으로 삽입 순서 보존
+- `@SuppressWarnings("unchecked")`는 최소화 (toArray, castKeyValue만)
+
+### 근거
+- `Map.copyOf()`의 순서 비보장 문제는 JDK 내부 구현(`MapN` 사용)에 의해 발생
+- `Collections.unmodifiableMap(new LinkedHashMap<>(original))`은 복사본 생성 + 순서 보존 + 불변 뷰 제공
+- Stream + 랜덤 분기 패턴은 StringUtil에서 검증된 접근 방식

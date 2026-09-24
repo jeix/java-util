@@ -25,11 +25,41 @@ java-util/
 ├── mvnw                    # Unix용 Maven wrapper
 ├── mvnw.cmd                # Windows용 Maven wrapper
 ├── pom.xml                 # Maven 빌드 설정
+├── AGENTS.md               # 작업 가이드라인
+├── PRD.md                  # 프로젝트 요구사항 정의
+├── PLAN.md                 # 실행 계획
+├── DECISION.md             # 설계 결정 기록
 └── src/
     ├── main/java/
-    │   └── s/Hello.java    # 유틸리티 클래스
+    │   ├── s/Hello.java         # 유틸리티 클래스
+    │   ├── s/util/
+    │   │   ├── StringUtil.java   # 문자열 유틸리티 (25개 메서드)
+    │   │   └── CollectionUtil.java # 컬렉션 유틸리티 (List/Map)
+    │   └── s/type/tuple/
+    │       ├── Pair.java         # 2-튜플
+    │       ├── Triplet.java      # 3-튜플
+    │       └── Quartet.java      # 4-튜플
     └── test/java/
-        └── s/HelloTest.java # JUnit 5 테스트
+        ├── s/HelloTest.java
+        ├── s/util/StringUtilTest.java
+        ├── s/util/CollectionUtilTest.java
+        └── s/type/tuple/TupleTest.java
+```
+
+## 모듈
+
+| 패키지 | 설명 |
+|--------|------|
+| `s.Hello` | 기본 유틸리티 (greet, toJson, isPalindrome) |
+| `s.util.StringUtil` | 문자열 처리 (isBlank, isEmpty, slice, trimLeadingZero, repeat, reverse, lpad/rpad, join, split) |
+| `s.util.CollectionUtil` | 컬렉션 처리 (zip, set operations, slice, asMap, castKeyValue) |
+| `s.type.tuple` | 튜플 타입 (Pair, Triplet, Quartet) - Jackson 직렬화 지원 |
+
+## 테스트
+
+```bash
+# 전체 테스트 (151개)
+./mvnw clean test
 ```
 
 ## 의존성

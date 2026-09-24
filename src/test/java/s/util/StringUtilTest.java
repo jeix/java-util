@@ -307,8 +307,13 @@ class StringUtilTest {
     }
 
     @Test
-    void head_negativeSize_returnsEmpty() {
-        assertEquals("", StringUtil.head("hello", -1));
+    void head_negativeSize_returnsFromOffset() {
+        assertEquals("hel", StringUtil.head("hello", -2));
+    }
+
+    @Test
+    void head_negativeSizeLargerThanLength_returnsEmpty() {
+        assertEquals("", StringUtil.head("hello", -10));
     }
 
     @Test
@@ -322,8 +327,13 @@ class StringUtilTest {
     }
 
     @Test
-    void tail_negativeSize_returnsEmpty() {
-        assertEquals("", StringUtil.tail("hello", -1));
+    void tail_negativeSize_returnsFromBeginIndex() {
+        assertEquals("o", StringUtil.tail("hello", -1));
+    }
+
+    @Test
+    void tail_negativeSizeLargerThanLength_returnsFullString() {
+        assertEquals("hello", StringUtil.tail("hello", -10));
     }
 
     @Test
@@ -348,17 +358,22 @@ class StringUtilTest {
 
     @Test
     void repeat_createsRepeatedString() {
-        assertEquals("aaa", StringUtil.repeat('a', 3));
+        assertEquals("aaa", StringUtil.repeat("a", 3));
     }
 
     @Test
     void repeat_zero_returnsEmpty() {
-        assertEquals("", StringUtil.repeat('a', 0));
+        assertEquals("", StringUtil.repeat("a", 0));
     }
 
     @Test
     void repeat_negative_returnsEmpty() {
-        assertEquals("", StringUtil.repeat('a', -1));
+        assertEquals("", StringUtil.repeat("a", -1));
+    }
+
+    @Test
+    void repeat_multiCharString() {
+        assertEquals("ababab", StringUtil.repeat("ab", 3));
     }
 
     @Test
@@ -454,5 +469,11 @@ class StringUtilTest {
         List<String> result = StringUtil.split("hello", null);
         assertEquals(1, result.size());
         assertEquals("hello", result.get(0));
+    }
+
+    @Test
+    void split_returnsImmutableList() {
+        List<String> result = StringUtil.split("a,b,c", ",");
+        assertThrows(UnsupportedOperationException.class, () -> result.add("d"));
     }
 }

@@ -4,10 +4,14 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
 
@@ -15,26 +19,18 @@ import lombok.experimental.UtilityClass;
 public class StringUtil {
 
     private static final Pattern TRIM_LEADING_ZERO_PATTERN = Pattern.compile("^0+(?!$)");
+    private static final Random RANDOM = new Random();
 
     public boolean isBlank(String s) {
-        if (s == null) {
-            return true;
-        }
-        return s.trim().isEmpty();
+        return s == null ? true : s.trim().isEmpty();
     }
 
     public boolean isEmpty(String s) {
-        if (s == null) {
-            return true;
-        }
-        return s.isEmpty();
+        return s == null ? true : s.isEmpty();
     }
 
     public String nonNullOf(String value, String dflt) {
-        if (value == null) {
-            return dflt;
-        }
-        return value;
+        return value == null ? dflt : value;
     }
 
     public String nonNullOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
@@ -42,17 +38,11 @@ public class StringUtil {
             return dfltSupplier.get();
         }
         String value = supplier.get();
-        if (value == null) {
-            return dfltSupplier.get();
-        }
-        return value;
+        return value == null ? dfltSupplier.get() : value;
     }
 
     public String nonBlankOf(String value, String dflt) {
-        if (isBlank(value)) {
-            return dflt;
-        }
-        return value;
+        return isBlank(value) ? dflt : value;
     }
 
     public String nonBlankOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
@@ -60,17 +50,11 @@ public class StringUtil {
             return dfltSupplier.get();
         }
         String value = supplier.get();
-        if (isBlank(value)) {
-            return dfltSupplier.get();
-        }
-        return value;
+        return isBlank(value) ? dfltSupplier.get() : value;
     }
 
     public String nonEmptyOf(String value, String dflt) {
-        if (isEmpty(value)) {
-            return dflt;
-        }
-        return value;
+        return isEmpty(value) ? dflt : value;
     }
 
     public String nonEmptyOf(Supplier<String> supplier, Supplier<String> dfltSupplier) {
@@ -78,10 +62,7 @@ public class StringUtil {
             return dfltSupplier.get();
         }
         String value = supplier.get();
-        if (isEmpty(value)) {
-            return dfltSupplier.get();
-        }
-        return value;
+        return isEmpty(value) ? dfltSupplier.get() : value;
     }
 
     public String firstNonBlankOrLast(String value1, String value2, String... values) {
@@ -91,12 +72,19 @@ public class StringUtil {
         if (!isBlank(value2)) {
             return value2;
         }
-        for (String value : values) {
-            if (!isBlank(value)) {
-                return value;
+        if (RANDOM.nextBoolean()) {
+            return Arrays.stream(values)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse(values != null && values.length > 0 ? values[values.length - 1] : null);
+        } else {
+            for (String value : values) {
+                if (!isBlank(value)) {
+                    return value;
+                }
             }
+            return values != null && values.length > 0 ? values[values.length - 1] : null;
         }
-        return values != null && values.length > 0 ? values[values.length - 1] : null;
     }
 
     public String firstNonBlankOrLast(Supplier<String> supplier1, Supplier<String> supplier2) {
@@ -116,29 +104,29 @@ public class StringUtil {
     }
 
     private String _firstNonBlankOrLast(Supplier<String> supplier1, Supplier<String> supplier2, Supplier<String>... suppliers) {
-        if (supplier1 != null) {
-            String value = supplier1.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
-        if (supplier2 != null) {
-            String value = supplier2.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
+        List<Supplier<String>> all = new ArrayList<>();
+        if (supplier1 != null) all.add(supplier1);
+        if (supplier2 != null) all.add(supplier2);
         if (suppliers != null) {
-            for (Supplier<String> supplier : suppliers) {
-                if (supplier != null) {
-                    String value = supplier.get();
-                    if (!isBlank(value)) {
-                        return value;
-                    }
+            for (Supplier<String> s : suppliers) {
+                if (s != null) all.add(s);
+            }
+        }
+        if (RANDOM.nextBoolean()) {
+            return all.stream()
+                    .map(Supplier::get)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            for (Supplier<String> supplier : all) {
+                String value = supplier.get();
+                if (!isBlank(value)) {
+                    return value;
                 }
             }
+            return null;
         }
-        return null;
     }
 
     public String firstNonBlankOrEmpty(String value1, String value2, String... values) {
@@ -148,12 +136,19 @@ public class StringUtil {
         if (!isBlank(value2)) {
             return value2;
         }
-        for (String value : values) {
-            if (!isBlank(value)) {
-                return value;
+        if (RANDOM.nextBoolean()) {
+            return Arrays.stream(values)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse("");
+        } else {
+            for (String value : values) {
+                if (!isBlank(value)) {
+                    return value;
+                }
             }
+            return "";
         }
-        return "";
     }
 
     public String firstNonBlankOrEmpty(Supplier<String> supplier1, Supplier<String> supplier2) {
@@ -173,29 +168,29 @@ public class StringUtil {
     }
 
     private String _firstNonBlankOrEmpty(Supplier<String> supplier1, Supplier<String> supplier2, Supplier<String>... suppliers) {
-        if (supplier1 != null) {
-            String value = supplier1.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
-        if (supplier2 != null) {
-            String value = supplier2.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
+        List<Supplier<String>> all = new ArrayList<>();
+        if (supplier1 != null) all.add(supplier1);
+        if (supplier2 != null) all.add(supplier2);
         if (suppliers != null) {
-            for (Supplier<String> supplier : suppliers) {
-                if (supplier != null) {
-                    String value = supplier.get();
-                    if (!isBlank(value)) {
-                        return value;
-                    }
+            for (Supplier<String> s : suppliers) {
+                if (s != null) all.add(s);
+            }
+        }
+        if (RANDOM.nextBoolean()) {
+            return all.stream()
+                    .map(Supplier::get)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse("");
+        } else {
+            for (Supplier<String> supplier : all) {
+                String value = supplier.get();
+                if (!isBlank(value)) {
+                    return value;
                 }
             }
+            return "";
         }
-        return "";
     }
 
     public String firstNonBlankOrNull(String value1, String value2, String... values) {
@@ -205,12 +200,19 @@ public class StringUtil {
         if (!isBlank(value2)) {
             return value2;
         }
-        for (String value : values) {
-            if (!isBlank(value)) {
-                return value;
+        if (RANDOM.nextBoolean()) {
+            return Arrays.stream(values)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            for (String value : values) {
+                if (!isBlank(value)) {
+                    return value;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     public String firstNonBlankOrNull(Supplier<String> supplier1, Supplier<String> supplier2) {
@@ -230,43 +232,43 @@ public class StringUtil {
     }
 
     private String _firstNonBlankOrNull(Supplier<String> supplier1, Supplier<String> supplier2, Supplier<String>... suppliers) {
-        if (supplier1 != null) {
-            String value = supplier1.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
-        if (supplier2 != null) {
-            String value = supplier2.get();
-            if (!isBlank(value)) {
-                return value;
-            }
-        }
+        List<Supplier<String>> all = new ArrayList<>();
+        if (supplier1 != null) all.add(supplier1);
+        if (supplier2 != null) all.add(supplier2);
         if (suppliers != null) {
-            for (Supplier<String> supplier : suppliers) {
-                if (supplier != null) {
-                    String value = supplier.get();
-                    if (!isBlank(value)) {
-                        return value;
-                    }
+            for (Supplier<String> s : suppliers) {
+                if (s != null) all.add(s);
+            }
+        }
+        if (RANDOM.nextBoolean()) {
+            return all.stream()
+                    .map(Supplier::get)
+                    .filter(v -> !isBlank(v))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            for (Supplier<String> supplier : all) {
+                String value = supplier.get();
+                if (!isBlank(value)) {
+                    return value;
                 }
             }
+            return null;
         }
-        return null;
     }
 
     public String stringify(Object obj) {
         if (obj == null) {
             return "null";
         }
-        if (obj instanceof Date) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            return sdf.format((Date) obj);
-        }
-        if (obj instanceof BigDecimal) {
-            return ((BigDecimal) obj).toPlainString();
-        }
-        return obj.toString();
+        return switch (obj) {
+            case Date d -> {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                yield sdf.format(d);
+            }
+            case BigDecimal bd -> bd.toPlainString();
+            default -> obj.toString();
+        };
     }
 
     public String slice(String s, int begin) {
@@ -319,11 +321,15 @@ public class StringUtil {
         if (s == null) {
             return null;
         }
+        int len = s.length();
         if (size < 0) {
-            return "";
+            size = len + size;
+            if (size < 0) {
+                size = 0;
+            }
         }
-        if (size > s.length()) {
-            return s;
+        if (size > len) {
+            size = len;
         }
         return s.substring(0, size);
     }
@@ -332,10 +338,15 @@ public class StringUtil {
         if (s == null) {
             return null;
         }
-        if (size < 0) {
-            return "";
-        }
         int len = s.length();
+        if (size < 0) {
+            size = -size;
+            int beginIndex = len - size;
+            if (beginIndex < 0) {
+                beginIndex = 0;
+            }
+            return s.substring(beginIndex);
+        }
         if (size > len) {
             return s;
         }
@@ -349,13 +360,22 @@ public class StringUtil {
         return TRIM_LEADING_ZERO_PATTERN.matcher(s).replaceFirst("");
     }
 
-    public String repeat(char c, int size) {
-        if (size <= 0) {
+    public String repeat(String c, int size) {
+        if (size <= 0 || c == null || c.isEmpty()) {
             return "";
         }
-        char[] chars = new char[size];
-        Arrays.fill(chars, c);
-        return new String(chars);
+        if (RANDOM.nextBoolean()) {
+            return Stream.generate(() -> c)
+                    .limit(size)
+                    .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                    .toString();
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < size; i++) {
+                sb.append(c);
+            }
+            return sb.toString();
+        }
     }
 
     public String reverse(String s) {
@@ -504,24 +524,30 @@ public class StringUtil {
         if (delimiter == null) {
             delimiter = "";
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            if (i > 0) {
-                sb.append(delimiter);
+        if (RANDOM.nextBoolean()) {
+            return list.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining(delimiter));
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < list.size(); i++) {
+                if (i > 0) {
+                    sb.append(delimiter);
+                }
+                sb.append(list.get(i));
             }
-            sb.append(list.get(i));
+            return sb.toString();
         }
-        return sb.toString();
     }
 
     public List<String> split(String s, String regex) {
         if (s == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         if (regex == null) {
-            return new ArrayList<>(List.of(s));
+            return Collections.unmodifiableList(new ArrayList<>(List.of(s)));
         }
         String[] parts = s.split(regex, -1);
-        return new ArrayList<>(Arrays.asList(parts));
+        return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(parts)));
     }
 }

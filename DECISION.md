@@ -193,3 +193,50 @@
   `null` 함수는 두 구현 모두 걸러 `CollectionUtil.asMap(entries)`의 `null` 항목 처리와 규칙을 맞췄고,
   `Pipeline`의 private 팩터리는 프로젝트 규칙(private 메서드 `_` 접두사)에 따라 `_init`으로 두었습니다.
   `Pipeline`을 `Function`으로 구현하는 것은 필요해지면 추가할 수 있습니다(현재는 `then`/`apply`만 제공).
+
+## 22. DateTimeUtil은 압축형과 구분자형 두 가지 포맷만 지원한다
+
+- 결정: 포맷 상수로 `yyyyMMdd`, `HHmmss`, `yyyyMMddHHmmss`(압축형)와 `yyyy-MM-dd`, `HH:mm:ss`,
+  `yyyy-MM-dd HH:mm:ss`(구분자형)만 두고, 이름에 `2`가 붙은 메서드는 구분자형을 사용합니다.
+  문자열 파싱은 두 포맷을 순서대로 시도하고, 모두 실패하면 `null`을 반환합니다.
+- 대안: 임의의 포맷을 인자로 받는 메서드 추가, 파싱 실패 시 예외 발생, ISO-8601(`2024-01-15T10:30:50`)까지 허용.
+- 근거: 포맷이 두 개뿐이라 호출부가 포맷을 지정할 필요가 없고, 요청한 메서드 목록에 그대로 대응합니다.
+  읽을 수 없는 값을 예외로 처리하지 않은 것은 `StringUtil`/`CollectionUtil`의 "정상적으로 처리할 수 없으면 그대로
+  리턴" 규칙을 따른 것입니다. `T` 구분자는 요청에 없어 지원하지 않습니다(필요해지면 포맷 후보에 추가).
+
+## 23. 날짜/시각 파싱은 uuuu + STRICT로 한다
+
+- 결정: `DateTimeFormatter.ofPattern(...)`에 `uuuu`(연도)를 사용하고 `ResolverStyle.STRICT`를 적용합니다.
+  파싱 실패는 `DateTimeParseException`을 잡아 다음 포맷을 시도합니다.
+- 대안: `yyyy` 사용(기본 `SMART` 해석), 예외를 그대로 전파.
+- 근거: `yyyy`는 연도-시대(year-of-era) 필드라 `STRICT`에서 시대 정보 없이는 해석되지 않고, `SMART`는
+  `20240230`(2월 30일)을 `20240229`로 조용히 보정합니다. `uuuu` + `STRICT`는 잘못된 날짜를 만들지 않아
+  `localDateOf("20240230")`이 `null`이 되고, 이 규칙을 테스트로 확인합니다.
+
+## 24. eval과 eom은 입력과 같은 형식으로 반환한다
+
+- 결정: `eval(date, op, n, unit)`과 `eom(date)`은 입력이 구분자형이면 구분자형으로, 압축형이면 압축형으로
+  반환합니다. `eval`에 시각이 있는 입력을 주면 결과에도 시각을 유지하고, `eom`은 "그 달의 마지막 날"이므로
+  날짜만 반환합니다.
+- 대안: 항상 압축형으로 반환, 항상 구분자형으로 반환, `stringify`/`stringify2`처럼 메서드를 두 개로 분리.
+- 근거: 입력 형식을 그대로 돌려주면 `DateTimeUtil.eval("2024-01-31", "+", 1, "M")`처럼 구분자형을 쓰는 호출부가
+  결과 형식을 다시 바꾸지 않아도 됩니다. 시각 유지도 같은 이유이며, 날짜만 준 경우에는 `00:00:00`을 붙이지 않습니다.
+  문자열을 받아 문자열을 돌려주는 메서드가 두 개뿐이라 오버로드를 늘리는 것보다 이 규칙이 단순합니다.
+
+## 25. eval의 잘못된 연산자·단위는 예외 대신 null/false로 처리한다
+
+- 결정: `eval(date1, op, date2)`는 값이 없거나 지원하지 않는 연산자면 `false`, `eval(date, op, n, unit)`은
+  값/연산자/단위를 처리할 수 없으면 `null`을 반환합니다. 연산자와 단위의 앞뒤 공백은 무시하고 단위 대소문자는
+  구분하지 않습니다("D"와 "d"가 같음).
+- 대안: `IllegalArgumentException` 발생(`CollectionUtil.asMap`의 홀수 항목 처리처럼), 연산자 기본값으로 `+` 사용.
+- 근거: 두 메서드의 입력은 대부분 사용자 입력·설정값에서 오고, 반환 타입이 `boolean`/`String`이라 "비교 결과 없음"과
+  "연산 결과 없음"을 각각 `false`/`null`로 표현할 수 있습니다. 반면 잘못된 날짜 문자열은 `22`번 결정에 따라
+  파싱 단계에서 이미 `null`로 처리됩니다.
+
+## 26. toTimestamp는 시스템 기본 시간대를 사용한다
+
+- 결정: `toTimestamp(LocalDate)`는 `date.atStartOfDay()`를, `toTimestamp(LocalDateTime)`은
+  `Timestamp.valueOf(datetime)`을 사용합니다.
+- 대안: `ZoneId` 인자를 받는 오버로드 추가, UTC 고정, `Date.from(...)` 사용.
+- 근거: `Timestamp.valueOf(LocalDateTime)`이 시스템 기본 시간대를 쓰므로 두 변환이 같은 규칙을 따르게 됩니다.
+  시간대를 명시해야 하는 호출부가 생기면 `ZoneId`를 받는 오버로드를 추가하면 됩니다.

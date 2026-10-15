@@ -3,8 +3,8 @@
 ## 현재 상태
 
 - 브랜치 `codex-deepseek`에서 작업 중이고 `origin`에 push되어 추적 중입니다(upstream: `origin/codex-deepseek`).
-- `s.Hello`, `s.util.StringUtil`(문자열 유틸리티 + `pipe`/`Pipeline`), `s.util.CollectionUtil`, `s.type.tuple`(Pair/Triplet/Quartet) 구현과 테스트를 마쳤습니다.
-- `./mvnw -o clean package` 기준 전체 테스트 91개가 통과합니다.
+- `s.Hello`, `s.util.StringUtil`(문자열 유틸리티 + `pipe`/`Pipeline`), `s.util.CollectionUtil`, `s.util.DateTimeUtil`, `s.type.tuple`(Pair/Triplet/Quartet) 구현과 테스트를 마쳤습니다.
+- `./mvnw -o clean package` 기준 전체 테스트 128개가 통과합니다.
 
 ## 수행 결과
 
@@ -32,6 +32,9 @@
 | 20 | `StringUtil`에 `pipe(Function...)`, `pipe()`, `Pipeline` 클래스 추가(codelet 예제 재현 테스트 포함, 전체 90개 테스트 통과) 및 문서 갱신 | 완료 |
 | 21 | 배치 정리: `pipe(Function...)`과 `pipe()`를 `Pipeline` 클래스 바로 앞으로 이동 | 완료 |
 | 22 | `pipe(Function...)`에 codelet의 impl. 1(입력값 축소 구현) 추가 및 랜덤 분기 적용(랜덤 분기 검증 테스트 추가, 전체 91개 테스트 통과) | 완료 |
+| 23 | `s.util.DateTimeUtil` 구현(현재 날짜/시각, `stringify`/`stringify2`, `localDateOf`/`localTimeOf`/`localDateTimeOf`, `toTimestamp`, `eval` 비교·연산, `eom`) | 완료 |
+| 24 | `s.util.DateTimeUtilTest` 작성(37개 테스트 실행, 전체 128개 테스트 통과) | 완료 |
+| 25 | 문서 갱신(README `DateTimeUtil` 섹션, PRD 요구사항 R16·R17, PLAN·DECISION) | 완료 |
 
 ## 다음 단계
 

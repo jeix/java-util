@@ -30,6 +30,8 @@
 | R13 | `s.util.CollectionUtil`에서 리스트/맵의 `null` 처리, `zip`, 항목 검색, 집합 연산, 부분 리스트, 색인·분류, 맵 생성·복사를 제공하고 `CollectionUtilTest`에서 검증한다. |
 | R14 | `CollectionUtil`의 `zip(list1, list2, mixer)`, `findOne`, `indexing`, `grouping`, `asMap(items)`, `asMap(entries)`는 반복문 구현과 스트림 구현을 두고 실행 시 랜덤하게 분기하며, 두 구현은 같은 결과를 낸다. |
 | R15 | `StringUtil.pipe(fns)`는 함수들을 순서대로 적용하는 `Function<String, String>`을 만들고, `StringUtil.pipe()`는 `then`으로 함수를 이어 붙이는 `Pipeline`을 만든다. 두 방식 모두 `null` 함수를 건너뛰고 빈 파이프라인은 입력을 그대로 반환하며, `pipe(fns)`는 함수 합성 구현과 입력값 축소 구현을 두고 실행 시 랜덤하게 분기한다(두 구현은 같은 결과). |
+| R16 | `s.util.DateTimeUtil`에서 현재 날짜/시각 문자열(`date`, `time`, `datetime`과 구분자형 `2` 계열), `LocalDate`/`LocalTime`/`LocalDateTime` 변환·파싱, `Timestamp` 변환, 날짜 비교(`eval`)와 날짜 연산(`eval`), 월말 계산(`eom`)을 제공한다. |
+| R17 | `DateTimeUtil`은 압축형(`yyyyMMdd`, `HHmmss`, `yyyyMMddHHmmss`)과 구분자형(`yyyy-MM-dd`, `HH:mm:ss`, `yyyy-MM-dd HH:mm:ss`)을 모두 지원한다. 문자열을 받는 메서드는 `null`/공백이거나 읽을 수 없는 값에 `null`(비교는 `false`)을 반환하고, 날짜 연산·월말 결과는 입력과 같은 형식으로 반환하며 잘못된 날짜는 보정하지 않는다. 모든 public 메서드를 `s.util.DateTimeUtilTest`에서 검증한다. |
 
 ## 범위 밖
 

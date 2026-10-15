@@ -41,10 +41,12 @@
     ├── main/java/s/type/tuple/Quartet.java
     ├── main/java/s/util/StringUtil.java    # 문자열 유틸리티
     ├── main/java/s/util/CollectionUtil.java # 리스트/맵 유틸리티
+    ├── main/java/s/util/DateTimeUtil.java  # 날짜/시각 유틸리티
     ├── test/java/s/HelloTest.java          # JUnit 5 테스트 예시
     ├── test/java/s/type/tuple/TupleTest.java
     ├── test/java/s/util/StringUtilTest.java
-    └── test/java/s/util/CollectionUtilTest.java
+    ├── test/java/s/util/CollectionUtilTest.java
+    └── test/java/s/util/DateTimeUtilTest.java
 ```
 
 유틸리티 클래스는 `src/main/java/s` 아래에, 테스트 클래스는 `src/test/java/s` 아래에 같은 패키지 구조로 추가합니다.
@@ -116,6 +118,37 @@ String b = StringUtil.pipe()
 - `indexing`은 같은 색인에 대해 먼저 나온 항목을 유지하고, `grouping`은 항목 순서를 유지합니다.
 - `zip(list1, list2, mixer)`, `findOne`, `indexing`, `grouping`, `asMap(items)`, `asMap(entries)`는 반복문 구현과
   스트림 구현을 함께 두고 실행 시 랜덤하게 분기합니다. 두 구현은 같은 결과를 냅니다.
+
+## s.util.DateTimeUtil
+
+| 메서드 | 설명 |
+| --- | --- |
+| `today`, `date`, `date2` | 오늘 날짜(`yyyyMMdd`, `yyyy-MM-dd`) |
+| `time`, `time2` | 현재 시각(`HHmmss`, `HH:mm:ss`) |
+| `datetime`, `datetime2` | 현재 일시(`yyyyMMddHHmmss`, `yyyy-MM-dd HH:mm:ss`) |
+| `stringify`, `stringify2` | `LocalDate`/`LocalTime`/`LocalDateTime`을 압축형/구분자형 문자열로 변환 |
+| `localDateOf`, `localTimeOf`, `localDateTimeOf` | 압축형/구분자형 문자열을 `LocalDate`/`LocalTime`/`LocalDateTime`으로 파싱 |
+| `toTimestamp(LocalDate)`, `toTimestamp(LocalDateTime)` | `java.sql.Timestamp`로 변환 |
+| `eval(date1, op, date2)` | `=`, `!=`, `>=`, `>`, `<=`, `<` 비교 |
+| `eval(date, op, n, unit)` | `+`/`-` 연산자와 `D`/`W`/`M`/`Y` 단위로 날짜 연산 |
+| `eom(date)` | 그 달의 마지막 날 |
+
+- 포맷은 압축형(`yyyyMMdd`, `HHmmss`, `yyyyMMddHHmmss`)과 구분자형(`yyyy-MM-dd`, `HH:mm:ss`,
+  `yyyy-MM-dd HH:mm:ss`)을 지원합니다. 이름에 `2`가 붙은 메서드는 구분자형을 사용합니다.
+- 문자열을 받는 메서드는 `null`/공백이거나 지원하는 포맷으로 읽을 수 없으면 `null`을, `eval(date1, op, date2)`는
+  `false`를 반환합니다. `20240230`처럼 잘못된 날짜는 보정하지 않습니다.
+- `eval(date, op, n, unit)`과 `eom(date)`은 입력이 구분자형이면 구분자형으로, 압축형이면 압축형으로 반환합니다.
+  `eval`에 시각이 있는 입력을 주면 시각도 유지합니다.
+- `today()`는 `date()`의 별칭이고, `toTimestamp(LocalDate)`는 그 날의 00:00:00으로 해석합니다.
+
+```java
+String today = DateTimeUtil.date();                        // "20260115"
+String datetime = DateTimeUtil.datetime2();                // "2026-01-15 12:26:41"
+LocalDate date = DateTimeUtil.localDateOf("2024-01-15");   // LocalDate.of(2024, 1, 15)
+String afterMonth = DateTimeUtil.eval("2024-01-31", "+", 1, "M"); // "20240229"
+String lastDay = DateTimeUtil.eom("2024-02-10");           // "20240229"
+boolean isAfter = DateTimeUtil.eval("20240116", ">", "20240115"); // true
+```
 
 ## s.type.tuple
 

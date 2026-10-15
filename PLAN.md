@@ -56,6 +56,17 @@
 - [x] 가변인자 배열을 `List` 에 옮겨 담아 `[varargs]` 경고 제거
 - [x] `StringUtilTest` 에 `pipe` 그룹 7개 추가, 리플렉션으로 두 구현 비교, 테스트 5회 반복
 
+## 7. `s.util.DateTimeUtil`
+
+- [x] 21개 메서드 구현 — 지금(today·date·time·datetime), stringify, 파싱, toTimestamp, eval(비교·가감), eom
+- [x] 파싱 3개에 무작위 분기 추가 — 포맷터 방식 / 숫자 추출 방식
+- [x] 받아들이는 형식 검사와 예외(IllegalArgumentException)를 한 곳에 모아 두 구현을 맞춤
+- [x] 시각·일시 포맷터를 `ResolverStyle.STRICT` 로 — 스마트 모드는 `20260230` 을 `20260228` 로 바꾼다
+- [x] `eom`·`eval`(가감)은 들어온 형식 그대로 돌려주기, 달·해 가감은 그 달 마지막 날로 맞추기
+- [x] `DateTimeUtilTest` — `@Slf4j`, `@Nested` 7그룹
+- [x] 리플렉션으로 두 구현 맞붙이기(날짜 312 · 시각 112 · 일시 30 표본), public API 반복 호출 확인
+- [x] 테스트 10회 반복 실행
+
 ## 남은 것
 
 - [ ] 랜덤 분기 두 구현의 동등성 검사를 테스트로 남길지 검토 — 지금은 리플렉션으로 한 번씩 확인만 한다

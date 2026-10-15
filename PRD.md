@@ -59,10 +59,27 @@
 - 값이 같으면 같은 것으로 본다(`@EqualsAndHashCode`).
 - JSON 으로 바꾸면 `{"ord1": ..., "ord2": ...}` 모양이 되고, 그 JSON 으로 다시 만들 수 있다.
 
-### R5. 테스트
+### R5. 날짜·시각 유틸리티 `s.util.DateTimeUtil`
+
+스태틱 메서드 21개.
+
+| 묶음 | 메서드 |
+|---|---|
+| 지금 | `today()`(=`date()`), `date()`, `date2()`, `time()`, `time2()`, `datetime()`, `datetime2()` |
+| 문자열로 | `stringify(LocalDate·LocalTime·LocalDateTime)`, `stringify2(...)` — 각각 `yyyyMMdd`/`yyyy-MM-dd`, `HHmmss`/`HH:mm:ss`, `yyyyMMddHHmmss`/`yyyy-MM-dd HH:mm:ss` |
+| 파싱 | `localDateOf(date)`, `localTimeOf(time)`, `localDateTimeOf(datetime)` — 두 형식을 모두 받는다 |
+| Timestamp | `toTimestamp(LocalDate)`(그 날 00:00:00), `toTimestamp(LocalDateTime)` |
+| 비교 | `eval(date1, op, date2)` — `=·!=·>=·>·<=·<` |
+| 가감 | `eval(date, op, n, unit)` — `+·-`, `D·W·M·Y`. 달·해는 그 달에 없는 날을 마지막 날로 맞춘다 |
+| 그 달의 끝 | `eom(date)` |
+
+- 문자열을 돌려주는 `eom`·`eval`(가감)은 들어온 형식을 그대로 따른다.
+- `null` 규칙은 클래스 Javadoc 에 있다(파싱은 `null` 을 견디고, `boolean` 을 돌려주는 비교는 견디지 못한다).
+
+### R6. 테스트
 
 - 클래스마다 테스트 클래스를 둔다: `s.HelloTest`, `s.util.StringUtilTest`, `s.util.CollectionUtilTest`,
-  `s.type.tuple.TupleTest`.
+  `s.type.tuple.TupleTest`, `s.util.DateTimeUtilTest`.
 - JUnit 5 로 쓰고, 테스트 클래스에 Lombok `@Slf4j` 를 붙인다.
 
 ## 품질 기준

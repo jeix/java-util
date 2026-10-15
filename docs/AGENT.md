@@ -35,5 +35,6 @@
   - `s.util.StringUtil` / `StringUtilTest` (`pipe`/`Pipeline` 포함)
   - `s.type.tuple.Pair`·`Triplet`·`Quartet` / `TupleTest`
   - `s.util.CollectionUtil` / `CollectionUtilTest`
-- 테스트: `./mvnw test` → Tests run: 124, Failures: 0, Errors: 0
-- 다음 작업: `docs/PLAN.md`의 M4
+  - `s.util.DateTimeUtil` / `DateTimeUtilTest`
+- 테스트: `./mvnw test` → Tests run: 144, Failures: 0, Errors: 0
+- 다음 작업: `docs/PLAN.md`의 M5

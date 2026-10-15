@@ -38,12 +38,14 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
     │   ├── s/type/tuple/Triplet.java
     │   ├── s/type/tuple/Quartet.java
     │   ├── s/util/StringUtil.java
-    │   └── s/util/CollectionUtil.java
+    │   ├── s/util/CollectionUtil.java
+    │   └── s/util/DateTimeUtil.java
     └── test/java/
         ├── s/HelloTest.java
         ├── s/type/tuple/TupleTest.java
         ├── s/util/StringUtilTest.java
-        └── s/util/CollectionUtilTest.java
+        ├── s/util/CollectionUtilTest.java
+        └── s/util/DateTimeUtilTest.java
 ```
 
 ## 의존성
@@ -62,6 +64,7 @@ Windows에서는 `mvnw.cmd test`를 사용합니다.
 | --- | --- |
 | `s.util.StringUtil` | 문자열 판별/기본값/선택/변환/패딩/조인·분리, 함수 합성(`pipe`/`Pipeline`) |
 | `s.util.CollectionUtil` | 리스트·맵 판별, 집합 연산, 슬라이스, 색인·분류, 변환 (결과 컬렉션은 불변) |
+| `s.util.DateTimeUtil` | 현재 일시 포맷, `LocalDate`·`LocalTime`·`LocalDateTime` 포맷/파싱, `Timestamp` 변환, 날짜 비교·연산, 월말 계산 |
 | `s.type.tuple.Pair` / `Triplet` / `Quartet` | 순서 있는 값 묶음, `@EqualsAndHashCode`, JSON 키 `ord1`~`ordN` |
 
 ## 사용 예
@@ -82,6 +85,13 @@ StringUtil.pipe()
 // 컬렉션 (반환값은 불변)
 CollectionUtil.unionOf(List.of(1, 2), List.of(2, 3)); // [1, 2, 3]
 CollectionUtil.asMap("foo", 42);                      // {foo=42}
+
+// 날짜·시간 (연산·월말 계산은 입력 포맷 유지)
+DateTimeUtil.date();                                  // "20261015"
+DateTimeUtil.localDateOf("2024-02-29");               // LocalDate 2024-02-29
+DateTimeUtil.eval("20240131", "+", 1, "M");           // "20240229"
+DateTimeUtil.eval("20240102", ">", "2024-01-01");     // true
+DateTimeUtil.eom("2024-04-15");                       // "20240430"
 
 // 튜플
 Quartet<Integer, String, Long, Boolean> quartet = Quartet.of(1, "a", 2L, true);

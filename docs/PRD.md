@@ -18,6 +18,7 @@
   - 소스/테스트 디렉터리 구조, Maven 빌드 구성
   - 문자열 유틸리티 `s.util.StringUtil`
   - 컬렉션 유틸리티 `s.util.CollectionUtil`
+  - 날짜·시간 유틸리티 `s.util.DateTimeUtil`
   - 순서 있는 값 묶음 타입 `s.type.tuple.Pair`/`Triplet`/`Quartet`
   - 예제 클래스 `s.Hello`와 각 구성의 테스트
 - 제외: 배포 자동화(CI/CD), 외부 서비스 연동, 라이선스 확정
@@ -36,6 +37,7 @@
 | FR-8 | 순서 있는 값 묶음 타입 `s.type.tuple.Pair`/`Triplet`/`Quartet`를 제공하고, JSON 직렬화 키로 `ord1`~`ordN`을 사용한다. |
 | FR-9 | 각 유틸리티/타입에 정상 케이스 1개 이상, 경계/실패 케이스 1개 이상의 테스트를 제공한다. |
 | FR-10 | 테스트 클래스는 Lombok `@Slf4j`로 로깅할 수 있다. |
+| FR-11 | 날짜·시간 유틸리티 `s.util.DateTimeUtil`(현재 일시 포맷, `LocalDate`/`LocalTime`/`LocalDateTime` 포맷·파싱, `Timestamp` 변환, 날짜 비교·단위 연산, 월말 계산)을 제공한다. |
 
 ## 5. 비기능 요구사항
 

@@ -36,15 +36,22 @@
 - [x] 반환 List/Map 불변화, for/while → Stream 대체 구현 + `_coin()` 랜덤 분기(if/else)
 - [x] `./mvnw test` 통과 (Tests run: 121, Failures: 0, Errors: 0, 5회 반복 확인)
 
-### M4. 유틸리티 클래스 추가 확충 — 미착수
+### M4. `s.util.DateTimeUtil` 구현 — 완료
 
-- [ ] 다음 유틸리티 클래스 후보 정의 (예: `NumberUtil`, `DateUtil`)
-- [ ] 클래스별 정상/경계 테스트 작성
-- [ ] `./mvnw test` 회귀 확인
+- [x] `s.util.DateTimeUtil` 구현 (현재 일시 포맷, `LocalDate`/`LocalTime`/`LocalDateTime` 포맷·파싱, `Timestamp` 변환, 비교·연산, 월말)
+- [x] `s.util.DateTimeUtilTest` 작성 (`@Slf4j`, 정상·경계 20건)
+- [x] 두 포맷(`yyyyMMdd`·`yyyy-MM-dd` 등) 파싱 지원, `null`/공백 → `null`
+- [x] `eval(date, op, n, unit)`·`eom`은 입력 포맷 유지, 미지원 op/unit은 `IllegalArgumentException`
+- [x] 파싱·비교·연산·월말 계산에 대체 구현 + `_coin()` 랜덤 분기(if/else, 공유 헬퍼 `_parse`/`_format`)
+- [x] `./mvnw test` 통과 (Tests run: 144, Failures: 0, Errors: 0, 5회 반복 확인)
+
+### M5. 유틸리티 클래스 추가 확충 — 미착수
+
+- [ ] 다음 유틸리티 클래스 후보 정의 (예: `NumberUtil`)
 
 ## 다음 단계
 
-1. M4에서 다룰 유틸리티 클래스 범위를 정한다.
+1. M5에서 다룰 유틸리티 클래스 범위를 정한다.
 2. 클래스 1개 단위로 구현 → 테스트 → 회귀 확인 순서로 진행한다.
 
 ## 확인 방법
@@ -66,3 +73,4 @@
 | 2026-09-16 | M3 반환 컬렉션 불변화, Stream 이중 구현·랜덤 분기(if/else) 후 테스트 121건 5회 통과 |
 | 2026-09-16 | M1 `StringUtil.pipe`/`Pipeline` 추가(이중 구현·랜덤 분기), 테스트 124건 5회 통과 |
 | 2026-09-16 | M1 `StringUtil` 메서드 재배치(pipe는 Pipeline 앞, private은 호출부 뒤), 테스트 124건 통과 |
+| 2026-10-15 | M4 `s.util.DateTimeUtil` 및 `DateTimeUtilTest` 구현, 테스트 144건 5회 통과 |

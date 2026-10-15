@@ -101,3 +101,26 @@
 - `pipe()`/`pipe(Function...)`는 `Pipeline` 클래스 바로 앞에 둔다.
 - private 헬퍼(`_` 접두사)는 이를 호출하는 메서드(군) 다음에 배치한다. 공유 헬퍼(`_supplierValues`, `_suppliers`, `_value`, `_index`, `_pad`)는 해당 메서드군 뒤에, 최다 공유 헬퍼 `_coin()`은 마지막 호출부인 pipe 섹션 직전에 둔다.
 - 근거: 호출 관계가 가까운 위치에 보이도록 해 가독성과 유지보수성을 높인다. 동작 변경 없는 순수 재배치이며 테스트로 회귀를 확인한다.
+
+## D-15. `DateTimeUtil` 동작 규약
+
+- 정적 메서드, `final` + private 생성자, 파라미터 선검사 조기 반환, private 헬퍼 `_` 접두사. `StringUtil`/`CollectionUtil`과 동일 규약.
+- 포맷 상수 6종: `DATE`(`yyyyMMdd`), `DATE2`(`yyyy-MM-dd`), `TIME`(`HHmmss`), `TIME2`(`HH:mm:ss`), `DATETIME`(`yyyyMMddHHmmss`), `DATETIME2`(`yyyy-MM-dd HH:mm:ss`).
+- `today()`는 `date()`의 별칭. `date()`~`datetime2()`는 `LocalDate`/`LocalTime`/`LocalDateTime.now()`를 각 상수로 포맷한다.
+- `stringify`/`stringify2`는 `null` 입력 시 `null`을 반환하고, 그 외에는 대응 포맷 문자열을 반환한다.
+- `localDateOf`/`localTimeOf`/`localDateTimeOf`는 기본형·대시형 두 포맷을 모두 허용한다. `null`/공백은 `null`, 그 외 지원하지 않는 형식은 `DateTimeParseException`.
+- `toTimestamp`는 `null` 입력 시 `null`, 그 외 `Timestamp.valueOf(...)`(날짜는 `atStartOfDay()`)를 반환한다.
+- `eval(date1, op, date2)`는 인자 중 하나라도 `null`이면 `false`, 미지원 `op`는 `IllegalArgumentException`. 두 날짜에 서로 다른 포맷을 허용한다.
+- `eval(date, op, n, unit)`은 `date`가 `null`이면 `null`, 미지원 `op`/`unit`은 `IllegalArgumentException`. 결과는 **입력과 같은 포맷**으로 반환한다. 월 경계는 말일로 클램프한다(`"20240131" +1M` → `"20240229"`).
+- `eom(date)`는 말일을 구해 **입력과 같은 포맷**으로 반환하고, `date`가 `null`이면 `null`.
+- 입력 포맷 판별: `-` 또는 `:`를 포함하면 대시형, 아니면 기본형.
+
+## D-16. `DateTimeUtil` 대체 구현 이중화와 랜덤 분기
+
+- 결정: 파싱·비교·연산·월말 계산에 두 구현을 두고 `_coin()`(`ThreadLocalRandom.nextBoolean()`)으로 분기한다.
+  - 파싱(`_parse`): A=기본형 `try` 후 대시형 폴백, B=`-`/`:` 포함 여부로 포맷을 골라 단일 파싱.
+  - 비교(`eval(date1,op,date2)`): A=`compareTo` 기반, B=`isEqual`/`isBefore`/`isAfter` 기반.
+  - 연산(`eval(date,op,n,unit)`): A=`plusDays`/`plusWeeks`/`plusMonths`/`plusYears`, B=`ChronoUnit` 매핑 후 `plus(amount, unit)`.
+  - 월말(`eom`): A=`TemporalAdjusters.lastDayOfMonth()`, B=`withDayOfMonth(lengthOfMonth())`.
+- 구조: 모든 분기 지점을 `if (_coin()) { ... } else { ... }` 형태로 작성해 들여쓰기 깊이를 맞춘다(D-9와 동일).
+- 근거: D-9/D-12/D-13 방침과 일관되게 두 구현을 유지하고, `randomBranchesProduceConsistentResults` 테스트(100회 반복)와 5회 실행으로 양쪽 분기를 검증한다.

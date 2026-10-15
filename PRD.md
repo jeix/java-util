@@ -3,12 +3,13 @@
 ## 프로젝트 개요
 - **이름**: java-util
 - **목적**: Java 유틸리티 라이브러리
-- **기술 스택**: JDK 21, Maven, Lombok, Jackson, JUnit 5
+- **기술 스택**: JDK 21, Maven, Lombok, Jackson, JUnit 5, SLF4J + Logback (Test Scope)
 
 ## 현재 상태
 - 프로젝트 구조 초기화 완료
 - Maven Wrapper 설정 완료
 - 기본 유틸리티 클래스 및 테스트 존재 (Hello, HelloTest, StringUtil, StringUtilTest)
+  - Hello: @Slf4j 로깅 추가 (greet/toJson/isPalindrome 메서드에 로그 출력)
 - 튜플 타입 클래스 추가 완료 (Pair, Triplet, Quartet, TupleTest)
 - 컬렉션 유틸리티 추가 완료 (CollectionUtil, CollectionUtilTest)
   - 불변 컬렉션 반환 헬퍼 (zip, asMap, castKeyValue, indexing, grouping, copyOf 등)

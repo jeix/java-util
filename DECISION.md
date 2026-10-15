@@ -84,3 +84,14 @@
 ## 18. DateTimeUtil: eom 반환 포맷
 - **결정**: `eom(date)`는 `yyyyMMdd` (compact format)으로 반환
 - **근거**: `date()` / `datetime()` 등 기본 날짜 조회 메서드의 기본 포맷과 일관성 유지
+
+## 19. SLF4J + Logback 의존성 구조
+- **결정**: `slf4j-api`를 `compile` scope, `logback-classic`을 `test` scope로 분리
+- **근거**: 
+  - `slf4j-api`는 main 코드에서도 사용되므로 compile scope (Hello.java @Slf4j)
+  - `logback-classic`은 테스트 시 SLF4J 구현체만 필요하므로 test scope
+  - 라이브러리 사용자는 자신의 SLF4J 바인딩을 제공 (표준 SLF4J 실천)
+
+## 20. Hello 로깅 (@Slf4j)
+- **결정**: `Hello` 클래스에 `@Slf4j` 추가, `greet`/`toJson`/`isPalindrome` 메서드에 로그 출력
+- **근거**: 테스트 시 동작 추적 가능, `@UtilityClass`와 `@Slf4j`의 조화로운 공존 (Lombok이 static final Logger 필드 생성)

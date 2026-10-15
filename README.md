@@ -4,7 +4,7 @@ Java 유틸리티 라이브러리. JDK 21 기반으로 작성되었습니다.
 
 ## 기술 스택
 - **JDK 21**, **Maven Wrapper** (`./mvnw`)
-- **Lombok**, **Jackson**, **JUnit 5**
+- **Lombok**, **Jackson**, **JUnit 5**, **SLF4J** + **Logback** (Test Scope)
 
 ## 빌드 & 테스트
 ```bash

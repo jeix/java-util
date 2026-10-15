@@ -33,5 +33,27 @@ Java 유틸리티 라이브러리. JDK 21 기반으로 작성되었습니다.
 - `copyOf`: 불변 Map 복사
 - for-loop / stream 구현을 `RANDOM.nextBoolean()`으로 랜덤 분기
 
+### 4. 날짜/시간 유틸리티 (`s.util.DateTimeUtil`)
+- **현재 날짜/시간 조회**: `today()` / `date()` / `date2()` / `time()` / `time2()` / `datetime()` / `datetime2()`
+  - compact 포맷 (`yyyyMMdd`, `HHmmss`, `yyyyMMddHHmmss`)과 구분자 포맷 (`yyyy-MM-dd`, `HH:mm:ss`, `yyyy-MM-dd HH:mm:ss`) 지원
+- **문자열 변환**: `stringify(LocalDate/LocalTime/LocalDateTime)` / `stringify2(...)`
+- **문자열 파싱**: `localDateOf` / `localTimeOf` / `localDateTimeOf` (포맷 자동 인식: `-` 또는 `:` 포함 여부로 구분)
+- **Timestamp 변환**: `toTimestamp(LocalDate)` / `toTimestamp(LocalDateTime)`
+- **날짜 비교**: `eval(date1, op, date2)` — `=` `!=` `>=` `>` `<=` `<`
+- **날짜 연산**: `eval(date, op, n, unit)` — `+` `-` / `D` `W` `M` `Y`
+- **월말 계산**: `eom(date)` — 해당 월의 마지막 날짜 반환
+
+```java
+// 사용 예제
+DateTimeUtil.today();                            // "20250115"
+DateTimeUtil.date2();                            // "2025-01-15"
+DateTimeUtil.stringify(LocalDate.of(2024, 1, 15)); // "20240115"
+DateTimeUtil.localDateOf("2024-01-15");        // LocalDate
+DateTimeUtil.eval("20240115", ">", "20240110"); // true
+DateTimeUtil.eval("20240115", "+", 1, "M");    // "20240215"
+DateTimeUtil.eom("20240115");                  // "20240131"
+DateTimeUtil.toTimestamp(LocalDate.now());      // java.sql.Timestamp
+```
+
 ## 설계 결정
 주요 설계 결정은 [`DECISION.md`](./DECISION.md)를 참고하세요.

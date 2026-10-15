@@ -15,6 +15,10 @@
   - for-loop / stream 구현을 `RANDOM.nextBoolean()`으로 랜덤 분기 (unionOf, intersectionOf,
     differenceOf, symmetricDifferenceOf, zip, asMap, castKeyValue 등)
   - slice/head/tail 음수 인덱스 처리
+- 날짜/시간 유틸리티 추가 완료 (DateTimeUtil, DateTimeUtilTest)
+  - compact/구분자 포맷 자동 인식 문자열 파싱 (localDateOf, localTimeOf, localDateTimeOf)
+  - 날짜 비교 (eval: =, !=, >=, >, <=, <) 및 날짜 연산 (eval: +, -, D/W/M/Y)
+  - 월말 계산 (eom), Timestamp 변환 (toTimestamp)
 
 ## 핵심 기능
 1. **문자열 유틸리티** (StringUtil)
@@ -44,8 +48,17 @@
     - slice / head / tail: 음수 인덱스 지원 리스트 슬라이스
     - for-loop / stream 구현을 `RANDOM.nextBoolean()`으로 랜덤 분기
 
+4. **날짜/시간 유틸리티** (DateTimeUtil)
+    - today / date / date2 / time / time2 / datetime / datetime2: 현재 날짜/시간 조회
+    - stringify / stringify2 (LocalDate / LocalTime / LocalDateTime): 포맷팅
+    - localDateOf / localTimeOf / localDateTimeOf: 문자열 파싱 (compact/구분자 포맷 자동 인식)
+    - toTimestamp (LocalDate / LocalDateTime): java.sql.Timestamp 변환
+    - eval (date, op, date2): 날짜 비교 (6개 연산자)
+    - eval (date, op, n, unit): 날짜 연산 (+/-, D/W/M/Y)
+    - eom: 월말 계산
+
 ## 향후 계획
 - 추가 유틸리티 클래스 개발
 - 더 많은 튜플 타입 (Quintet, Sextet 등)
 - 컬렉션 유틸리티
-- 날짜/시간 유틸리티
+- 문서화 (각 모듈별 문서화, 사용 예제 추가)

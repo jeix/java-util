@@ -57,3 +57,30 @@
   `RANDOM.nextBoolean()`으로 랜덤 분기
 - **근거**: 두 구현 모두 동일한 좌→우 함수 적용 결과를 보장, 커버리지 확보
 - **참고**: `pipe()` 무인자 호출은 빌더 `Pipeline` 반환( varargs 우선순위 낮음)임에 유의
+
+## 13. DateTimeUtil: @UtilityClass 패턴
+- **결정**: `StringUtil`과 동일하게 Lombok `@UtilityClass` 사용
+- **근거**: 일관성 유지, 메서드가 암묵적으로 `public static`, 인스턴스화 방지
+
+## 14. DateTimeUtil: 이중 포맷 자동 파싱
+- **결정**: `localDateOf` / `localTimeOf` / `localDateTimeOf`에서 포맷 자동 인식
+  - `date.contains("-")` → 구분자 포맷 (`yyyy-MM-dd`), `date.contains(":")` → 구분자 포맷 (`HH:mm:ss`, `yyyy-MM-dd HH:mm:ss`)
+  - 그 외 → compact 포맷 (`yyyyMMdd`, `HHmmss`, `yyyyMMddHHmmss`)
+- **근거**: 호출 코드에서 포맷을 명시할 필요 없이 자연스럽게 양식을 섞어 사용할 수 있음
+
+## 15. DateTimeUtil: DateTimeFormatter 상수 재사용
+- **결정**: `DateTimeFormatter.ofPattern(...)`을 `private static final` 상수로 선언
+- **근거**: `DateTimeFormatter`는 스레드 안전하므로 재사용 가능, 매번 `ofPattern` 호출 비용 회피
+
+## 16. DateTimeUtil: eval 메서드 오버로드
+- **결정**: `eval(String, String, String)` (비교, boolean 반환)과 `eval(String, String, int, String)` (산술, String 반환)으로 오버로드
+- **근거**: 인터페이스 시그니처(`eval(date1, op, date2)` vs `eval(date, op, n, unit)`)를 자연스럽게 표현, 파라미터 수가 달라 충돌 없음
+
+## 17. DateTimeUtil: 날짜 비교 연산자 구현
+- **결정**: `LocalDate.isEqual` / `isBefore` / `isAfter`를 기반으로 6개 연산자 구현
+  - `>=` = `!isBefore`, `<=` = `!isAfter` (Java의 `ChronoLocalDate` 비교 계약에 정확히 부합)
+- **근거**: `compareTo` 기반이라서 시간대나 초단위 차이 없이 날짜만으로 정확히 비교
+
+## 18. DateTimeUtil: eom 반환 포맷
+- **결정**: `eom(date)`는 `yyyyMMdd` (compact format)으로 반환
+- **근거**: `date()` / `datetime()` 등 기본 날짜 조회 메서드의 기본 포맷과 일관성 유지

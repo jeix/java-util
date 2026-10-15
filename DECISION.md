@@ -400,3 +400,30 @@ return List.of(s.split(regex));
 - `Function::andThen`은 Java 8+ 함수 합성의 표준 방식
 - `@UtilityClass` 내에서 static nested class 사용 가능 (Lombok이 중첩 클래스 영향 안 함)
 - 두 API 스타일(선언적/명령적) 모두 제공
+
+---
+
+## 결정 #20: DateTimeUtil 날짜/시간 유틸리지 설계
+**일시:** 2026-10-15
+**상태:** 승인됨
+
+### 배경
+요구사항: `s.util.DateTimeUtil`에 날짜/시간 처리 메서드 21개 구현.
+
+### 선택
+- **포맷 패턴**: `DateTimeFormatter.ofPattern()` 상수로 관리
+  - `yyyyMMdd`, `yyyy-MM-dd`, `HHmmss`, `HH:mm:ss`, `yyyyMMddHHmmss`, `yyyy-MM-dd HH:mm:ss`
+- **오버로드**: `stringify(LocalDate)`, `stringify(LocalTime)`, `stringify(LocalDateTime)` - 타입별 포맷팅
+- **포맷 자동 감지**: `localDateOf`/`localTimeOf`/`localDateTimeOf` - 구분자(`-`, `:`) 존재 여부로 compact vs delimited 판별
+- **eval 비교**: `localDateOf`로 파싱 후 `isEqual`/`isBefore`/`isAfter`로 6개 연산자 처리 (switch expression)
+- **eval 산술**: `plusDays`/`plusWeeks`/`plusMonths`/`plusYears`로 단위 처리, `-` 연산자는 amount 음수화
+- **결과 포맷**: 산술/월말 결과는 입력 문자열의 포맷(구분자 포함 여부)을 유지
+- **null 처리**: `stringify` 계열은 null → "", `localDateOf` 계열은 null → null, `toTimestamp` 계열은 null → null
+- **월말(eom)**: `d.withDayOfMonth(d.lengthOfMonth())`로 달성, 윤년/28일/30일/31일 자동 처리
+
+### 근거
+- `java.time` API (LocalDate/LocalTime/LocalDateTime) 사용으로 Java 8+ 표준 시간 API 활용
+- `@UtilityClass`로 static 메서드만 제공하는 유틸리티 패턴 유지 (StringUtil/CollectionUtil과 일관성)
+- 포맷 자동 감지로 사용 편의성 향상 (compact + delimited 양방향 지원)
+- switch expression으로 연산자/단위 처리 가독성 향상 (Java 21)
+- 결과 포맷 유지로 round-trip (parse → format) 일관성 확보

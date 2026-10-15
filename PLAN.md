@@ -1,16 +1,17 @@
 # PLAN (Execution Plan)
 
-## 현재 상태: 2단계 완료 (문자열 유틸리티 + 튜플 타입)
+## 현재 상태: 4단계 완료 (문자열/컬렉션 유틸리티 + 튜플 타입 + 날짜/시간 유틸리티)
 
 ### 진행 상황
 | 단계 | 설명 | 상태 | 완료일 |
 |------|------|------|--------|
 | 0 | 프로젝트 구조 초기화 | ✅ 완료 | 2026-09-21 |
-| 1 | 문자열 유틸리지 (StringUtil) | ✅ 완료 | 2026-09-21 |
-| 2 | 컬렉션 유틸리지 (CollectionUtil) | ✅ 완료 | 2026-09-21 |
+| 1 | 문자열 유틸리티 (StringUtil) | ✅ 완료 | 2026-09-21 |
+| 2 | 컬렉션 유틸리티 (CollectionUtil) | ✅ 완료 | 2026-09-21 |
 | 3 | 튜플 타입 (Pair/Triplet/Quartet) | ✅ 완료 | 2026-09-21 |
 | 4 | pipe/Pipeline 추가 (StringUtil) | ✅ 완료 | 2026-09-21 |
 | 5 | 문서화 | ✅ 완료 | 2026-09-21 |
+| 6 | 날짜/시간 유틸리티 (DateTimeUtil) | ✅ 완료 | 2026-10-15 |
 
 ## 실행 단계
 
@@ -85,6 +86,27 @@
 - [x] Pair/Triplet/Quartet equals/hashCode 정상 동작
 - [x] toString "(t, u)" / "(t, u, v)" / "(t, u, v, w)" 형식
 
+### 6단계: 날짜/시간 유틸리티 (DateTimeUtil) [완료]
+**목표:** `s.util.DateTimeUtil`에 날짜/시간 처리 메서드 21개 제공
+
+**완료된 작업:**
+- `s.util.DateTimeUtil` 클래스 작성 (21개 메서드)
+  - 현재 날짜/시간: `today()`, `date()`, `date2()`, `time()`, `time2()`, `datetime()`, `datetime2()`
+  - 변환: `stringify(LocalDate/LocalTime/LocalDateTime)`, `stringify2(...)` (6개 오버로드)
+  - 파싱: `localDateOf`, `localTimeOf`, `localDateTimeOf` (compact + delimited 포맷 지원)
+  - Timestamp 변환: `toTimestamp(LocalDate)`, `toTimestamp(LocalDateTime)`
+  - 날짜 비교: `eval(date1, op, date2)` (6개 연산자)
+  - 날짜 산술: `eval(date, op, n, unit)` (+/-, D/W/M/Y)
+  - 월말: `eom(date)`
+- `s.util.DateTimeUtilTest` 작성 (56개 JUnit 5 테스트, Lombok @Slf4j)
+- `./mvnw clean test` 실행 → BUILD SUCCESS, 219/219 테스트 통과
+
+**완료 기준:**
+- [x] `./mvnw clean test` 성공
+- [x] 테스트 219개 통과, 0 실패
+- [x] compact + delimited 포맷 양방향 처리
+- [x] 윤년/28일/30일/31일 월말 처리
+
 ## 마일스톤
 
 | 마일스톤 | 목표 | 목표일 | 상태 |
@@ -93,6 +115,7 @@
 | M1 | 문자열 유틸리티 | 2026-09-21 | ✅ 완료 |
 | M2 | 컬렉션 유틸리티 | - | 예정 |
 | M3 | 튜플 타입 제공 | 2026-09-21 | ✅ 완료 |
-| M4 | 컬렉션 유틸리지 | 2026-09-21 | ✅ 완료 |
+| M4 | 컬렉션 유틸리티 | 2026-09-21 | ✅ 완료 |
 | M5 | pipe/Pipeline | 2026-09-21 | ✅ 완료 |
 | M6 | 문서화 | 2026-09-21 | ✅ 완료 |
+| M7 | 날짜/시간 유틸리티 | 2026-10-15 | ✅ 완료 |

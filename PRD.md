@@ -42,6 +42,7 @@ java-util
 | F-002 | Jackson을 사용한 객체-JSON 변환 기능 제공 | High | `Hello.toJson(String key, String value)` |
 | F-003 | 팰린드롬 판별 기능 제공 | Medium | `Hello.isPalindrome(String)` - null 처리 |
 | F-004 | 각 유틸리티 메서드에 대한 단위 테스트 작성 | High | JUnit 5 Jupiter 기반 |
+| F-005 | 날짜/시간 처리 유틸리티 제공 | High | `DateTimeUtil` (today, date, time, stringify, parse, eval, eom) |
 
 ### 3.2 비기능 요구사항 (NF)
 | ID | 설명 | 우선순위 | 비고 |
@@ -73,6 +74,6 @@ java-util
 - [x] `opencode-kilo` 브랜치에서 초기화 커밋 완료
 
 ## 5. 향후 확장 가능 영역
-- `s.util.*` 패키지: 문자열, 컬렉션 등 일반 유틸리티
+- `s.util.*` 패키지: 문자열, 컬렉션, 날짜/시간 등 일반 유틸리티 (완료)
 - `s.type.*` 패키지: 튜플 및 커스텀 데이터 타입
 - `s.io.*` 패키지: 파일/스트림 처리 유틸리티

@@ -33,8 +33,9 @@ java-util/
     ├── main/java/
     │   ├── s/Hello.java         # 유틸리티 클래스
     │   ├── s/util/
-    │   │   ├── StringUtil.java   # 문자열 유틸리티 (25개 메서드)
-    │   │   └── CollectionUtil.java # 컬렉션 유틸리티 (List/Map)
+    │   │   ├── StringUtil.java       # 문자열 유틸리티 (25개 메서드)
+    │   │   ├── CollectionUtil.java   # 컬렉션 유틸리티 (List/Map)
+    │   │   └── DateTimeUtil.java     # 날짜/시간 유틸리티
     │   └── s/type/tuple/
     │       ├── Pair.java         # 2-튜플
     │       ├── Triplet.java      # 3-튜플
@@ -43,6 +44,7 @@ java-util/
         ├── s/HelloTest.java
         ├── s/util/StringUtilTest.java
         ├── s/util/CollectionUtilTest.java
+        ├── s/util/DateTimeUtilTest.java
         └── s/type/tuple/TupleTest.java
 ```
 
@@ -53,12 +55,13 @@ java-util/
 | `s.Hello` | 기본 유틸리티 (greet, toJson, isPalindrome) |
 | `s.util.StringUtil` | 문자열 처리 (isBlank, isEmpty, slice, trimLeadingZero, repeat, reverse, lpad/rpad, join, split, pipe, Pipeline) |
 | `s.util.CollectionUtil` | 컬렉션 처리 (zip, set operations, slice, asMap, castKeyValue) |
+| `s.util.DateTimeUtil` | 날짜/시간 처리 (today, date, time, stringify, localDateOf, toTimestamp, eval, eom) |
 | `s.type.tuple` | 튜플 타입 (Pair, Triplet, Quartet) - Jackson 직렬화 지원 |
 
 ## 테스트
 
 ```bash
-# 전체 테스트 (163개)
+# 전체 테스트 (219개)
 ./mvnw clean test
 ```
 

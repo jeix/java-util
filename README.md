@@ -1,6 +1,6 @@
 # java-util
 
-Java 21 기반 유틸리티 라이브러리. 문자열 처리, 컬렉션/맵 조작, 튜플 타입을 제공합니다.
+Java 21 기반 유틸리티 라이브러리. 문자열 처리, 컬렉션/맵 조작, 날짜/시간 처리, 튜플 타입을 제공합니다.
 
 ## 요구사항
 
@@ -28,7 +28,8 @@ src/main/java
 │   ├── Hello.java                    # 예제 클래스
 │   ├── util/
 │   │   ├── StringUtil.java           # 문자열 유틸리티
-│   │   └── CollectionUtil.java       # 컬렉션/맵 유틸리티
+│   │   ├── CollectionUtil.java       # 컬렉션/맵 유틸리티
+│   │   └── DateTimeUtil.java         # 날짜/시간 유틸리티
 │   └── type/
 │       └── tuple/
 │           ├── Pair.java             # 2-튜플
@@ -115,6 +116,48 @@ Map<String, Integer> map = CollectionUtil.asMap("foo", 42, "bar", 43);
 // 불변 맵 - map.put("baz", 1) 시 UnsupportedOperationException
 ```
 
+### DateTimeUtil (`s.util.DateTimeUtil`)
+
+날짜/시간 포맷팅, 파싱, 계산, 비교 기능을 제공. Java 8 Time API(`LocalDate`, `LocalTime`, `LocalDateTime`, `Timestamp`) 기반.
+
+**주요 메서드:**
+
+| 카테고리 | 메서드 |
+|----------|--------|
+| **현재 시각** | `today()`, `date()`, `date2()`, `time()`, `time2()`, `datetime()`, `datetime2()` |
+| **포맷팅** | `stringify(date)` / `stringify2(date)` - `LocalDate`, `LocalTime`, `LocalDateTime` 오버로드 |
+| **파싱** | `localDateOf(str)`, `localTimeOf(str)`, `localDateTimeOf(str)` - 양쪽 포맷 자동 감지 |
+| **변환** | `toTimestamp(date)` / `toTimestamp(dateTime)` → `java.sql.Timestamp` |
+| **비교** | `eval(date1, op, date2)` - `=`, `!=`, `>`, `>=`, `<`, `<=` 연산자 지원 |
+| **계산** | `eval(date, op, n, unit)` - `+`/`-` 연산, 단위: `D`(일), `W`(주), `M`(월), `Y`(년) |
+| **월말** | `eom(date)` - 해당 월의 마지막 날짜 반환 |
+
+**특징:**
+- `date`/`date2`, `time`/`time2`, `datetime`/`datetime2`: 구분자 없는 포맷/있는 포맷 쌍 제공
+- `stringify`: null 안전 (`null` 입력 시 `null` 반환)
+- `localDateOf`/`localTimeOf`/`localDateTimeOf`: 구분자(`-`, `:`, ` `)로 포맷 자동 감지
+- `eval`: switch expression 사용, 잘못된 연산자/단위 시 `IllegalArgumentException`
+- `eom`: 윤년 자동 처리 (2월 29일 등)
+
+```java
+DateTimeUtil.date()              // "20261015"
+DateTimeUtil.date2()             // "2026-10-15"
+DateTimeUtil.datetime2()         // "2026-10-15 21:55:56"
+
+DateTimeUtil.stringify(LocalDate.of(2024, 1, 15))      // "20240115"
+DateTimeUtil.stringify2(LocalDate.of(2024, 1, 15))     // "2024-01-15"
+
+DateTimeUtil.localDateOf("20240115")       // LocalDate(2024, 1, 15)
+DateTimeUtil.localDateOf("2024-01-15")     // LocalDate(2024, 1, 15)
+
+DateTimeUtil.eval("20240115", ">", "20240110")   // true
+DateTimeUtil.eval("2024-01-15", "+", 1, "M")     // "20240215"
+DateTimeUtil.eval("2024-01-15", "+", 1, "M")     // "2024-02-15" (dashed format 유지)
+
+DateTimeUtil.eom("20240201")        // "20240229" (윤년)
+DateTimeUtil.eom("20230201")        // "20230228" (평년)
+```
+
 ### 튜플 타입 (`s.type.tuple`)
 
 불변 튜플 클래스. JSON 직렬화 지원.
@@ -143,7 +186,7 @@ new ObjectMapper().writeValueAsString(Pair.of("hello", 42))
 
 ## 테스트
 
-총 **53개 테스트** 통과:
+총 **70개 테스트** 통과:
 
 | 테스트 클래스 | 테스트 수 |
 |--------------|----------|
@@ -151,6 +194,7 @@ new ObjectMapper().writeValueAsString(Pair.of("hello", 42))
 | `StringUtilTest` | 20 |
 | `TupleTest` | 9 |
 | `CollectionUtilTest` | 21 |
+| `DateTimeUtilTest` | 17 |
 
 ```bash
 ./mvnw test

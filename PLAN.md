@@ -23,12 +23,20 @@
 - [x] 20단계: CollectionUtilTest 클래스 구현 (@Slf4j, 테스트 메서드)
 - [x] 21단계: 빌드 및 테스트 검증 (CollectionUtil)
 - [x] 22단계: 문서 갱신 (3차)
-- [x] 23단계: StringUtil 리팩토링 (스트림/랜덤 분기, switch, head/tail 음수, trimLeadingZero 정규식, repeat char 제거, pad String, split 불변 리스트)
-- [x] 24단계: StringUtilTest 갱신 (char repeat 제거, pad String, head/tail 음수, split 불변 리스트 검증)
-- [x] 25단계: CollectionUtil 리팩토링 (불변 리스트/맵 반환, 스트림/랜덤 분기, head/tail 음수)
-- [x] 26단계: CollectionUtilTest 갱신 (불변성 검증, head/tail 음수, 불변 리스트/맵 검증)
-- [x] 27단계: 빌드 및 테스트 검증 (전체 리팩토링 후)
-- [x] 28단계: 문서 갱신 (4차)
+- [x] 23단계: DateTimeUtil 클래스 구현 (모든 메서드)
+- [x] 24단계: DateTimeUtilTest 클래스 구현 (@Slf4j, 테스트 메서드)
+- [x] 25단계: 빌드 및 테스트 검증 (DateTimeUtil)
+- [x] 26단계: 문서 갱신 (4차)
+- [x] 27단계: StringUtil 리팩토링 (스트림/랜덤 분기, switch, head/tail 음수, trimLeadingZero 정규식, repeat char 제거, pad String, split 불변 리스트)
+- [x] 28단계: StringUtilTest 갱신 (char repeat 제거, pad String, head/tail 음수, split 불변 리스트 검증)
+- [x] 29단계: CollectionUtil 리팩토링 (불변 리스트/맵 반환, 스트림/랜덤 분기, head/tail 음수)
+- [x] 30단계: CollectionUtilTest 갱신 (불변성 검증, head/tail 음수, 불변 리스트/맵 검증)
+- [x] 31단계: 빌드 및 테스트 검증 (전체 리팩토링 후)
+- [x] 32단계: 문서 갱신 (5차)
+- [x] 33단계: StringUtil 추가 리팩토링 (private 메서드 `_` 접두사, isBlank 3항 연산자, Supplier null 처리, stream 구현, varargs, substring 단일 호출, lpad2/rpad2/pad2 추가)
+- [x] 34단계: CollectionUtil 추가 리팩토링 (private 메서드 `_` 접두사, zip if/else 분기, slice list.size() 사용, StringUtilTest 수정)
+- [x] 35단계: 빌드 및 테스트 검증 (전체 추가 리팩토링 후)
+- [x] 36단계: 문서 갱신 (6차)
 
 ## 단계별 상세
 
@@ -164,7 +172,31 @@
 - **수정 파일**: 4개 마크다운 파일
 - **완료 기준**: 모든 문서가 현재 상태 반영
 
-### 23단계: StringUtil 리팩토링 ✅
+### 23단계: DateTimeUtil 클래스 구현 ✅
+- **입력**: 디렉토리 구조, PRD 기능 요구사항
+- **출력**: src/main/java/s/util/DateTimeUtil.java
+- **수정 파일**: DateTimeUtil.java
+- **완료 기준**: 현재 시각, 포맷팅, 파싱, 변환, 비교, 계산, 월말 등 20여 개 메서드 구현 완료, 컴파일 성공
+
+### 24단계: DateTimeUtilTest 클래스 구현 ✅
+- **입력**: DateTimeUtil 클래스
+- **출력**: src/test/java/s/util/DateTimeUtilTest.java
+- **수정 파일**: DateTimeUtilTest.java
+- **완료 기준**: @Slf4j 적용, 17개 테스트 메서드 작성 (현재 시각, 포맷팅, 파싱, 변환, 비교, 계산, 월말)
+
+### 25단계: 빌드 및 테스트 검증 (DateTimeUtil) ✅
+- **입력**: 전체 소스 코드 (Hello + StringUtil + Tuple + CollectionUtil + DateTimeUtil)
+- **출력**: target/classes, target/test-classes, 테스트 리포트
+- **실행 명령**: ./mvnw test
+- **완료 기준**: BUILD SUCCESS, Tests run: 73, Failures: 0
+
+### 26단계: 문서 갱신 (4차) ✅
+- **입력**: 완료된 프로젝트
+- **출력**: AGENT.md, PRD.md, PLAN.md, DECISION.md 갱신
+- **수정 파일**: 4개 마크다운 파일
+- **완료 기준**: 모든 문서가 현재 상태 반영
+
+### 27단계: StringUtil 리팩토링 ✅
 - **입력**: 기존 StringUtil 클래스
 - **출력**: 리팩토링된 StringUtil.java
 - **수정 파일**: StringUtil.java

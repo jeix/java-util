@@ -56,11 +56,21 @@
 - **색인화/분류**: `indexing` (Function→불변 Map, 스트림/루프 랜덤 분기), `grouping` (Function→불변 Map<불변 List>, 스트림/루프 랜덤 분기)
 - **맵 생성/변환**: `asMap` (가변인자/클래스/Entry리스트, 불변 맵, 스트림/루프 랜덤 분기), `castKeyValue`, `copyOf` (불변 맵)
 
-#### 3.5 테스트 클래스
+#### 3.5 DateTimeUtil 클래스 (날짜/시간 유틸리티)
+- **현재 시각 조회**: `today()`, `date()`, `date2()`, `time()`, `time2()`, `datetime()`, `datetime2()` - 포맷별 쌍 제공 (구분자 없음/있음)
+- **포맷팅**: `stringify` / `stringify2` - `LocalDate`, `LocalTime`, `LocalDateTime` 오버로드, null 안전
+- **파싱**: `localDateOf`/`localTimeOf`/`localDateTimeOf` - 구분자(`-`, `:`, ` `)로 포맷 자동 감지, null/빈 문자열 시 null 반환
+- **Timestamp 변환**: `toTimestamp(LocalDate)` / `toTimestamp(LocalDateTime)` - `java.sql.Timestamp` 반환
+- **날짜 비교**: `eval(date1, op, date2)` - `=`, `!=`, `>`, `>=`, `<`, `<=` 연산자, switch expression 사용
+- **날짜 계산**: `eval(date, op, n, unit)` - `+`/`-` 연산, 단위: `D`(일), `W`(주), `M`(월), `Y`(년), 입력 포맷 유지
+- **월말 계산**: `eom(date)` - 해당 월 마지막 날짜, 윤년 자동 처리
+
+#### 3.6 테스트 클래스
 - **HelloTest**: 정상/경계 케이스, Lombok 생성 메서드 검증 (3개 테스트)
 - **StringUtilTest**: @Slf4j 적용, 모든 public 메서드 검증 (20개 테스트)
 - **TupleTest**: @Slf4j 적용, 생성/조회, equals/hashCode, null 값, 불변성, JSON 직렬화 검증 (9개 테스트)
 - **CollectionUtilTest**: @Slf4j 적용, 빈 체크, 결합, 필터링, 집합 연산, 슬라이싱, 색인화, 맵 변환, 불변성 검증 (21개 테스트)
+- **DateTimeUtilTest**: @Slf4j 적용, 현재 시각, 포맷팅, 파싱, 변환, 비교, 계산, 월말 검증 (17개 테스트)
 
 ### 4. 비기능 요구사항
 - Maven Wrapper 제공으로 별도 설치 없이 빌드 가능

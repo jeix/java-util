@@ -229,3 +229,20 @@
 - if/else로 두 구현의 시각적 균형 맞춤
 - `list.size()`로 명확한 범위 지정, 불필요한 큰 상수 제거
 - Supplier null 시 기본값 제공 로직이 변경되어 테스트 기대값 수정
+
+## 22. DateTimeUtil 클래스 설계
+**결정**: 
+- Java 8 Time API(`LocalDate`, `LocalTime`, `LocalDateTime`, `Timestamp`) 기반 구현
+- 현재 시각 조회 메서드: 포맷별 쌍 제공 (`date`/`date2`, `time`/`time2`, `datetime`/`datetime2`)
+- 포맷팅: `stringify`/`stringify2` 오버로드, null 안전
+- 파싱: 구분자(`-`, `:`, ` `)로 포맷 자동 감지 (`localDateOf`, `localTimeOf`, `localDateTimeOf`)
+- 비교: `eval(date1, op, date2)` - switch expression으로 6개 연산자 처리
+- 계산: `eval(date, op, n, unit)` - `+`/`-`, 단위 `D`/`W`/`M`/`Y`, 입력 포맷 유지
+- 월말: `eom(date)` - `withDayOfMonth(lengthOfMonth())`로 윤년 자동 처리
+- `Timestamp` 변환: `toTimestamp(LocalDate)` / `toTimestamp(LocalDateTime)`
+**근거**: 
+- Java 표준 Time API 사용으로 신뢰성/호환성 확보
+- 포맷 자동 감지로 사용자 편의성 증대 (두 포맷 모두 허용)
+- switch expression으로 가독성/성능 향상
+- 입력 포맷 유지로 일관된 출력 제공
+- 윤년 처리 로직 내장으로 정확성 보장

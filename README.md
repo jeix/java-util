@@ -15,6 +15,8 @@
 | Java | 21 (`maven.compiler.release`) |
 | lombok | 1.18.44 (`provided`, 컴파일러 애노테이션 프로세서로 등록) |
 | jackson-databind | 2.21.1 |
+| slf4j-api | 2.0.19 (`@Slf4j` 로깅) |
+| slf4j-simple | 2.0.19 (`test`, 테스트 로그 출력) |
 | JUnit Jupiter | 5.14.1 (`test`) |
 
 `only-script` 방식이라 wrapper용 JAR가 저장소에 들어 있지 않아요. 첫 실행 때 `mvnw`가 Maven 배포본을 내려받아 `~/.m2/wrapper`에 캐시해요.
@@ -26,9 +28,15 @@ pom.xml
 mvnw, mvnw.cmd, .mvn/wrapper/   Maven wrapper
 src/main/java/s/Hello.java      유틸리티 클래스 (lombok, jackson 사용 예)
 src/test/java/s/HelloTest.java  Hello의 JUnit 테스트
+src/main/java/s/util/StringUtil.java      문자열 유틸리티 (static 메서드)
+src/test/java/s/util/StringUtilTest.java  StringUtil의 JUnit 테스트
 ```
 
 `s.Hello`와 `s.HelloTest`는 초기 구조가 제대로 동작하는지 확인하려고 둔 예제예요.
+
+## StringUtil
+
+`s.util.StringUtil`은 null 안전한 문자열 유틸리티예요. 기본값 선택(`nonNullOf`, `nonBlankOf`, `nonEmptyOf`), 첫 유효값 선택(`firstNonBlankOrLast`/`OrEmpty`/`OrNull`, 값·Supplier 버전), 변환·부분 문자열(`stringify`, `slice`, `head`, `tail`, `trimLeadingZero`, `repeat`, `reverse`), 패딩(`lpad`/`rpad`/`pad`, `lpad2`/`rpad2`/`pad2`), `join`, `split`을 제공해요. 경계 동작과 근거는 `DECISIONS.md` 5·6번에 있어요.
 
 ## 빌드와 테스트
 

@@ -24,3 +24,19 @@
 
 - **결정**: `s.Hello`(유틸리티 클래스)와 `s.HelloTest`(JUnit 테스트)를 만들어 `./mvnw test`로 구조를 확인해요.
 - **이유**: 빌드, lombok 처리, jackson 사용, 테스트 실행이 한 번에 검증돼요. `Hello`가 lombok(`@NoArgsConstructor`)과 jackson(`ObjectMapper`)을 모두 쓰는 이유예요.
+
+## 5. StringUtil 동작 규칙 (2026-10-19)
+
+- **결정**: `s.util.StringUtil`은 null 문자열을 ""로 취급하고, 처리할 수 없는 입력은 예외 없이 `s`(또는 "")를 돌려줘요. 구현은 오버로드 중 하나(supplier 버전, `_firstNonBlankOr*`)에 모으고 나머지는 위임해요.
+- **세부 규칙**: `head`/`tail`은 size가 음수이거나 길이보다 크면 "". `slice`는 end를 길이로 보정하고 begin이 음수이거나 end 이상이면 "". `lpad`/`rpad`/`pad`는 패딩 불가(len ≤ 길이, 싱글바이트 아님, pad 길이 ≠ 1)이면 `s` 그대로이고 잘라내지 않아요. `pad`/`pad2`는 남는 칸이 홀수면 오른쪽이 하나 더. `split`은 뒤쪽 빈 문자열을 남기고(limit -1), `stringify(null)`은 "", `Date`는 시스템 기본 시간대의 `yyyy-MM-dd`.
+- **이유**: 요구 사항에 정해지지 않은 경계를 위와 같이 정했어요. 바꾸려면 새 항목을 추가해요.
+- **의존성**: `@Slf4j`를 쓰려고 `slf4j-api` 2.0.19(compile)와 `slf4j-simple`(test)를 추가했어요.
+
+## 6. StringUtil 수정: 무작위 분기와 인덱스 규칙 (2026-10-19)
+
+- **결정**: 5번 항목의 규칙 중 아래를 바꿔요(5번은 고치지 않고 이 항목이 우선해요).
+  - `stringify(null)`은 null. `join`은 null 원소를 ""로 이어요.
+  - `slice`는 음수 인덱스를 뒤에서부터 센 위치로 보고 범위를 [0, 길이]로 보정해요. `head(s, size)`는 `slice(s, 0, size)`와 같고(길이보다 크면 전체), `tail`의 음수 size는 앞에서 -size개를 뺀 나머지예요. 더는 "범위 밖이면 빈 문자열"이 아니에요.
+  - `repeat`의 첫 파라미터는 `String`. `lpad`/`rpad`/`pad`의 pad는 싱글바이트 한 글자(`"가"`, `"do"`는 불가). `split`은 불변 리스트를 돌려줘요.
+- **무작위 분기**: 반복문 구현과 stream 구현(`firstNonBlankOr*`, `join`, varargs → supplier 변환), 반복문과 정규식 구현(`trimLeadingZero`)을 두고 호출 때마다 `_useStream()`으로 무작위로 골라요. 두 구현은 결과가 같아야 해요.
+- **테스트**: 분기가 있는 메서드의 테스트는 `@RepeatedTest(20)`으로 두 구현을 모두 거치게 했어요(한쪽만 20번 연속 걸릴 확률 약 2⁻¹⁹).

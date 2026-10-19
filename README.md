@@ -30,6 +30,8 @@ src/main/java/s/Hello.java      유틸리티 클래스 (lombok, jackson 사용 �
 src/test/java/s/HelloTest.java  Hello의 JUnit 테스트
 src/main/java/s/util/StringUtil.java      문자열 유틸리티 (static 메서드)
 src/test/java/s/util/StringUtilTest.java  StringUtil의 JUnit 테스트
+src/main/java/s/util/CollectionUtil.java      리스트·맵 유틸리티 (static 메서드)
+src/test/java/s/util/CollectionUtilTest.java  CollectionUtil의 JUnit 테스트
 src/main/java/s/type/tuple/               Pair, Triplet, Quartet (불변 튜플, JSON 직렬화·역직렬화 가능)
 src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 ```
@@ -39,6 +41,10 @@ src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 ## StringUtil
 
 `s.util.StringUtil`은 null 안전한 문자열 유틸리티예요. 기본값 선택(`nonNullOf`, `nonBlankOf`, `nonEmptyOf`), 첫 유효값 선택(`firstNonBlankOrLast`/`OrEmpty`/`OrNull`, 값·Supplier 버전), 변환·부분 문자열(`stringify`, `slice`, `head`, `tail`, `trimLeadingZero`, `repeat`, `reverse`), 패딩(`lpad`/`rpad`/`pad`, `lpad2`/`rpad2`/`pad2`), `join`, `split`을 제공해요. 경계 동작과 근거는 `DECISIONS.md` 5·6번에 있어요.
+
+## CollectionUtil
+
+`s.util.CollectionUtil`은 null 안전한 리스트·맵 유틸리티예요. 빈 값 처리(`isEmpty`, `emptyIfNull`), `zip`, `toArray`, 검색(`findOne`, `findAll`), 집합 연산(`unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf`), 부분 리스트(`slice`, `head`, `tail`), 색인·분류(`indexing`, `grouping`), 맵 생성·변환(`asMap`, `castKeyValue`, `copyOf`)을 제공해요. 동작 규칙은 `DECISIONS.md` 9번에 있어요.
 
 ## 빌드와 테스트
 

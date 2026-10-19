@@ -49,3 +49,14 @@
 ## 8. 튜플 역직렬화 추가 (2026-10-19)
 
 - **결정**: 7번의 "역직렬화 미지원"을 뒤집어요. private 생성자에 `@JsonCreator`와 `@JsonProperty("ordN")` 파라미터를 붙여 `{"ord1":..,"ord2":..}`를 읽어요. 제네릭 타입은 `TypeReference`로 지정해야 해요. 없는 키는 null이 돼요.
+
+## 9. CollectionUtil 동작 규칙 (2026-10-19)
+
+- **결정**: `s.util.CollectionUtil`은 `StringUtil`(5·6번)과 같은 방식이에요. null 리스트·맵은 빈 컬렉션으로 취급하고, 처리할 수 없는 입력은 예외 없이 빈 컬렉션을 돌려줘요. 새로 만드는 리스트·맵은 수정할 수 없고 맵은 삽입 순서를 유지해요. `emptyIfNull`은 null이 아니면 원본을 그대로 돌려줘요.
+- **세부 규칙**:
+  - `slice`/`head`/`tail`은 `StringUtil`과 같은 인덱스 규칙(음수는 뒤에서부터, 범위 보정)이고 `subList`의 뷰가 아니라 복사본을 돌려줘요.
+  - 집합 연산은 중복을 그대로 두고 상대 리스트에 들어 있는지만 봐요(`unionOf`는 list1 + (list2 − list1), `intersectionOf`는 list1 − (list1 − list2)).
+  - `zip`은 짧은 쪽 길이에 맞춰요. `indexing`은 같은 색인이면 뒤의 항목이 이겨요.
+  - `asMap(items...)`는 개수가 홀수이면 빈 맵이고, 같은 키는 뒤의 것이 이겨요. `asMap(keyClass, valueClass, items...)`가 실제 구현이고 타입이 맞지 않으면 `ClassCastException`을 던져요(`asMap(items...)`는 `Object.class`로 위임). `castKeyValue`는 복사 없이 타입 인자만 바꾸고 검사하지 않아요.
+  - `toArray(list)`는 `Class` 인자가 없어서 원소들의 공통 상위 클래스를 배열 타입으로 써요. 비었거나 전부 null이면 `Object[]`라서 `String[]` 변수에 받으면 `ClassCastException`이 나요(그런 경우 `list.toArray(new String[0])`).
+- **stream**: 이 클래스는 반복문 대신 stream을 쓰고, `StringUtil`처럼 무작위로 분기하지는 않아요(요청에 없어서).

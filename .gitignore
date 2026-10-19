@@ -1,0 +1,8 @@
+# 빌드 산출물
+target/
+
+# 이 브랜치와 무관한 다른 도구/브랜치용 파일
+.agents/
+.codex/
+.claude/settings.local.json
+.env-*

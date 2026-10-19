@@ -30,6 +30,8 @@ src/main/java/s/Hello.java      유틸리티 클래스 (lombok, jackson 사용 �
 src/test/java/s/HelloTest.java  Hello의 JUnit 테스트
 src/main/java/s/util/StringUtil.java      문자열 유틸리티 (static 메서드)
 src/test/java/s/util/StringUtilTest.java  StringUtil의 JUnit 테스트
+src/main/java/s/type/tuple/               Pair, Triplet, Quartet (불변 튜플, JSON 직렬화·역직렬화 가능)
+src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 ```
 
 `s.Hello`와 `s.HelloTest`는 초기 구조가 제대로 동작하는지 확인하려고 둔 예제예요.

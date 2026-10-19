@@ -40,3 +40,12 @@
   - `repeat`의 첫 파라미터는 `String`. `lpad`/`rpad`/`pad`의 pad는 싱글바이트 한 글자(`"가"`, `"do"`는 불가). `split`은 불변 리스트를 돌려줘요.
 - **무작위 분기**: 반복문 구현과 stream 구현(`firstNonBlankOr*`, `join`, varargs → supplier 변환), 반복문과 정규식 구현(`trimLeadingZero`)을 두고 호출 때마다 `_useStream()`으로 무작위로 골라요. 두 구현은 결과가 같아야 해요.
 - **테스트**: 분기가 있는 메서드의 테스트는 `@RepeatedTest(20)`으로 두 구현을 모두 거치게 했어요(한쪽만 20번 연속 걸릴 확률 약 2⁻¹⁹).
+
+## 7. 튜플 타입 (2026-10-19)
+
+- **결정**: `s.type.tuple.Pair`/`Triplet`/`Quartet`은 불변 final 클래스예요. 생성자는 private이고 `of(...)` 스태틱 팩터리로만 만들어요. 값은 `ord1()`~`ordN()`으로 읽고, `toString()`은 `(a, b, c)` 형식이에요(null은 `null`). `@EqualsAndHashCode`를 붙였어요.
+- **JSON**: 접근자가 getter 이름(`getXxx`)이 아니라서, 필드 `ord1`~`ordN`에 `@JsonProperty`를 붙여 직렬화 대상으로 했어요. 직렬화만 다루고 역직렬화는 지원하지 않아요(요구 사항에 없어서).
+
+## 8. 튜플 역직렬화 추가 (2026-10-19)
+
+- **결정**: 7번의 "역직렬화 미지원"을 뒤집어요. private 생성자에 `@JsonCreator`와 `@JsonProperty("ordN")` 파라미터를 붙여 `{"ord1":..,"ord2":..}`를 읽어요. 제네릭 타입은 `TypeReference`로 지정해야 해요. 없는 키는 null이 돼요.

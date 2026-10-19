@@ -32,6 +32,8 @@ src/main/java/s/util/StringUtil.java      문자열 유틸리티 (static 메서�
 src/test/java/s/util/StringUtilTest.java  StringUtil의 JUnit 테스트
 src/main/java/s/util/CollectionUtil.java      리스트·맵 유틸리티 (static 메서드)
 src/test/java/s/util/CollectionUtilTest.java  CollectionUtil의 JUnit 테스트
+src/main/java/s/util/DateTimeUtil.java        날짜·시간 유틸리티 (static 메서드)
+src/test/java/s/util/DateTimeUtilTest.java    DateTimeUtil의 JUnit 테스트
 src/main/java/s/type/tuple/               Pair, Triplet, Quartet (불변 튜플, JSON 직렬화·역직렬화 가능)
 src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 ```
@@ -45,6 +47,10 @@ src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 ## CollectionUtil
 
 `s.util.CollectionUtil`은 null 안전한 리스트·맵 유틸리티예요. 빈 값 처리(`isEmpty`, `emptyIfNull`), `zip`, `toArray`, 검색(`findOne`, `findAll`), 집합 연산(`unionOf`, `intersectionOf`, `differenceOf`, `symmetricDifferenceOf`), 부분 리스트(`slice`, `head`, `tail`), 색인·분류(`indexing`, `grouping`), 맵 생성·변환(`asMap`, `castKeyValue`, `copyOf`)을 제공해요. 동작 규칙은 `DECISIONS.md` 9번에 있어요.
+
+## DateTimeUtil
+
+`s.util.DateTimeUtil`은 날짜·시간 문자열 유틸리티예요. 현재 시각(`today`, `date`, `time`, `datetime`과 구분자 있는 `*2`), `LocalDate`/`LocalTime`/`LocalDateTime` ↔ 문자열(`stringify`, `stringify2`, `localDateOf`, `localTimeOf`, `localDateTimeOf`), `toTimestamp`, 날짜 비교·계산(`eval`), 월말(`eom`)을 제공해요. 동작 규칙은 `DECISIONS.md` 10번에 있어요.
 
 ## 빌드와 테스트
 

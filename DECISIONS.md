@@ -60,3 +60,12 @@
   - `asMap(items...)`는 개수가 홀수이면 빈 맵이고, 같은 키는 뒤의 것이 이겨요. `asMap(keyClass, valueClass, items...)`가 실제 구현이고 타입이 맞지 않으면 `ClassCastException`을 던져요(`asMap(items...)`는 `Object.class`로 위임). `castKeyValue`는 복사 없이 타입 인자만 바꾸고 검사하지 않아요.
   - `toArray(list)`는 `Class` 인자가 없어서 원소들의 공통 상위 클래스를 배열 타입으로 써요. 비었거나 전부 null이면 `Object[]`라서 `String[]` 변수에 받으면 `ClassCastException`이 나요(그런 경우 `list.toArray(new String[0])`).
 - **stream**: 이 클래스는 반복문 대신 stream을 쓰고, `StringUtil`처럼 무작위로 분기하지는 않아요(요청에 없어서).
+
+## 10. DateTimeUtil 동작 규칙 (2026-10-19)
+
+- **결정**: `s.util.DateTimeUtil`의 날짜·시간 파라미터와 반환값은 `eval`·`eom`에서 `String`이고(`yyyyMMdd` 또는 `yyyy-MM-dd`), `StringUtil`·`CollectionUtil`과 같게 처리할 수 없는 입력은 예외 없이 null(boolean은 false)을 돌려줘요. `stringify*(null)`도 null.
+- **세부 규칙**:
+  - 파싱은 `ResolverStyle.STRICT`라서 없는 날짜("20240230")나 24시는 null이에요. 구분자 없는 형식과 있는 형식은 문자열 길이로 가려요(8/10, 6/8, 14/19). 앞뒤 공백은 허용하지 않아요.
+  - `eval(date, op, n, unit)`의 결과는 입력과 같은 형식이에요. 달·년 계산에서 해당 날짜가 없으면 그 달의 마지막 날로 맞춰요(`20240131` + 1 M → `20240229`). `op`·`unit`은 대소문자를 구분하고(`"d"`는 null), 범위를 넘는 계산도 null이에요. `n`이 음수이면 방향이 반대예요.
+  - `eom`도 입력과 같은 형식으로 돌려줘요. `toTimestamp(LocalDate)`는 그날 0시예요.
+  - `today()`/`date()`/`time()` 등은 시스템 기본 시간대의 현재 시각이에요. 시계를 주입하지 않아서 테스트는 형식과 전후 시각 범위만 확인해요.

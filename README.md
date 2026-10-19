@@ -42,7 +42,7 @@ src/test/java/s/type/tuple/TupleTest.java 튜플 테스트
 
 ## StringUtil
 
-`s.util.StringUtil`은 null 안전한 문자열 유틸리티예요. 기본값 선택(`nonNullOf`, `nonBlankOf`, `nonEmptyOf`), 첫 유효값 선택(`firstNonBlankOrLast`/`OrEmpty`/`OrNull`, 값·Supplier 버전), 변환·부분 문자열(`stringify`, `slice`, `head`, `tail`, `trimLeadingZero`, `repeat`, `reverse`), 패딩(`lpad`/`rpad`/`pad`, `lpad2`/`rpad2`/`pad2`), `join`, `split`을 제공해요. 경계 동작과 근거는 `DECISIONS.md` 5·6번에 있어요.
+`s.util.StringUtil`은 null 안전한 문자열 유틸리티예요. 기본값 선택(`nonNullOf`, `nonBlankOf`, `nonEmptyOf`), 첫 유효값 선택(`firstNonBlankOrLast`/`OrEmpty`/`OrNull`, 값·Supplier 버전), 변환·부분 문자열(`stringify`, `slice`, `head`, `tail`, `trimLeadingZero`, `repeat`, `reverse`), 패딩(`lpad`/`rpad`/`pad`, `lpad2`/`rpad2`/`pad2`), `join`, `split`, 함수 합성(`pipe`)을 제공해요. 경계 동작과 근거는 `DECISIONS.md` 5·6·11번에 있어요.
 
 ## CollectionUtil
 

@@ -69,3 +69,9 @@
   - `eval(date, op, n, unit)`의 결과는 입력과 같은 형식이에요. 달·년 계산에서 해당 날짜가 없으면 그 달의 마지막 날로 맞춰요(`20240131` + 1 M → `20240229`). `op`·`unit`은 대소문자를 구분하고(`"d"`는 null), 범위를 넘는 계산도 null이에요. `n`이 음수이면 방향이 반대예요.
   - `eom`도 입력과 같은 형식으로 돌려줘요. `toTimestamp(LocalDate)`는 그날 0시예요.
   - `today()`/`date()`/`time()` 등은 시스템 기본 시간대의 현재 시각이에요. 시계를 주입하지 않아서 테스트는 형식과 전후 시각 범위만 확인해요.
+
+## 11. StringUtil.pipe (2026-10-19)
+
+- **결정**: `StringUtil`에 함수 합성 두 가지를 추가했어요. `pipe(fns...)`는 `Function<String,String>`을 차례로 이은 하나의 함수를 돌려주고(`Function.identity()`에서 `Function::andThen`으로 `reduce`), `pipe()`는 `.then(f).then(g).apply(s)` 형태의 불변 `StringUtil.Pipeline`을 돌려줘요.
+- **이유**: 제시된 codelet 두 가지를 따랐어요. 병렬 stream이 아니라서 combiner가 필요한 `reduce` 구현은 쓰지 않고 `andThen` 방식을 골랐어요.
+- **세부 규칙**: `fns`가 null이거나 비었으면 입력 그대로이고 null 함수는 건너뛰어요. `Pipeline.then(null)`은 자기 자신을 돌려줘요. 입력 null은 첫 함수가 처리해요. 이 메서드들은 `_useStream()` 무작위 분기를 쓰지 않아요.

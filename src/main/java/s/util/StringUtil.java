@@ -5,8 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -494,5 +496,47 @@ public final class StringUtil {
             return List.of(s);
         }
         return List.of(s.split(regex, -1));
+    }
+
+    // ---- 파이프라인 ----
+
+    /**
+     * 함수들을 차례로 이어 하나의 함수로 만들어요. 앞 함수의 결과가 다음 함수의 입력이에요.
+     * fns가 null이거나 비었으면 입력을 그대로 돌려주고, null 함수는 건너뛰어요.
+     */
+    @SafeVarargs
+    public static Function<String, String> pipe(Function<String, String>... fns) {
+        if (fns == null) {
+            return Function.identity();
+        }
+        return Arrays.stream(fns).filter(Objects::nonNull).reduce(Function.identity(), Function::andThen);
+    }
+
+    /** {@code pipe().then(f1).then(f2).apply(s)} 형태로 함수를 하나씩 이어요. */
+    public static Pipeline pipe() {
+        return Pipeline.init();
+    }
+
+    /** 불변 파이프라인. {@link #then(Function)}은 새 파이프라인을 돌려줘요. */
+    public static final class Pipeline {
+
+        private final Function<String, String> fn;
+
+        private Pipeline(Function<String, String> fn) {
+            this.fn = fn;
+        }
+
+        private static Pipeline init() {
+            return new Pipeline(Function.identity());
+        }
+
+        /** next가 null이면 이 파이프라인 그대로. */
+        public Pipeline then(Function<String, String> next) {
+            return next == null ? this : new Pipeline(fn.andThen(next));
+        }
+
+        public String apply(String input) {
+            return fn.apply(input);
+        }
     }
 }

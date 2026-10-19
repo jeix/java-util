@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.RepeatedTest;
@@ -337,5 +338,52 @@ class StringUtilTest {
         assertThrows(UnsupportedOperationException.class, () -> StringUtil.split("a,b", ",").add("c"));
         assertThrows(UnsupportedOperationException.class, () -> StringUtil.split("abc", null).add("c"));
         assertThrows(UnsupportedOperationException.class, () -> StringUtil.split(null, ",").add("c"));
+    }
+
+    @Test
+    void pipe() {
+        String s = "2025-03-19 12:26:41.012345000";
+        s = StringUtil.pipe(
+                        (s1) -> StringUtil.slice(s1, 20),
+                        StringUtil::reverse,
+                        StringUtil::trimLeadingZero,
+                        StringUtil::reverse)
+                .apply(s);
+        log.info(s);
+        assertEquals("012345", s);
+    }
+
+    @Test
+    void pipeOrderAndEdgeCases() {
+        assertEquals("a-b", StringUtil.pipe((String x) -> x + "-", x -> x + "b").apply("a"));
+        assertEquals("ba", StringUtil.pipe((String x) -> "b" + x, x -> x.substring(0, 1) + "a").apply("x"));
+        assertEquals("abc", StringUtil.pipe().apply("abc"));
+        assertEquals("abc", StringUtil.pipe((Function<String, String>[]) null).apply("abc"));
+        assertEquals("CBA", StringUtil.pipe(null, StringUtil::reverse, null, String::toUpperCase).apply("abc"));
+        assertNull(StringUtil.pipe().apply(null));
+        assertEquals("", StringUtil.pipe(StringUtil::reverse).apply(null));
+    }
+
+    @Test
+    void pipeline() {
+        String s = "2025-03-19 12:26:41.012345000";
+        s = StringUtil.pipe()
+                .then((s1) -> StringUtil.slice(s1, 20))
+                .then(StringUtil::reverse)
+                .then(StringUtil::trimLeadingZero)
+                .then(StringUtil::reverse)
+                .apply(s);
+        log.info(s);
+        assertEquals("012345", s);
+    }
+
+    @Test
+    void pipelineIsImmutable() {
+        StringUtil.Pipeline base = StringUtil.pipe().then(String::trim);
+        StringUtil.Pipeline upper = base.then(String::toUpperCase);
+        assertEquals("ab", base.apply(" ab "));
+        assertEquals("AB", upper.apply(" ab "));
+        assertEquals("abc", StringUtil.pipe().apply("abc"));
+        assertEquals("ab", base.then(null).apply(" ab "));
     }
 }
